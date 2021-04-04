@@ -1,0 +1,32 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[  ]
+_global_script_class_icons={
+}
+
+[application]
+
+config/name="test"
+run/main_scene="res://test.tscn"
+run/flush_stdout_on_print.debug=false
+
+[editor_plugins]
+
+enabled=PackedStringArray( "res://addons/TerrainPlugin/plugin.cfg" )
+
+[physics]
+
+3d/run_on_thread=true
+3d/physics_engine="PhysX"
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"

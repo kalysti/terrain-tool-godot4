@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[ext_resource path="res://Node3D.shader" type="Shader" id=1]
+
+[resource]
+shader = ExtResource( 1 )
+shader_param/uv_scale = null
+shader_param/TerrainChunkSizeLOD0 = null
+shader_param/ChunkSizeNextLOD = null
+shader_param/useSmotthlod = null
+shader_param/CurrentLOD = null
+shader_param/NeighborLOD = null
