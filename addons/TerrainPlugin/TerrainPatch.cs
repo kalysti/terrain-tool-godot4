@@ -19,10 +19,15 @@ namespace TerrainEditor
         public Vector2 patchCoord = new Vector2();
 
         [Export]
+
+        public Vector3 offset = new Vector3();
+
+
+        [Export]
         public Godot.Collections.Array<TerrainChunk> chunks = new Godot.Collections.Array<TerrainChunk>();
 
         [Export]
-        public ImageTexture heightmap = new ImageTexture();
+        public ImageTexture heightmap;
 
         public AABB bounds = new AABB();
 
@@ -53,6 +58,7 @@ namespace TerrainEditor
         {
             chunks.Clear();
 
+
             for (int i = 0; i < Terrain3D.CHUNKS_COUNT; i++)
             {
                 var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainChunk.cs").New();
@@ -61,11 +67,9 @@ namespace TerrainEditor
 
                 int px = i % Terrain3D.CHUNKS_COUNT_EDGE;
                 int py = i / Terrain3D.CHUNKS_COUNT_EDGE;
-                res.position = new Vector2((float)px, (float)py);
+                res.position = new Vector2i((int)px, (int)py);
 
-                var q = new Quat(1.0f, 1.0f, res.position.x, res.position.y) * (1.0f / Terrain3D.CHUNKS_COUNT_EDGE);
 
-                res.heightmapUVScale = new Plane(q.x, q.y, q.z, q.w);
 
                 //  res.ChunkSizeNextLOD = (float)(((info.chunkSize + 1) >> (lod + 1)) - 1);
                 res.TerrainChunkSizeLOD0 = Terrain3D.TERRAIN_UNITS_PER_VERTEX * info.chunkSize;
@@ -75,13 +79,12 @@ namespace TerrainEditor
 
         }
 
-
-        public void UpdateHeightMap(Godot.Collections.Array<float> heightmapData, Vector2i modifiedOffset, Vector2i modifiedSize)
+        public void UpdateHeightMap(Terrain3D terrain, float[] heightmapData, Vector2i modifiedOffset, Vector2i modifiedSize)
         {
-            var image = createHeightMapTexutre();
-            var str = new ImageTexture();
+            var image = heightmap.GetImage().Duplicate() as Image;
+            var data = CacheHeightData();
 
-            var data = heightMapCachedData;
+
             if (modifiedOffset.x < 0 || modifiedOffset.y < 0 ||
                 modifiedSize.x <= 0 || modifiedSize.y <= 0 ||
                 modifiedOffset.x + modifiedSize.x > info.heightMapSize ||
@@ -89,6 +92,9 @@ namespace TerrainEditor
             {
                 GD.PrintErr("Invalid heightmap samples range.");
             }
+
+            info.patchOffset = 0.0f;
+            info.patchHeight = 1.0f;
 
             for (int z = 0; z < modifiedSize.y; z++)
             {
@@ -102,42 +108,39 @@ namespace TerrainEditor
             float[] chunkHeights = new float[Terrain3D.CHUNKS_COUNT];
 
             CalculateHeightmapRange(data, ref chunkOffsets, ref chunkHeights);
-
-            image = DrawHeightMapOnImage(data, image);
-            image = UpdateNormalsAndHoles(data, null, Vector2i.Zero, new Vector2i(info.heightMapSize, info.heightMapSize), image);
-            str.CreateFromImage(image);
+            DrawHeightMapOnImage(ref image, data);
+            UpdateNormalsAndHoles(ref image, data, null, modifiedOffset, modifiedSize);
 
             int chunkIndex = 0;
+
             foreach (var chunk in chunks)
             {
                 chunk.offset = chunkOffsets[chunkIndex];
                 chunk.height = chunkHeights[chunkIndex];
-                chunk.UpdateHeightmap(str);
+                chunk.UpdateHeightmap(info);
+
                 chunkIndex++;
             }
-            
-            heightMapCachedData = data;
-            heightmap = str;
+
+            var newColliderData = ModifyCollision(0, modifiedOffset, modifiedSize, data);
+            CookModifyCollision(terrain, heightMapCachedData);
+            heightMapCachedData = newColliderData;
+            heightmap.Update(image, true);
         }
 
-        public void createHeightmap(int _chunkSize, Godot.Collections.Array<float> heightMapdata = null)
+        public void createEmptyHeightmap(int _chunkSize)
         {
             updateInfo(_chunkSize);
             createChunks();
 
-
-
             var image = createHeightMapTexutre();
 
-            if (heightMapdata == null)
-            {
-                heightMapdata = new Godot.Collections.Array<float>();
-                heightMapdata.Resize(info.heightMapSize * info.heightMapSize);
-            }
+            var heightMapdata = new float[info.heightMapSize * info.heightMapSize];
+            heightMapCachedData = new float[info.heightMapSize * info.heightMapSize];
 
             float[] chunkOffsets = new float[Terrain3D.CHUNKS_COUNT];
             float[] chunkHeights = new float[Terrain3D.CHUNKS_COUNT];
-         
+
             CalculateHeightmapRange(heightMapdata, ref chunkOffsets, ref chunkHeights);
 
             int chunkIndex = 0;
@@ -146,47 +149,22 @@ namespace TerrainEditor
                 chunk.offset = chunkOffsets[chunkIndex];
                 chunk.height = chunkHeights[chunkIndex];
             }
-            image = DrawHeightMapOnImage(heightMapdata, image);
-            image = UpdateNormalsAndHoles(heightMapdata, null, Vector2i.Zero, new Vector2i(info.heightMapSize, info.heightMapSize), image);
 
-            //for testing
-            image.SavePng("test.png");
-            heightmap.CreateFromImage(image);
+            DrawHeightMapOnImage(ref image, heightMapdata);
+            UpdateNormalsAndHoles(ref image, heightMapdata, null, Vector2i.Zero, new Vector2i(info.heightMapSize, info.heightMapSize));
 
+            if (heightmap == null)
+            {
+                heightmap = new ImageTexture();
+                heightmap.CreateFromImage(image);
+            }
+
+            else
+                heightmap.Update(image);
             heightMapCachedData = heightMapdata;
         }
 
-
-        public Godot.Collections.Array<float> heightMapCachedData = new Godot.Collections.Array<float>();
-
-        public bool RayCast(PhysicsDirectSpaceState3D state, Vector3 origin, Vector3 direction, float resultHitDistance, float maxDistance)
-        {
-            /*
-            if (_physicsShape == nullptr)
-                return false;
-
-            // Prepare data
-            PxTransform trans = _physicsActor->getGlobalPose();
-            trans.p = trans.transform(_physicsShape->getLocalPose().p);
-            const PxHitFlags hitFlags = (PxHitFlags)0;
-
-
-            // Perform raycast test
-            PxRaycastHit hit;
-
-            state.IntersectRay();
-
-
-            if (PxGeometryQuery::raycast(origin, (direction, _physicsShape->getGeometry().any(), trans, maxDistance, hitFlags, 1, &hit) != 0)
-            {
-                resultHitDistance = hit.distance;
-                return true;
-            }
-            */
-
-
-            return false;
-        }
+        public float[] heightMapCachedData;
 
         public void Draw(RID scenario, Terrain3D terrainNode, RID shaderRid)
         {
@@ -195,19 +173,20 @@ namespace TerrainEditor
                 chunk.Clear();
             }
 
-            GD.Print("geneate mesh");
+            //generate mesh
             mesh = GenerateMesh(info.chunkSize, 0);
+            //create cache
+            heightMapCachedData = CacheHeightData();
 
             foreach (var chunk in chunks)
             {
-                chunk.Draw(this, info, scenario, mesh.GetRid(), heightmap, terrainNode, getOffset(), shaderRid);
+                chunk.Draw(this, info, scenario, mesh.GetRid(), ref heightmap, terrainNode, getOffset(), shaderRid);
                 chunk.UpdateTransform(info, terrainNode.GlobalTransform, getOffset());
             }
         }
 
         public void UpdateTransform(Terrain3D terrainNode)
         {
-            GD.Print("update transform");
             foreach (var chunk in chunks)
             {
                 chunk.UpdateTransform(info, terrainNode.GlobalTransform, getOffset());
@@ -219,7 +198,7 @@ namespace TerrainEditor
         private Image createHeightMapTexutre()
         {
             var initData = new Image();
-            initData.Create(info.textureSize, info.textureSize, true, Image.Format.Rgba8);
+            initData.Create(info.textureSize, info.textureSize, false, Image.Format.Rgba8);
 
             return initData;
         }
@@ -242,7 +221,6 @@ namespace TerrainEditor
             info.vertexCountEdge = vertexCountEdge;
             info.heightMapSize = heightmapSize;
             info.textureSize = textureSet;
-
         }
 
         public AABB getBounds()
@@ -274,7 +252,7 @@ namespace TerrainEditor
             return new Vector3(patchCoord.x * size, 0.0f, patchCoord.y * size);
         }
 
-        public ArrayMesh GenerateMesh(int chunkSize, int lodIndex)
+        private ArrayMesh GenerateMesh(int chunkSize, int lodIndex)
         {
             int chunkSizeLOD0 = chunkSize;
 
@@ -330,10 +308,10 @@ namespace TerrainEditor
                     st.AddIndex(i00);
                     st.AddIndex(i10);
                     st.AddIndex(i11);
+
                     st.AddIndex(i00);
                     st.AddIndex(i11);
                     st.AddIndex(i01);
-
                 }
             }
 
@@ -342,10 +320,9 @@ namespace TerrainEditor
 
             return st.Commit();
         }
-
-
-        private Image DrawHeightMapOnImage(Godot.Collections.Array<float> heightmap, Image image)
+        private void DrawHeightMapOnImage(ref Image image, float[] heightmapData)
         {
+            int d = 0;
             for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
             {
                 int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
@@ -357,9 +334,13 @@ namespace TerrainEditor
                 int chunkHeightmapX = chunkX * info.chunkSize;
                 int chunkHeightmapZ = chunkZ * info.chunkSize;
 
+
+
+                var imgData = image.GetData();
+
                 for (int z = 0; z < info.vertexCountEdge; z++)
                 {
-                    int tz = (chunkTextureZ + z);
+                    int tz = (chunkTextureZ + z) * info.textureSize;
                     int sz = (chunkHeightmapZ + z) * info.heightMapSize;
 
                     for (int x = 0; x < info.vertexCountEdge; x++)
@@ -369,45 +350,21 @@ namespace TerrainEditor
                         int textureIndex = tz + tx;
                         int heightmapIndex = sz + sx;
 
-                        var newColor = WriteHeight(image.GetPixel(tz, tx), heightmap[heightmapIndex]);
-                        image.SetPixel(tz, tx, newColor);
+                        var newColor = WriteHeight(image.GetPixel(tx, tz / info.textureSize), heightmapData[heightmapIndex]);
+                        image.SetPixel(tx, tz / info.textureSize, newColor);
+
+                        d++;
                     }
                 }
             }
 
-            return image;
-        }
-        private VertexResult getVertex(Godot.Collections.Array<float> heightmap, int heightMapSize, Vector2i normalsStart, Vector2i normalsSize, int a, int b, int x, int z)
-        {
-            int i = (z + (b) - normalsStart.y) * normalsSize.x + (x + (a) - normalsStart.x);
-            int h = (z + (b)) * heightMapSize + (x + (a));
-
-            Vector3 v = new Vector3();
-            v.x = (x + (a)) * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
-            v.y = heightmap[h];
-            v.z = (z + (b)) * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
-
-            return new VertexResult
-            {
-                v = v,
-                i = i
-            };
         }
 
-        private VertexResult getNormal(Godot.Collections.Array<Vector3> normalsPerVertex, Vector2i normalsSize, int a, int b, int x, int z)
+        private void UpdateNormalsAndHoles(ref Image image, float[] heightmapData, Godot.Collections.Array<bool> holesMask, Vector2i modifiedOffset, Vector2i modifiedSize)
         {
-            int i = (z + (b - 1)) * normalsSize.x + (x + (a - 1));
-            Vector3 v = normalsPerVertex[i].Normalized();
 
-            return new VertexResult
-            {
-                v = v,
-                i = i
-            };
-        }
+            //   var buffer = image.SavePngToBuffer();
 
-        private Image UpdateNormalsAndHoles(Godot.Collections.Array<float> heightmap, Godot.Collections.Array<bool> holesMask, Vector2i modifiedOffset, Vector2i modifiedSize, Image image)
-        {
             // Expand the area for the normals to prevent issues on the edges (for the averaged normals)
             int heightMapSize = info.heightMapSize;
             Vector2i modifiedEnd = modifiedOffset + modifiedSize;
@@ -415,10 +372,39 @@ namespace TerrainEditor
             Vector2i normalsEnd = new Vector2i(Math.Min(heightMapSize, modifiedEnd.x + 1), Math.Min(heightMapSize, modifiedEnd.y + 1));
             Vector2i normalsSize = normalsEnd - normalsStart;
 
+
             // Prepare memory
             int normalsLength = normalsSize.x * normalsSize.y;
-            var normalsPerVertex = new Godot.Collections.Array<Vector3>();
-            normalsPerVertex.Resize(normalsLength);
+            var normalsPerVertex = new Vector3[normalsLength];
+
+            Func<int, int, int, int, VertexResult> getVertex = (a, b, x, z) =>
+              {
+                  int i = (z + (b) - normalsStart.y) * normalsSize.x + (x + (a) - normalsStart.x);
+                  int h = (z + (b)) * heightMapSize + (x + (a));
+
+                  Vector3 v = new Vector3();
+                  v.x = (x + (a)) * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
+                  v.y = heightmapData[h]; // << takes time
+                  v.z = (z + (b)) * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
+
+                  return new VertexResult
+                  {
+                      v = v,
+                      i = i
+                  };
+              };
+
+            Func<int, int, int, int, VertexResult> getNormal = (a, b, x, z) =>
+            {
+                int i = (z + (b - 1)) * normalsSize.x + (x + (a - 1));
+                Vector3 v = normalsPerVertex[i].Normalized();
+
+                return new VertexResult
+                {
+                    v = v,
+                    i = i
+                };
+            };
 
             // Calculate per-quad normals and apply them to nearby vertices
             for (int z = normalsStart.y; z < normalsEnd.y - 1; z++)
@@ -426,10 +412,10 @@ namespace TerrainEditor
                 for (int x = normalsStart.x; x < normalsEnd.x - 1; x++)
                 {
                     // Get four vertices from the quad
-                    var v00 = getVertex(heightmap, heightMapSize, normalsStart, normalsSize, 0, 0, x, z);
-                    var v10 = getVertex(heightmap, heightMapSize, normalsStart, normalsSize, 1, 0, x, z);
-                    var v01 = getVertex(heightmap, heightMapSize, normalsStart, normalsSize, 0, 1, x, z);
-                    var v11 = getVertex(heightmap, heightMapSize, normalsStart, normalsSize, 1, 1, x, z);
+                    var v00 = getVertex(0, 0, x, z);
+                    var v10 = getVertex(1, 0, x, z);
+                    var v01 = getVertex(0, 1, x, z);
+                    var v11 = getVertex(1, 1, x, z);
 
                     // Calculate normals for quad two vertices
                     Vector3 n0 = ((v00.v - v01.v).Cross(v01.v - v10.v)).Normalized();
@@ -449,15 +435,16 @@ namespace TerrainEditor
             {
                 for (int x = 1; x < normalsSize.x - 1; x++)
                 {
-                    var n00 = getNormal(normalsPerVertex, normalsSize, 0, 0, x, z);
-                    var n01 = getNormal(normalsPerVertex, normalsSize, 0, 1, x, z);
-                    var n10 = getNormal(normalsPerVertex, normalsSize, 1, 0, x, z);
-                    var n11 = getNormal(normalsPerVertex, normalsSize, 1, 1, x, z);
-                    var n20 = getNormal(normalsPerVertex, normalsSize, 2, 0, x, z);
-                    var n21 = getNormal(normalsPerVertex, normalsSize, 2, 1, x, z);
-                    var n02 = getNormal(normalsPerVertex, normalsSize, 0, 2, x, z);
-                    var n12 = getNormal(normalsPerVertex, normalsSize, 1, 2, x, z);
-                    var n22 = getNormal(normalsPerVertex, normalsSize, 2, 2, x, z);
+                    var n00 = getNormal(0, 0, x, z);
+                    var n01 = getNormal(0, 1, x, z);
+                    var n10 = getNormal(1, 0, x, z);
+                    var n11 = getNormal(1, 1, x, z);
+                    var n20 = getNormal(2, 0, x, z);
+
+                    var n21 = getNormal(2, 1, x, z);
+                    var n02 = getNormal(0, 2, x, z);
+                    var n12 = getNormal(1, 2, x, z);
+                    var n22 = getNormal(2, 2, x, z);
 
                     // Get four normals for the nearby quads
                     Vector3 avg = (n00.v + n01.v + n02.v + n10.v + n11.v + n12.v + n20.v + n21.v + n22.v) * (1.0f / 9.0f);
@@ -467,6 +454,7 @@ namespace TerrainEditor
                 }
             }
 
+            int d = 0;
             // Write back to the data container
             for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
             {
@@ -493,7 +481,7 @@ namespace TerrainEditor
                         continue;
                     int hz = (chunkHeightmapZ + z) * heightMapSize;
                     int sz = (chunkHeightmapZ + z - normalsStart.y) * normalsSize.x;
-                    int tz = (chunkTextureZ + z); // not necceasary on c# => * info.textureSize
+                    int tz = (chunkTextureZ + z) * info.textureSize;
 
                     // TODO: adjust loop range to reduce iterations count for edge cases (skip checking unmodified samples)
                     for (int x = 0; x < info.vertexCountEdge; x++)
@@ -517,18 +505,17 @@ namespace TerrainEditor
                         if (holesMask != null && !holesMask[heightmapIndex])
                             normal = Vector3.One;
 
-                        var color = image.GetPixel(tz, tx);
+                        var color = image.GetPixel(tx, tz / info.textureSize);
 
-                        color.b8 = Convert.ToInt32((normal.x * byte.MaxValue));
-                        color.a8 = Convert.ToInt32((normal.z * byte.MaxValue));
-                        color.a8 = 255;
+                        color.b = normal.x;
+                        color.a = normal.z;
 
-                        image.SetPixel(tz, tx, color);
+                        image.SetPixel(tx, tz / info.textureSize, color);
+                        d++;
                     }
                 }
             }
 
-            return image;
         }
 
 
@@ -541,20 +528,26 @@ namespace TerrainEditor
             raw.g8 = Convert.ToInt32((byte)((quantizedHeight >> 8) & 0xff));
 
 
-
             return raw;
         }
-        private float ReadNormalizedHeight(Color raw)
+        private float ReadNormalizedHeight(Color raw, bool print = false)
         {
             var test = raw.r8 | (raw.g8 << 8);
             UInt16 quantizedHeight = Convert.ToUInt16(test);
-            float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
 
+            if (print)
+                GD.Print(quantizedHeight);
+
+            float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
             return normalizedHeight;
         }
 
+        private bool ReadIsHole(Color raw)
+        {
+            return (raw.b8 + raw.a8) >= (int)(1.9f * byte.MaxValue);
+        }
 
-        private void CalculateHeightmapRange(Godot.Collections.Array<float> heightmap, ref float[] chunkOffsets, ref float[] chunkHeights)
+        private void CalculateHeightmapRange(float[] heightmap, ref float[] chunkOffsets, ref float[] chunkHeights)
         {
             float minPatchHeight = float.MaxValue;
             float maxPatchHeight = float.MinValue;
@@ -602,10 +595,10 @@ namespace TerrainEditor
             return (float)(heightCountInt * error);
         }
 
-        public Godot.Collections.Array<Vector3> GetDebugMeshLines(Godot.Collections.Array<float> heightField)
+        public Godot.Collections.Array<Vector3> GetDebugMeshLines(float[] heightField)
         {
-            int map_width = info.textureSize;
-            int map_depth = info.textureSize;
+            int map_width = info.heightMapSize;
+            int map_depth = info.heightMapSize;
 
             Godot.Collections.Array<Vector3> points = new Godot.Collections.Array<Vector3>();
 
@@ -653,60 +646,10 @@ namespace TerrainEditor
 
             return points;
         }
-
-        private Godot.Collections.Array<float> getColliderLod(int collisionLod)
-        {
-            // Prepare datas
-            int collisionLOD = 0;
-            int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
-            int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
-            int heightFieldLength = heightFieldSize * heightFieldSize;
-
-            // Setup terrain collision information
-            // auto & mip = initData->Mips[collisionLOD];
-            int vertexCountEdgeMip = info.vertexCountEdge >> collisionLOD;
-            int textureSizeMip = info.textureSize >> collisionLOD;
-
-            var img = heightmap.GetImage();
-
-            var heightField = new Godot.Collections.Array<float>();
-
-            for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
-            {
-                int chunkTextureX = chunkX * vertexCountEdgeMip;
-                int chunkStartX = chunkX * heightFieldChunkSize;
-
-                for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
-                {
-                    int chunkTextureZ = chunkZ * vertexCountEdgeMip;
-                    int chunkStartZ = chunkZ * heightFieldChunkSize;
-
-                    for (int z = 0; z < vertexCountEdgeMip; z++)
-                    {
-                        for (int x = 0; x < vertexCountEdgeMip; x++)
-                        {
-                            int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
-                            Color raw = img.GetPixel((chunkTextureX + x), (chunkTextureZ + z));
-                            float normalizedHeight = ReadNormalizedHeight(raw);
-
-                            int heightmapX = chunkStartX + x;
-                            int heightmapZ = chunkStartZ + z;
-
-                            int dstIndex = (heightmapX * heightFieldSize) + heightmapZ;
-
-                            heightField.Add(normalizedHeight);
-                        }
-                    }
-                }
-            }
-            return heightField;
-        }
-
         public Transform transform;
-
-        public void updateColliderPosition(Terrain3D terrain)
+        private void updateColliderPosition(Terrain3D terrain)
         {
-            int collisionLOD = 0;
+            int collisionLOD = 1;
             int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
             int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
             int heightFieldLength = heightFieldSize * heightFieldSize;
@@ -730,11 +673,239 @@ namespace TerrainEditor
             PhysicsServer3D.BodySetState(terrain.bodyRid, PhysicsServer3D.BodyState.Transform, transform);
         }
 
-        public void CookCollision(int collisionLod, Terrain3D terrain)
+        private float[] CacheHeightData()
         {
+            if (heightmap == null)
+                return null;
+
+            int heightMapLength = info.heightMapSize * info.heightMapSize;
+
+            // Allocate data
+            float[] _cachedHeightMap = new float[heightMapLength];
+            float[] _cachedHolesMask = new float[heightMapLength];
+
+            int d = 0;
+
+            // Extract heightmap data and denormalize it to get the pure height field
+            float patchOffset = info.patchOffset;
+            float patchHeight = info.patchHeight;
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            {
+                int chunkTextureX = chunks[chunkIndex].position.x * info.vertexCountEdge;
+                int chunkTextureZ = chunks[chunkIndex].position.y * info.vertexCountEdge;
+
+                int chunkHeightmapX = chunks[chunkIndex].position.x * info.chunkSize;
+                int chunkHeightmapZ = chunks[chunkIndex].position.y * info.chunkSize;
+
+                for (int z = 0; z < info.vertexCountEdge; z++)
+                {
+                    int tz = (chunkTextureZ + z);
+                    int sz = (chunkHeightmapZ + z) * info.heightMapSize;
+
+                    for (int x = 0; x < info.vertexCountEdge; x++)
+                    {
+                        int tx = chunkTextureX + x;
+                        int sx = chunkHeightmapX + x;
+                        int textureIndex = tz + tx;
+                        int heightmapIndex = sz + sx;
+
+                        Color raw = heightmap.GetImage().GetPixel(tx, tz);
+
+                        float normalizedHeight = ReadNormalizedHeight(raw);
+                        float height = (normalizedHeight * patchHeight) + patchOffset;
+
+                        bool isHole = ReadIsHole(raw);
+
+                        _cachedHeightMap[heightmapIndex] = height;
+                        _cachedHolesMask[heightmapIndex] = isHole ? 0 : 255;
+
+                        d++;
+                    }
+                }
+            }
+
+            return _cachedHeightMap;
+        }
+
+
+        private float[] getColliderLod(int collisionLod) // init
+        {
+            int collisionLOD = Math.Clamp(collisionLod, 0, 2);
+
+            // Prepare datas
+            int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
+            int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+            int heightFieldLength = heightFieldSize * heightFieldSize;
+
+            int vertexCountEdgeMip = info.vertexCountEdge >> collisionLOD;
+            int textureSizeMip = info.textureSize >> collisionLOD;
+
+            var img = heightmap.GetImage();
+
+            int heightMapLength = info.heightMapSize * info.heightMapSize;
+            var heightField = new float[heightMapLength];
+
+            for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
+            {
+                int chunkTextureX = chunkX * vertexCountEdgeMip;
+                int chunkStartX = chunkX * heightFieldChunkSize;
+
+                for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
+                {
+                    int chunkTextureZ = chunkZ * vertexCountEdgeMip;
+                    int chunkStartZ = chunkZ * heightFieldChunkSize;
+
+                    for (int z = 0; z < vertexCountEdgeMip; z++)
+                    {
+                        for (int x = 0; x < vertexCountEdgeMip; x++)
+                        {
+
+                            int textureIndexZ = (chunkTextureZ + z) * textureSizeMip;
+                            int textureIndexX = chunkTextureX + x;
+
+                            Color raw = img.GetPixel(textureIndexX, textureIndexZ / textureSizeMip);
+
+
+                            float normalizedHeight = ReadNormalizedHeight(raw);
+                            float height = (normalizedHeight * info.patchHeight) + info.patchOffset;
+
+
+                            bool isHole = ReadIsHole(raw);
+
+                            int heightmapX = chunkStartX + x;
+                            int heightmapZ = chunkStartZ + z;
+
+                            int dstIndex = (heightmapX * heightFieldSize) + heightmapZ;
+
+                            heightField[dstIndex] = height;
+                        }
+                    }
+                }
+            }
+
+            return heightField;
+        }
+
+
+        public float[] ModifyCollision(int collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
+        {
+            var img = heightmap.GetImage();
+
+            // Prepare data
+            Vector2 modifiedOffsetRatio = new Vector2((float)modifiedOffset.x / info.heightMapSize, (float)modifiedOffset.y / info.heightMapSize);
+            Vector2 modifiedSizeRatio = new Vector2((float)modifiedSize.x / info.heightMapSize, (float)modifiedSize.y / info.heightMapSize);
+            int collisionLOD = Math.Clamp(collisionLod, 0, 0); //from mip
+            int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
+            int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+
+            Vector2i samplesOffset = new Vector2i(Mathf.FloorToInt(modifiedOffsetRatio.x * (float)heightFieldSize), Mathf.FloorToInt(modifiedOffsetRatio.y * (float)heightFieldSize));
+            Vector2i samplesSize = new Vector2i(Mathf.CeilToInt(modifiedSizeRatio.x * (float)heightFieldSize), Mathf.CeilToInt(modifiedSizeRatio.y * (float)heightFieldSize));
+
+            samplesSize.x = Math.Max(samplesSize.x, 1);
+            samplesSize.y = Math.Max(samplesSize.y, 1);
+
+            Vector2i samplesEnd = samplesOffset + samplesSize;
+            samplesEnd.x = Math.Min(samplesEnd.x, heightFieldSize);
+            samplesEnd.y = Math.Min(samplesEnd.y, heightFieldSize);
+
+            // Allocate data
+            int heightFieldDataLength = samplesSize.x * samplesSize.y;
+
+            // Setup terrain collision information
+            //auto & mip = initData->Mips[collisionLOD];
+            int vertexCountEdgeMip = info.vertexCountEdge >> collisionLOD;
+            int textureSizeMip = info.textureSize >> collisionLOD;
+            for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
+            {
+                int chunkTextureX = chunkX * vertexCountEdgeMip;
+                int chunkStartX = chunkX * heightFieldChunkSize;
+
+                // Skip unmodified chunks
+                if (chunkStartX >= samplesEnd.x || chunkStartX + vertexCountEdgeMip < samplesOffset.x)
+                    continue;
+
+                for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
+                {
+                    int chunkTextureZ = chunkZ * vertexCountEdgeMip;
+                    int chunkStartZ = chunkZ * heightFieldChunkSize;
+
+                    // Skip unmodified chunks
+                    if (chunkStartZ >= samplesEnd.y || chunkStartZ + vertexCountEdgeMip < samplesOffset.y)
+                        continue;
+
+                    for (int z = 0; z < vertexCountEdgeMip; z++)
+                    {
+                        // Skip unmodified columns
+                        int heightmapZ = chunkStartZ + z;
+                        int heightmapLocalZ = heightmapZ - samplesOffset.y;
+                        if (heightmapLocalZ < 0 || heightmapLocalZ >= samplesSize.y)
+                            continue;
+
+                        // TODO: adjust loop range to reduce iterations count for edge cases (skip checking unmodified samples)
+                        for (int x = 0; x < vertexCountEdgeMip; x++)
+                        {
+                            // Skip unmodified rows
+                            int heightmapX = chunkStartX + x;
+                            int heightmapLocalX = heightmapX - samplesOffset.x;
+                            if (heightmapLocalX < 0 || heightmapLocalX >= samplesSize.x)
+                                continue;
+
+                            Color raw = img.GetPixel((chunkTextureX + x), (chunkTextureZ + z) / textureSizeMip);
+                            float normalizedHeight = ReadNormalizedHeight(raw);
+                            bool isHole = ReadIsHole(raw);
+                            int dstIndex = (heightmapLocalX * samplesSize.y) + heightmapLocalZ;
+
+                            heightFieldData[dstIndex] = normalizedHeight;
+                        }
+                    }
+                }
+            }
+
+            return heightFieldData;
+        }
+
+        public void CookModifyCollision(Terrain3D terrain, float[] heightMapData)
+        {
+            GD.Print("Modified");
             var start = OS.GetTicksMsec();
 
             int collisionLOD = 0;
+            int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
+            int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+            int heightFieldLength = heightFieldSize * heightFieldSize;
+
+            //create heightmap shape
+
+            PhysicsServer3D.ShapeSetData(shapeRid, new Godot.Collections.Dictionary() {
+                {
+                    "width", (int)  Math.Sqrt(heightMapData.Length)
+                },
+                {
+                    "depth",  (int) Math.Sqrt(heightMapData.Length)
+                },
+                {
+                    "heights", heightMapData
+                },
+                {
+                    "cell_size", 1.0f
+                }
+            });
+
+            var shape = terrain.GetParent().GetNode("shape") as CollisionShape3D;
+            var hm = shape.Shape as HeightMapShape3D;
+
+            hm.MapWidth = (int)Math.Sqrt(heightMapData.Length);
+            hm.MapDepth = (int)Math.Sqrt(heightMapData.Length);
+            hm.MapData = heightMapData;
+
+            shape.Shape = hm;
+        }
+
+        public void CookCollision(int collisionLOD, Terrain3D terrain)
+        {
+            GD.Print("Cooking");
+            var start = OS.GetTicksMsec();
+
             int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
             int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
             int heightFieldLength = heightFieldSize * heightFieldSize;
@@ -744,28 +915,38 @@ namespace TerrainEditor
             //create heightmap shape
             shapeRid = PhysicsServer3D.HeightmapShapeCreate();
 
+
             PhysicsServer3D.BodyAddShape(terrain.bodyRid, shapeRid);
             PhysicsServer3D.ShapeSetData(shapeRid, new Godot.Collections.Dictionary() {
                 {
-                    "width", info.textureSize
+                    "width", (int) Math.Sqrt(heightField.Length)
                 },
                 {
-                    "depth", info.textureSize
+                    "depth", (int) Math.Sqrt(heightField.Length)
                 },
                 {
-                    "heights", heightField.ToArray()
+                    "heights", heightField
                 },
                 {
                     "cell_size", 1.0f
                 }
             });
 
-            updateColliderPosition(terrain);
+            var shape = terrain.GetParent().GetNode("shape") as CollisionShape3D;
+            var hm = new HeightMapShape3D();
+
+            hm.MapWidth = (int)Math.Sqrt(heightField.Length);
+            hm.MapDepth = (int)Math.Sqrt(heightField.Length);
+            hm.MapData = heightField;
+
+            shape.Shape = hm;
 
             PhysicsServer3D.BodySetCollisionLayer(terrain.bodyRid, terrain.collisionLayer);
             PhysicsServer3D.BodySetCollisionMask(terrain.bodyRid, terrain.collisionMask);
 
             debugLines = GetDebugMeshLines(heightField);
+
+            updateColliderPosition(terrain);
         }
     }
 

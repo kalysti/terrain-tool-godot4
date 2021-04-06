@@ -109,7 +109,6 @@ namespace TerrainEditor
         public override void Redraw(EditorNode3DGizmo gizmo)
         {
             gizmo.Clear();
-            GD.Print("redraw gizmo");
             var spatial = gizmo.GetSpatialNode() as Terrain3D;
             SurfaceTool st = new SurfaceTool();
 

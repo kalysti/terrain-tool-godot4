@@ -1,17 +1,19 @@
 shader_type spatial;
-render_mode  cull_disabled, depth_draw_always, unshaded;
-uniform sampler2D heigtmap;
+render_mode  unshaded, depth_draw_always, cull_disabled;
+
+uniform sampler2D heigtmap ;
 uniform vec4 uv_scale;
 uniform float TerrainChunkSizeLOD0;
 uniform float ChunkSizeNextLOD;
-uniform bool useSmotthlod = false;
+uniform bool useSmotthlod =false;
 uniform float CurrentLOD;
 uniform float NeighborLOD;
 uniform vec2 OffsetUV;
 
 varying vec4 currentHeight;
-
+varying float currentHeightMeters;
 varying vec3 colorMap ;
+
 
 
 float CalcLOD(vec2 xy, vec4 morph)
@@ -61,24 +63,30 @@ mat3 CalcTangentBasisFromWorldNormal(vec3 normal)
 
 void vertex()
 {
-	
-	
 		//calculate lod
 		float lodCalculated = CalcLOD(UV, COLOR);
 		float lodValue = CurrentLOD;
 		float morphAlpha = lodCalculated - CurrentLOD;
         vec2 nextLODPos = round(UV * ChunkSizeNextLOD) / ChunkSizeNextLOD;
 		
-		//sample heightmap
-		vec2 heightmapUVs = UV * uv_scale.xy + uv_scale.zw;
+		vec4 uvtest = uv_scale;
 		
-		vec4 heightmapValue = texture(heigtmap, heightmapUVs); // + lodValue
-	    float height = float((int((heightmapValue.x * 255.0)) + (int(heightmapValue.y * 255.0)) << 8)) ;
+		//sample heightmapuvtest
+		vec2 heightmapUVs = UV * uvtest.xy + uvtest.zw;
+		
+		vec4 heightmapValue = textureLod(heigtmap, heightmapUVs, lodValue); // + lodValue
+		
+		uint heightR = uint(heightmapValue.x* 255.0);
+		uint heightG = uint(heightmapValue.y* 255.0) * uint(256);
+		uint sum = heightR + heightG;
+		
+	    float height = float(sum ) / 65535.0;
+		
 		vec2 normalTemp = vec2(heightmapValue.b, heightmapValue.a) * 2.0f - 1.0f;
 		float c = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
 	    vec3 normal = vec3(normalTemp.x, sqrt(1.0 -c), normalTemp.y);
 		
-		currentHeight = heightmapValue;
+		currentHeightMeters = height;
 		
 		bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
 		if (isHole)
@@ -86,7 +94,6 @@ void vertex()
 			normal = vec3(0, 1, 0);
 		}
 		
-		//COLOR = vec4(1,1,1,0);
 		normal = normalize(normal);
 		
 		vec2 positionXZ = vec2(0,0);
@@ -104,17 +111,15 @@ void vertex()
 		mat3 triangles = CalcTangentBasisFromWorldNormal(normal);
 		
 		vec3 wp = (vec4(position, 1) * WORLD_MATRIX).xyz;
-		
-        //VERTEX = ( vec4(wp, 1) * PROJECTION_MATRIX).xyz;
-	 // VERTEX.y += cos(VERTEX.x * 4.0) * sin(VERTEX.z * 4.0);
+	
 		VERTEX = position;
-
-	    UV =  positionXZ * (1.0f / TerrainChunkSizeLOD0) + OffsetUV;
-		NORMAL = triangles[2];
+		//NORMAL = triangles[2];
+		//UV =  positionXZ * (1.0f / TerrainChunkSizeLOD0) + OffsetUV;
 }
 
 void fragment()
 {
-	ALBEDO = vec3(currentHeight.r,currentHeight.g, 0f);
+
+	ALBEDO = vec3(0, currentHeightMeters , 0);
 	ALPHA = 1.0f;
 }

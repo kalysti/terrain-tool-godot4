@@ -89,16 +89,16 @@ namespace TerrainEditor
                 if (result.Count > 0 && result["rid"] != null && result["collider"] != null)
                 {
                     var pos = (Vector3)result["position"];
-                    ApplySculpt(pos, delta);
+                    pos.y /= Terrain3D.COLLIDER_MULTIPLIER;
+                    DoEditTerrain(pos, delta);
                 }
-                else
-                {
-                    GD.Print("no collider found");
+                else {
+                    GD.Print("Not colliding");
                 }
             }
         }
 
-        protected void ApplySculpt(Vector3 pos, float delta)
+        protected void DoEditTerrain(Vector3 pos, float delta)
         {
             bool EditHoles = false;
 
@@ -115,12 +115,15 @@ namespace TerrainEditor
             var bMin = selectedTerrain.ToLocal(new Vector3(pos.x - brushSizeHalf, pos.y - brushSizeHalf - brushExtentY, pos.z - brushSizeHalf));
             var bMax = selectedTerrain.ToLocal(new Vector3(pos.x + brushSizeHalf, pos.y + brushSizeHalf + brushExtentY, pos.z + brushSizeHalf));
 
-            GD.Print(bMin + " min to " + bMax);
+            var start = OS.GetTicksMsec();
+
+            GD.Print("colldet at pos " + pos);
+
             foreach (var patch in patches)
             {
-                GD.Print("found patch");
+                GD.Print("Found patch");
                 var chunkSize = patch.info.chunkSize;
-                var heightmapLength = patch.info.heightMapSize * patch.info.heightMapSize;
+
                 var patchSize = chunkSize * Terrain3D.CHUNKS_COUNT_EDGE * Terrain3D.CHUNKS_COUNT_EDGE;
                 var unitsPerVertexInv = 1.0f / Terrain3D.TERRAIN_UNITS_PER_VERTEX;
 
@@ -134,8 +137,6 @@ namespace TerrainEditor
                 var brushPatchMax = new Vector2i(Mathf.CeilToInt(brushBoundsPatchLocalMax.x), Mathf.FloorToInt(brushBoundsPatchLocalMax.z));
                 var modifiedOffset = brushPatchMin;
                 var modifiedSize = brushPatchMax - brushPatchMin;
-                GD.Print("size " + modifiedOffset);
-                GD.Print("offset " + modifiedSize);
 
                 // Expand the modification area by one vertex in each direction to ensure normal vectors are updated for edge cases, also clamp to prevent overflows
                 if (modifiedOffset.x < 0)
@@ -157,41 +158,41 @@ namespace TerrainEditor
                 if (modifiedSize.x <= 0 || modifiedSize.y <= 0)
                     continue;
 
-                var sourceHeightMap = patch.heightMapCachedData;
-
-                strength = strength * 1000.0f;
-                //issue??????? (check)
-
-                var bufferSize = modifiedSize.y * modifiedSize.x;
-                var buffer = new float[bufferSize];
-
-                GD.Print("size; " + bufferSize);
-                for (int z = 0; z < modifiedSize.y; z++)
+                if (selectedTerrain.toolSculptMode == TerrainSculptMode.Sculpt)
                 {
-                    var zz = z + modifiedSize.y;
-                    for (int x = 0; x < modifiedSize.x; x++)
-                    {
-                        var xx = x + modifiedOffset.x;
-                        var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
-
-                        var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
-                        var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
-
-                        GD.Print("pos: " + pos + " vs " + samplePositionWorld + " pp " + patchPositionLocal);
-
-                        var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld);
-
-                        if (paintAmount > 0)
-                        {
-                            GD.Print(paintAmount);
-                        }
-                        var id = z * modifiedSize.x + x;
-                        buffer[id] = sourceHeight + paintAmount * strength;
-                    }
+                    ApplySculpt(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                 }
-
-                patch.UpdateHeightMap(new Godot.Collections.Array<float>(buffer), modifiedOffset, modifiedSize);
             }
+
+        }
+
+        public void ApplySculpt(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+        {
+            var sourceHeightMap = patch.heightMapCachedData;
+            float strength = editorStrength * 1000.0f;
+
+            var bufferSize = modifiedSize.y * modifiedSize.x;
+            var buffer = new float[bufferSize];
+
+            for (int z = 0; z < modifiedSize.y; z++)
+            {
+                var zz = z + modifiedOffset.y;
+                for (int x = 0; x < modifiedSize.x; x++)
+                {
+                    var xx = x + modifiedOffset.x;
+                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
+
+                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
+                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
+
+                    var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld);
+
+                    var id = z * modifiedSize.x + x;
+                    buffer[id] = sourceHeight + paintAmount * strength;
+                }
+            }
+
+            patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
 
 
@@ -216,7 +217,7 @@ namespace TerrainEditor
             float brushExtentY = 10000.0f;
             float brushSizeHalf = selectedTerrain.brushSize * 0.5f;
 
-            var ab = new AABB(hitPosition, new Vector3(brushSizeHalf, brushSizeHalf + brushExtentY, brushSizeHalf));
+            var ab = new AABB(hitPosition, new Vector3(brushSizeHalf, (brushSizeHalf + brushExtentY), brushSizeHalf));
 
             return ab;
         }

@@ -1,3 +1,4 @@
+using System.Xml.Schema;
 using System.IO.Compression;
 using System.IO;
 using System.ComponentModel;
@@ -14,6 +15,7 @@ namespace TerrainEditor
         public const int CHUNKS_COUNT = 16;
         public const int CHUNKS_COUNT_EDGE = 4;
         public const float TERRAIN_UNITS_PER_VERTEX = 100.0f;
+        public const float COLLIDER_MULTIPLIER = 1000.0f;
 
         public AABB bounds = new AABB();
 
@@ -30,38 +32,13 @@ namespace TerrainEditor
         }
 
 
-        public bool RayCast(Vector3 origin, Vector3 direction, float resultHitDistance, float maxDistance)
-        {
-            /*
-            float minDistance = float.MaxValue;
-            bool result = false;
-            var ray = new AABB(origin, direction);
-
-            foreach (var patch in terrainPatches)
-            {
-                if (patch.HasCollision() &&
-                    patch.bounds.Intersects(ray) &&
-                    patch.RayCast(GetWorld3d().DirectSpaceState, direction, resultHitDistance, maxDistance) &&
-                    resultHitDistance < minDistance)
-                {
-                    minDistance = resultHitDistance;
-                    result = true;
-                }
-            }
-
-            resultHitDistance = minDistance;
-             return result;
-            */
-
-            return false;
-
-        }
-
         public void Generate(int patchX, int patchY, int chunkSize, EditorInterface ef = null)
         {
             var start = OS.GetTicksMsec();
             Clear();
             terrainPatches.Clear();
+
+            float size = (chunkSize - 1) * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
 
             for (int x = 0; x < patchX; x++)
             {
@@ -69,12 +46,13 @@ namespace TerrainEditor
                 {
                     var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatch.cs").New();
                     var patch = script as TerrainPatch;
+                    patch.offset = new Vector3(x * size, 0.0f, y * size);
                     patch.ResourceLocalToScene = true;
                     patch.patchCoord = new Vector2((float)x, (float)y);
                     terrainPatches.Add(patch);
 
                     //create chunks
-                    patch.createHeightmap(chunkSize);
+                    patch.createEmptyHeightmap(chunkSize);
                 }
             }
 
@@ -92,7 +70,6 @@ namespace TerrainEditor
             PhysicsServer3D.BodySetMode(bodyRid, PhysicsServer3D.BodyMode.Static);
             PhysicsServer3D.BodyAttachObjectInstanceId(bodyRid, GetInstanceId());
             PhysicsServer3D.BodySetSpace(bodyRid, GetWorld3d().Space);
-
         }
 
         public void Init()
@@ -107,10 +84,6 @@ namespace TerrainEditor
 
             updateBounds();
             updateDebug();
-            GD.Print("Chunk cook time: " + (OS.GetTicksMsec() - start) + " ms");
-
-            var x = bounds.Size.x * 0.00001f;
-            GD.Print("Terrain Size:  " + x.ToString("n6") + "km");
         }
 
         public void updateDebug()
@@ -123,21 +96,15 @@ namespace TerrainEditor
 
             if (what == NotificationVisibilityChanged)
             {
-                GD.Print("visible:" + IsVisibleInTree());
             }
             else if (what == NotificationExitWorld)
             {
-
                 Clear();
                 PhysicsServer3D.FreeRid(bodyRid);
-
-            }
-            else if (what == NotificationPredelete)
-            {
-                GD.Print("pre delete");
             }
             else if (what == NotificationEnterWorld)
             {
+                GD.Print("Init");
                 PreInit();
                 Init();
             }
