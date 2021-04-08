@@ -28,6 +28,9 @@ namespace TerrainEditor
         public uint collisionLayer = 1;
         public uint collisionMask = 1;
         public bool collsionEnabled = true;
+        public StreamTexture2D terrainDefaultTexture;
+
+
 
         public override Godot.Collections.Array _GetPropertyList()
         {
@@ -188,7 +191,16 @@ namespace TerrainEditor
                 {"type", Variant.Type.Object },
                 {"hint", PropertyHint.ResourceType},
                 {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "Material"}
+                {"hint_string", "ShaderMaterial"}
+            }); 
+            
+            arr.Add(new Godot.Collections.Dictionary()
+            {
+                {"name", "terrainDefaultTexture"},
+                {"type", Variant.Type.Object },
+                {"hint", PropertyHint.ResourceType},
+                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
+                {"hint_string", "StreamTexture2D"}
             });
 
             arr.Add(new Godot.Collections.Dictionary()

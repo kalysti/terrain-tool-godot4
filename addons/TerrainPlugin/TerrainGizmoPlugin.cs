@@ -132,6 +132,8 @@ namespace TerrainEditor
 
                 gizmo.AddLines(lines.ToArray(), GetMaterial("main", gizmo));
             }
+
+
         }
 
         ArrayMesh get_debug_mesh(Godot.Collections.Array<Vector3> lines)

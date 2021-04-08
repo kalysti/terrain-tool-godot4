@@ -31,14 +31,17 @@ namespace TerrainEditor
                 patch.UpdateTransform(this);
         }
 
-
-        public void Generate(int patchX, int patchY, int chunkSize, EditorInterface ef = null)
+        public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null)
         {
+            if (bodyRid != null)
+                PhysicsServer3D.BodyClearShapes(bodyRid);
+
             var start = OS.GetTicksMsec();
             Clear();
             terrainPatches.Clear();
 
             float size = (chunkSize - 1) * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
+            int heightmapSize = (chunkSize - 1) * Terrain3D.CHUNKS_COUNT_EDGE + 1;
 
             for (int x = 0; x < patchX; x++)
             {
@@ -50,9 +53,38 @@ namespace TerrainEditor
                     patch.ResourceLocalToScene = true;
                     patch.patchCoord = new Vector2((float)x, (float)y);
                     terrainPatches.Add(patch);
+                }
+            }
 
-                    //create chunks
+            foreach (var patch in terrainPatches)
+            {
+                if (heightMapImage == null)
+                {
                     patch.createEmptyHeightmap(chunkSize);
+                }
+                else
+                {
+                    float[] heightmapData = new float[heightmapSize * heightmapSize];
+
+                    Vector2 uvPerPatch = Vector2.One / new Vector2(patchX, patchY);
+                    float heightmapSizeInv = 1.0f / (heightmapSize - 1);
+                    Vector2 uvStart = new Vector2(patch.patchCoord.x, patch.patchCoord.y) * uvPerPatch;
+                    GD.Print("Load image from " + heightmapSize);
+                    for (int z = 0; z < heightmapSize; z++)
+                    {
+                        for (int x = 0; x < heightmapSize; x++)
+                        {
+                            Vector2 uv = uvStart + new Vector2(x * heightmapSizeInv, z * heightmapSizeInv) * uvPerPatch;
+                            Color raw = heightMapImage.GetPixel(x, z);
+
+                            float normalizedHeight = patch.ReadNormalizedHeight(raw);
+                            //bool isHole = patch.ReadIsHole(raw);
+                            
+                            heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
+                        }
+                    }
+
+                    patch.createEmptyHeightmap(chunkSize, heightmapData);
                 }
             }
 
@@ -104,7 +136,6 @@ namespace TerrainEditor
             }
             else if (what == NotificationEnterWorld)
             {
-                GD.Print("Init");
                 PreInit();
                 Init();
             }
@@ -133,8 +164,6 @@ namespace TerrainEditor
             {
                 bounds = bounds.Merge(patch.getBounds());
             }
-
-
         }
 
     }

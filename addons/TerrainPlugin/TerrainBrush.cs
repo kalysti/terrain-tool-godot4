@@ -58,27 +58,6 @@ namespace TerrainEditor
             return 1.0f - Mathf.Sqrt(1.0f - Mathf.Sqrt((falloff + radius - distance) / falloff));
         }
 
-        /*
-                /// <inheritdoc />
-                public override MaterialInstance GetBrushMaterial(ref Vector3 position, ref Color color)
-                {
-                    var material = CacheMaterial(EditorAssets.TerrainCircleBrushMaterial);
-                    if (material)
-                    {
-                        // Data 0: XYZ: position, W: radius
-                        // Data 1: X: falloff, Y: type
-                        float halfSize = Size * 0.5f;
-                        float falloff = halfSize * Falloff;
-                        float radius = halfSize - falloff;
-                        material.SetParameterValue("Color", color);
-                        material.SetParameterValue("BrushData0", new Vector4(position, radius));
-                        material.SetParameterValue("BrushData1", new Vector4(falloff, (float)FalloffType, 0, 0));
-                    }
-                    return material;
-                }
-                */
-        /// <inheritdoc />
-        /// 
 
         public static void DistanceXZ(Vector3 value1, Vector3 value2, out float result)
         {

@@ -1,5 +1,10 @@
+using System.Text;
+using System.Security.Cryptography;
+using System.Collections.Specialized;
+using System.Collections.Generic;
 using Godot;
 using System;
+using System.Linq;
 
 namespace TerrainEditor
 {
@@ -19,14 +24,18 @@ namespace TerrainEditor
         public TerrainToolMode currentToolMode = TerrainToolMode.None;
 
 
-
         private Vector2 mousePosition = Vector2.Zero;
         private Camera3D editorCamera = null;
         private MenuButton menuButton = new MenuButton();
+        SpinBox patchXControl = new SpinBox();
+        SpinBox patchYControl = new SpinBox();
+        SpinBox importHeightScale = new SpinBox();
+        
+        OptionButton chunkSizeControl = new OptionButton();
+        Button chooseTextureButton = new Button();
 
-        private SpinBox patches_x = new SpinBox();
-        private SpinBox patches_z = new SpinBox();
-        private OptionButton chunkSize = new OptionButton();
+        FileDialog fileDialog = new FileDialog();
+
 
         public override bool ForwardSpatialGuiInput(Camera3D camera, InputEvent @event)
         {
@@ -41,7 +50,6 @@ namespace TerrainEditor
                 if (@event is InputEventMouseButton)
                 {
                     var button = @event as InputEventMouseButton;
-
                     if (button.IsPressed() && button.ButtonIndex == (int)MouseButton.Left)
                     {
                         handle_clicked = true;
@@ -54,12 +62,15 @@ namespace TerrainEditor
                     }
                 }
 
-                else if (@event is InputEventMouseMotion && handle_clicked)
+                if (@event is InputEventMouseMotion)
                 {
                     var motion = @event as InputEventMouseMotion;
                     mousePosition = motion.Position;
-                    return true;
+
+
+                    //return true;
                 }
+
             }
             else
             {
@@ -69,15 +80,76 @@ namespace TerrainEditor
             return base.ForwardSpatialGuiInput(camera, @event);
         }
 
+
+        /// <inheritdoc />
+        public void SetMaterialParams(TerrainChunk chunk, Vector3 position, Color color)
+        {
+            // Data 0: XYZ: position, W: radius
+            // Data 1: X: falloff, Y: type
+            float halfSize = selectedTerrain.brushSize * 0.5f; // 2000
+            float falloff = halfSize * selectedTerrain.brushFallof; // 1000
+            float radius = halfSize - falloff; // 1000
+
+            chunk.UpdateInspectorMaterial(color, new Plane(position, radius), new Plane(falloff, (float)selectedTerrain.brushFallOfType, 0, 0));
+        }
+
+        public void ResetMaterialParams(TerrainChunk chunk)
+        {
+            chunk.UpdateInspectorMaterial(new Color(), new Plane(Vector3.Zero, 0f), new Plane(Vector3.Zero, 0f));
+        }
+
+        public void DrawInspector(Vector3 pos, bool reset = false)
+        {
+            if (selectedTerrain != null && editorCamera != null)
+            {
+                TerrainChunk[] selectedChunks = null;
+                if (reset == false)
+                    selectedChunks = GetChunks(pos);
+
+                foreach (var patch in selectedTerrain.terrainPatches)
+                {
+                    foreach (var chunk in patch.chunks)
+                    {
+                        if (selectedChunks == null || !selectedChunks.Contains(chunk))
+                        {
+                            ResetMaterialParams(chunk);
+                        }
+                        else
+                        {
+                            SetMaterialParams(chunk, pos, new Color(1.0f, 0.85f, 0.0f));
+
+                        }
+                    }
+                }
+            }
+        }
+
         public override void _PhysicsProcess(float delta)
         {
             //sculping or painting
-            if (selectedTerrain != null && editorCamera != null && handle_clicked)
+            if (selectedTerrain != null && editorCamera != null)
+            {
+                var start = OS.GetTicksMsec();
+                var cast = DoRayCast(mousePosition);
+                if (cast != Vector3.Inf)
+                {
+                    if (handle_clicked)
+                        DoEditTerrain(cast, delta);
+
+                    DrawInspector(cast);
+                }
+
+            }
+        }
+
+        protected Vector3 DoRayCast(Vector2 pos)
+        {
+            if (selectedTerrain != null && editorCamera != null)
             {
                 var viewport = editorCamera.GetViewport() as SubViewport;
                 var viewport_container = viewport.GetParent() as SubViewportContainer;
 
-                var screen_pos = mousePosition * viewport.Size / viewport_container.RectSize;
+                var screen_pos = pos * viewport.Size / viewport_container.RectSize;
 
                 var from = editorCamera.ProjectRayOrigin(screen_pos);
                 var dir = editorCamera.ProjectRayNormal(screen_pos);
@@ -86,16 +158,14 @@ namespace TerrainEditor
                 var space_state = selectedTerrain.GetWorld3d().DirectSpaceState;
                 var result = space_state.IntersectRay(from, from + dir * distance);
 
-                if (result.Count > 0 && result["rid"] != null && result["collider"] != null)
+                if (result.Count > 0 && result["rid"] != null && result["collider"] == selectedTerrain)
                 {
-                    var pos = (Vector3)result["position"];
-                    pos.y /= Terrain3D.COLLIDER_MULTIPLIER;
-                    DoEditTerrain(pos, delta);
-                }
-                else {
-                    GD.Print("Not colliding");
+                    var positionWorldSpace = (Vector3)result["position"];
+                    return positionWorldSpace;
                 }
             }
+
+            return Vector3.Inf;
         }
 
         protected void DoEditTerrain(Vector3 pos, float delta)
@@ -107,6 +177,13 @@ namespace TerrainEditor
             if (strength <= 0.0f)
                 return;
 
+            bool inverted = Input.IsKeyPressed((int)Key.Control);
+
+            if (inverted)
+            {
+                strength *= -1;
+            }
+
             var patches = GetPatches(pos);
             float brushExtentY = 10000.0f;
             float brushSizeHalf = selectedTerrain.brushSize * 0.5f;
@@ -117,11 +194,8 @@ namespace TerrainEditor
 
             var start = OS.GetTicksMsec();
 
-            GD.Print("colldet at pos " + pos);
-
             foreach (var patch in patches)
             {
-                GD.Print("Found patch");
                 var chunkSize = patch.info.chunkSize;
 
                 var patchSize = chunkSize * Terrain3D.CHUNKS_COUNT_EDGE * Terrain3D.CHUNKS_COUNT_EDGE;
@@ -160,15 +234,121 @@ namespace TerrainEditor
 
                 if (selectedTerrain.toolSculptMode == TerrainSculptMode.Sculpt)
                 {
-                    ApplySculpt(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                    ApplySculpt(inverted, patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                }
+                if (selectedTerrain.toolSculptMode == TerrainSculptMode.Flatten)
+                {
+                    ApplyFlatten(inverted, patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                }
+                if (selectedTerrain.toolSculptMode == TerrainSculptMode.Smooth)
+                {
+                    ApplySmooth(inverted, patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                }
+
+
+            }
+        }
+
+        public float Saturate(float value)
+        {
+            if (value < 0f)
+                return 0f;
+            return value > 1f ? 1f : value;
+        }
+
+
+        public void ApplySmooth(bool invert, TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+        {
+            var radius = Mathf.Max(Mathf.CeilToInt(selectedTerrain.toolFilterRadius * 0.01f * selectedTerrain.brushSize), 2);
+            var sourceHeightMap = patch.CacheHeightData();
+            var strength = Saturate(editorStrength);
+            var bufferSize = modifiedSize.y * modifiedSize.x;
+            var buffer = new float[bufferSize];
+
+            for (int z = 0; z < modifiedSize.y; z++)
+            {
+                var zz = z + modifiedOffset.y;
+                for (int x = 0; x < modifiedSize.x; x++)
+                {
+                    var id = z * modifiedSize.x + x;
+                    var xx = x + modifiedOffset.x;
+
+                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
+
+                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
+                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
+                    var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld) * strength;
+                    var max = patch.info.heightMapSize - 1;
+                    if (paintAmount > 0)
+                    {
+                        // Blend between the height and the target value
+
+                        float smoothValue = 0;
+                        int smoothValueSamples = 0;
+                        int minX = Math.Max(x - radius + modifiedOffset.x, 0);
+                        int minZ = Math.Max(z - radius + modifiedOffset.y, 0);
+                        int maxX = Math.Min(x + radius + modifiedOffset.x, max);
+                        int maxZ = Math.Min(z + radius + modifiedOffset.y, max);
+                        for (int dz = minZ; dz <= maxZ; dz++)
+                        {
+                            for (int dx = minX; dx <= maxX; dx++)
+                            {
+                                var height = sourceHeightMap[dz * patch.info.heightMapSize + dx];
+                                smoothValue += height;
+                                smoothValueSamples++;
+                            }
+                        }
+
+                        // Normalize
+                        smoothValue /= smoothValueSamples;
+
+                        // Blend between the height and smooth value
+                        buffer[id] = Mathf.Lerp(sourceHeight, smoothValue, paintAmount);
+                    }
+                    else
+                    {
+                        buffer[id] = sourceHeight;
+                    }
                 }
             }
 
+            patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
 
-        public void ApplySculpt(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+        public void ApplyFlatten(bool invert, TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
         {
-            var sourceHeightMap = patch.heightMapCachedData;
+            var sourceHeightMap = patch.CacheHeightData();
+
+            var targetHeight = selectedTerrain.toolTargetHeight;
+            var strength = Saturate(editorStrength);
+
+            var bufferSize = modifiedSize.y * modifiedSize.x;
+            var buffer = new float[bufferSize];
+
+            for (int z = 0; z < modifiedSize.y; z++)
+            {
+                var zz = z + modifiedOffset.y;
+                for (int x = 0; x < modifiedSize.x; x++)
+                {
+                    var xx = x + modifiedOffset.x;
+                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
+
+                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
+                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
+
+                    var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld);
+
+                    // Blend between the height and the target value
+                    var id = z * modifiedSize.x + x;
+                    buffer[id] = Mathf.Lerp(sourceHeight, targetHeight, paintAmount);
+                }
+            }
+
+            patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
+        }
+        public void ApplySculpt(bool invert, TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+        {
+            var sourceHeightMap = patch.CacheHeightData();
             float strength = editorStrength * 1000.0f;
 
             var bufferSize = modifiedSize.y * modifiedSize.x;
@@ -196,7 +376,7 @@ namespace TerrainEditor
         }
 
 
-        public Godot.Collections.Array<TerrainPatch> GetPatches(Vector3 hitPosition)
+        public TerrainPatch[] GetPatches(Vector3 hitPosition)
         {
             var list = new Godot.Collections.Array<TerrainPatch>();
             var cursorBrush = CursorBrushBounds(hitPosition);
@@ -209,7 +389,25 @@ namespace TerrainEditor
                 }
             }
 
-            return list;
+            return list.ToArray();
+        }
+        public TerrainChunk[] GetChunks(Vector3 hitPosition)
+        {
+            var list = new Godot.Collections.Array<TerrainChunk>();
+            var cursorBrush = CursorBrushBounds(hitPosition);
+
+            foreach (var patch in GetPatches(hitPosition))
+            {
+                foreach (var chunk in patch.chunks)
+                {
+                    if (chunk.getBounds(patch.info, patch.getOffset()).Intersects(cursorBrush))
+                    {
+                        list.Add(chunk);
+                    }
+                }
+            }
+
+            return list.ToArray();
         }
 
         public AABB CursorBrushBounds(Vector3 hitPosition)
@@ -223,6 +421,7 @@ namespace TerrainEditor
         }
         public void refreshEditor(string prop)
         {
+            if (selectedTerrain == null) return;
             if (currentSculpMode != selectedTerrain.toolSculptMode || currentToolMode != selectedTerrain.toolMode)
             {
                 currentSculpMode = selectedTerrain.toolSculptMode;
@@ -230,8 +429,8 @@ namespace TerrainEditor
 
                 selectedTerrain.NotifyPropertyListChanged();
             }
-
         }
+
         public override void _EnterTree()
         {
             var editor_interface = GetEditorInterface();
@@ -245,6 +444,7 @@ namespace TerrainEditor
             var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
             var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/test.png");
 
+
             AddCustomType("TerrainPatchInfo", "Resource", scriptPatchhInfo, texture);
             AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);
             AddCustomType("TerrainChunk", "Resource", scriptChunk, texture);
@@ -254,26 +454,106 @@ namespace TerrainEditor
             menuButton.Text = "Terrain";
             menuButton.Icon = texture;
             menuButton.GetPopup().AddItem("Create terrain");
+            menuButton.GetPopup().AddItem("Import terrain");
             menuButton.Visible = false;
             menuButton.GetPopup().Connect("id_pressed", new Callable(this, "openCreateMenu"));
 
             AddControlToContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
             AddSpatialGizmoPlugin(gizmoPlugin);
 
-
+            createImportMenu();
         }
+
+        public string heightMapPath = null;
+        public void selectFilePath(string path)
+        {
+            heightMapPath = path;
+        }
+
         public void openCreateMenu(int id)
         {
-            creationConformed();
+            heightMapPath = null;
+
+            if (id == 0)
+                OpenDialog();
         }
 
-        public void creationConformed()
+        public void OpenDialog()
+        {
+            createDialog.PopupCentered();
+        }
+        protected void createImportMenu()
+        {
+            AddChild(createDialog);
+            AddChild(fileDialog);
+
+            createDialog.Connect("confirmed", new Callable(this, "generateTerrain"));
+            chooseTextureButton.Connect("pressed", new Callable(this, "fileDialogOpen"));
+
+            fileDialog.FileMode = FileDialog.FileModeEnum.OpenFile;
+            fileDialog.Connect("file_selected", new Callable(this, "selectFilePath"));
+            fileDialog.AddFilter("*.png ; PNG Images");
+
+            createDialog.Title = "Create a terrain";
+
+            var vbox = new VBoxContainer();
+            createDialog.AddChild(vbox);
+
+            patchXControl.MinValue = 1;
+            patchXControl.MaxValue = 10;
+            patchXControl.Step = 1;
+
+            patchYControl.MinValue = 1;
+            patchYControl.MaxValue = 10;
+            patchYControl.Step = 1;
+
+            importHeightScale.MinValue = -10000;
+            importHeightScale.MaxValue = 10000;
+            importHeightScale.Step = 1;
+            importHeightScale.Value = 5000;
+
+            chunkSizeControl.AddItem("32", 0);
+            chunkSizeControl.AddItem("64", 1);
+            chunkSizeControl.AddItem("128", 2);
+            chunkSizeControl.AddItem("256", 3);
+            chunkSizeControl.Selected = 0;
+
+            createMarginInput(vbox, "Patch X Size", patchYControl);
+            createMarginInput(vbox, "Patch Y Size", patchXControl);
+            createMarginInput(vbox, "Chunk Size", chunkSizeControl);
+            createMarginInput(vbox, "Choose texture", chooseTextureButton);
+            createMarginInput(vbox, "Import height scale", importHeightScale);
+        }
+
+        public void fileDialogOpen()
+        {
+            fileDialog.PopupCentered();
+        }
+
+        public void generateTerrain()
         {
             if (selectedTerrain != null)
             {
-                selectedTerrain.Generate(1, 1, 32, GetEditorInterface());
+                var chunkSize = int.Parse(chunkSizeControl.GetItemText(chunkSizeControl.GetSelectedId()));
+                var patchX = (int)patchXControl.Value;
+                var patchY = (int)patchYControl.Value;
+
+                var heightScale = (int)importHeightScale.Value;
+
+                GD.Print("Generate terrain (" + patchX + "," + patchY + ") with size of " + chunkSize + " with file " + heightMapPath);
+    
+                Image file = null;
+                if (heightMapPath != null)
+                {
+                    file = new Image();
+                    file.Load(heightMapPath);
+                }
+
+
+                selectedTerrain.Generate(patchX, patchY, chunkSize, heightScale, file);
             }
         }
+
         private void createMarginInput(VBoxContainer vbox, string text, Control control)
         {
             var margin = new MarginContainer();
@@ -288,8 +568,12 @@ namespace TerrainEditor
         }
         public override void _ExitTree()
         {
+            createDialog.Disconnect("confirmed", new Callable(this, "generateTerrain"));
+            chooseTextureButton.Disconnect("pressed", new Callable(this, "fileDialogOpen"));
+            fileDialog.Disconnect("file_selected", new Callable(this, "selectFilePath"));
 
             RemoveChild(createDialog);
+            RemoveChild(fileDialog);
             RemoveCustomType("Terrain3D");
             RemoveCustomType("TerrainPatch");
             RemoveCustomType("TerrainPatchInfo");
