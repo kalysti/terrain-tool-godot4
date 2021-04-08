@@ -20,14 +20,13 @@ _global_script_classes=[ {
 "path": "res://addons/TerrainPlugin/VisualShaderNodeTerrainMaterial3D.gd"
 } ]
 _global_script_class_icons={
-@"VisualShaderNodeTerrainMaterial3D": "",
-@"VisualShaderNodeTerrainGenerator3D": ""
+@"VisualShaderNodeTerrainGenerator3D": "",
+@"VisualShaderNodeTerrainMaterial3D": ""
 }
 
 [application]
 
 config/name="test"
-run/main_scene="res://new scene.tscn"
 run/flush_stdout_on_print.debug=false
 
 [editor_plugins]

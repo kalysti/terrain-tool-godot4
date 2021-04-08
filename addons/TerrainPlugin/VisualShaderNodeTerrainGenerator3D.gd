@@ -24,7 +24,7 @@ func _get_input_port_count():
 	return 0
 
 func _get_output_port_count():
-	return 5
+	return 6
 
 func _get_output_port_name(port):
 	match port:
@@ -38,6 +38,8 @@ func _get_output_port_name(port):
 			return "red"
 		4:
 			return "green"
+		5:
+			return "uv"
 
 
 func _get_output_port_type(port):
@@ -52,6 +54,8 @@ func _get_output_port_type(port):
 			return VisualShaderNode.PORT_TYPE_SCALAR
 		4:
 			return VisualShaderNode.PORT_TYPE_SCALAR
+		5:
+			return VisualShaderNode.PORT_TYPE_VECTOR
 
 func _get_global_code(mode):
 	return """
@@ -180,17 +184,20 @@ func _get_code(input_vars, output_vars, mode, type):
 
 	var heightStr = ""
 
-	heightStr = "vec4 heightMapValues = getHeightmap(UV, terrainUvScale, terrainHeightMap, terrainCurrentLodLevel);"
-	heightStr += "float height = getHeight(heightMapValues);"
-	heightStr += "vec3 position = getPosition(terrainChunkSize, terrainCurrentLodLevel, terrainNeighborLodLevel, terrainSmoothing, terrainNextLodChunkSize, COLOR, UV);"
-	heightStr += "vec3 normal = getNormal(heightMapValues);"
-	heightStr += "position.y = height;"
+	heightStr = "vec4 heightMapValues = getHeightmap(UV, terrainUvScale, terrainHeightMap, terrainCurrentLodLevel);\n"
+	heightStr += "float height = getHeight(heightMapValues);\n"
+	heightStr += "vec3 position = getPosition(terrainChunkSize, terrainCurrentLodLevel, terrainNeighborLodLevel, terrainSmoothing, terrainNextLodChunkSize, COLOR, UV);\n"
+	heightStr += "vec3 normal = getNormal(heightMapValues);\n"
+	heightStr += "position.y = height;\n"
 
-	heightStr += output_vars[0] + " = position;"
-	heightStr += output_vars[1] + " = height;" 
-	heightStr += output_vars[2] + " = normal;"
+	heightStr += output_vars[0] + " = position;\n"
+	heightStr += output_vars[1] + " = height;\n" 
+	heightStr += output_vars[2] + " = normal;\n"
 	
-	heightStr += output_vars[3] + " = heightMapValues.r;"
-	heightStr += output_vars[4] + " = heightMapValues.g;"
+	heightStr += output_vars[3] + " = heightMapValues.r;\n"
+	heightStr += output_vars[4] + " = heightMapValues.g;\n"
+	heightStr += "vec2 newUV = vec2(position.x, position.z) * (1.0f / terrainChunkSize) + terrainUvOffset;\n"
+	heightStr += output_vars[5] + " = vec3(newUV.x, newUV.y, 0.0);\n"
+
 
 	return heightStr;

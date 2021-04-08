@@ -30,7 +30,7 @@ namespace TerrainEditor
         SpinBox patchXControl = new SpinBox();
         SpinBox patchYControl = new SpinBox();
         SpinBox importHeightScale = new SpinBox();
-        
+
         OptionButton chunkSizeControl = new OptionButton();
         Button chooseTextureButton = new Button();
 
@@ -540,8 +540,7 @@ namespace TerrainEditor
 
                 var heightScale = (int)importHeightScale.Value;
 
-                GD.Print("Generate terrain (" + patchX + "," + patchY + ") with size of " + chunkSize + " with file " + heightMapPath);
-    
+
                 Image file = null;
                 if (heightMapPath != null)
                 {

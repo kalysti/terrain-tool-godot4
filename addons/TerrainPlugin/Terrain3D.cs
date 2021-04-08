@@ -36,9 +36,10 @@ namespace TerrainEditor
             if (bodyRid != null)
                 PhysicsServer3D.BodyClearShapes(bodyRid);
 
-            var start = OS.GetTicksMsec();
             Clear();
             terrainPatches.Clear();
+
+            var start = OS.GetTicksMsec();
 
             float size = (chunkSize - 1) * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
             int heightmapSize = (chunkSize - 1) * Terrain3D.CHUNKS_COUNT_EDGE + 1;
@@ -49,9 +50,10 @@ namespace TerrainEditor
                 {
                     var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatch.cs").New();
                     var patch = script as TerrainPatch;
+
                     patch.offset = new Vector3(x * size, 0.0f, y * size);
                     patch.ResourceLocalToScene = true;
-                    patch.patchCoord = new Vector2((float)x, (float)y);
+                    patch.patchCoord = new Vector2i(x, y);
                     terrainPatches.Add(patch);
                 }
             }
@@ -77,9 +79,9 @@ namespace TerrainEditor
                             Vector2 uv = uvStart + new Vector2(x * heightmapSizeInv, z * heightmapSizeInv) * uvPerPatch;
                             Color raw = heightMapImage.GetPixel(x, z);
 
-                            float normalizedHeight = patch.ReadNormalizedHeight(raw);
+                            float normalizedHeight = ReadNormalizedHeight(raw);
                             //bool isHole = patch.ReadIsHole(raw);
-                            
+
                             heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
                         }
                     }
@@ -89,11 +91,26 @@ namespace TerrainEditor
             }
 
 
-            var end = OS.GetTicksMsec();
-            GD.Print("Loading time: " + (end - start) + " ms");
+            GD.Print("[Generate Time] " + (OS.GetTicksMsec() - start) + " ms");
 
+            start = OS.GetTicksMsec();
             Init();
+            GD.Print("[Init Time] " + (OS.GetTicksMsec() - start) + " ms");
+
+            var kmX = bounds.Size.x * 0.00001f;
+            var kmY = bounds.Size.x * 0.00001f;
+            GD.Print("[Init Size] " + kmX + "x" + kmY + "km");
         }
+
+        public float ReadNormalizedHeight(Color raw)
+        {
+            var test = raw.r8 | (raw.g8 << 8);
+            UInt16 quantizedHeight = Convert.ToUInt16(test);
+
+            float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
+            return normalizedHeight;
+        }
+
 
         public void PreInit()
         {
@@ -106,7 +123,6 @@ namespace TerrainEditor
 
         public void Init()
         {
-            var start = OS.GetTicksMsec();
             RID scenario = GetWorld3d().Scenario;
             foreach (var patch in terrainPatches)
             {

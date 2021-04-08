@@ -5,18 +5,22 @@ using System.Runtime.InteropServices;
 using Godot;
 using System;
 using System.Linq;
+using System.IO;
 
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 namespace TerrainEditor
 {
 
     [Tool]
     public partial class TerrainPatch : Resource
     {
-        [Export]
-        public Vector3 position = new Vector3();
+
+        public Godot.Collections.Dictionary<int, ArrayMesh> meshCache = new Godot.Collections.Dictionary<int, ArrayMesh>();
+
 
         [Export]
-        public Vector2 patchCoord = new Vector2();
+        public Vector2i patchCoord = new Vector2i();
 
         [Export]
 
@@ -77,10 +81,8 @@ namespace TerrainEditor
 
         public void UpdateHeightMap(Terrain3D terrain, float[] samples, Vector2i modifiedOffset, Vector2i modifiedSize)
         {
-            var start1 = OS.GetTicksMsec();
-            var start = OS.GetTicksMsec();
 
-            var image = heightmap.GetImage() as Image;
+            var image = heightmap.GetImage().Duplicate() as Image;
             var data = CacheHeightData();
 
             if (modifiedOffset.x < 0 || modifiedOffset.y < 0 ||
@@ -106,10 +108,7 @@ namespace TerrainEditor
             float[] chunkHeights = new float[Terrain3D.CHUNKS_COUNT];
 
             CalculateHeightmapRange(data, ref chunkOffsets, ref chunkHeights);
-            DrawHeightMapOnImage(ref image, ref data);
-            UpdateNormalsAndHoles(ref image, data, null, modifiedOffset, modifiedSize);
 
-            start = OS.GetTicksMsec();
             int chunkIndex = 0;
             foreach (var chunk in chunks)
             {
@@ -119,14 +118,16 @@ namespace TerrainEditor
                 chunkIndex++;
             }
 
+            DrawHeightMapOnImage(ref image, ref data);
+            UpdateNormalsAndHoles(ref image, data, null, modifiedOffset, modifiedSize);
+
             terrain.updateBounds();
             terrain.updateDebug();
 
-
             var newColliderData = ModifyCollision(0, modifiedOffset, modifiedSize, data);
-            CookModifyCollision(terrain, getColliderLod(0));
-            heightmap.Update(image, true);
+            CookModifyCollision(terrain, newColliderData);
 
+            heightmap.Update(image, true);
             UpdateTransform(terrain);
         }
 
@@ -170,6 +171,7 @@ namespace TerrainEditor
 
         public void Draw(RID scenario, Terrain3D terrainNode, RID shaderRid)
         {
+            //clear chunks scene
             foreach (var chunk in chunks)
             {
                 chunk.Clear();
@@ -251,8 +253,56 @@ namespace TerrainEditor
             return new Vector3(patchCoord.x * size, 0.0f, patchCoord.y * size);
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RGBA
+        {
+            public byte r;
+            public byte g;
+            public byte b;
+            public byte a;
+        }
+
+        private static byte[] ToByteArray<T>(T[] source) where T : struct
+        {
+            GCHandle handle = GCHandle.Alloc(source, GCHandleType.Pinned);
+            try
+            {
+                IntPtr pointer = handle.AddrOfPinnedObject();
+                byte[] destination = new byte[source.Length * Marshal.SizeOf(typeof(T))];
+                Marshal.Copy(pointer, destination, 0, destination.Length);
+                return destination;
+            }
+            finally
+            {
+                if (handle.IsAllocated)
+                    handle.Free();
+            }
+        }
+
+        private static T[] FromByteArray<T>(byte[] source) where T : struct
+        {
+            T[] destination = new T[source.Length / Marshal.SizeOf(typeof(T))];
+            GCHandle handle = GCHandle.Alloc(destination, GCHandleType.Pinned);
+            try
+            {
+                IntPtr pointer = handle.AddrOfPinnedObject();
+                Marshal.Copy(source, 0, pointer, source.Length);
+                return destination;
+            }
+            finally
+            {
+                if (handle.IsAllocated)
+                    handle.Free();
+            }
+        }
+
+
         private void DrawHeightMapOnImage(ref Image image, ref float[] heightmapData)
         {
+            var buffer = image.GetData();
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
+
+            var df = 0;
             for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
             {
                 int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
@@ -273,19 +323,43 @@ namespace TerrainEditor
                     {
                         int tx = chunkTextureX + x;
                         int sx = chunkHeightmapX + x;
+
                         int textureIndex = tz + tx;
                         int heightmapIndex = sz + sx;
 
-                        var newColor = WriteHeight(image.GetPixel( tx, tz / info.textureSize), heightmapData[heightmapIndex]);
-                        image.SetPixel(  tx,  tz / info.textureSize, newColor);
+                        if (textureIndex > df)
+                            df = textureIndex;
+
+
+
+                        float normalizedHeight = (heightmapData[heightmapIndex] - info.patchOffset) / info.patchHeight;
+                        UInt16 quantizedHeight = (UInt16)(normalizedHeight * UInt16.MaxValue);
+
+                        imgRGBABuffer[textureIndex].r = (byte)(quantizedHeight & 0xff);
+                        imgRGBABuffer[textureIndex].g = (byte)((quantizedHeight >> 8) & 0xff);
                     }
                 }
             }
 
+            byte[] bytes = ToByteArray(imgRGBABuffer);
+            var newImage = new Image();
+            image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, bytes);
+        }
+
+        private void WriteHeightByte(ref RGBA raw, float height)
+        {
+            float normalizedHeight = (height - info.patchOffset) / info.patchHeight;
+            UInt16 quantizedHeight = (UInt16)(normalizedHeight * UInt16.MaxValue);
+
+            raw.r = (byte)(quantizedHeight & 0xff);
+            raw.g = (byte)((quantizedHeight >> 8) & 0xff);
         }
 
         private void UpdateNormalsAndHoles(ref Image image, float[] heightmapData, Godot.Collections.Array<bool> holesMask, Vector2i modifiedOffset, Vector2i modifiedSize)
         {
+
+            var buffer = image.GetData();
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             //   var buffer = image.SavePngToBuffer();
 
@@ -420,7 +494,7 @@ namespace TerrainEditor
                         int sx = chunkHeightmapX + x - normalsStart.x;
                         int tx = chunkTextureX + x;
 
-                        // int textureIndex = tz + tx;
+                        int textureIndex = tz + tx;
                         int heightmapIndex = hz + hx;
                         int normalIndex = sz + sx;
 
@@ -429,34 +503,20 @@ namespace TerrainEditor
                         if (holesMask != null && !holesMask[heightmapIndex])
                             normal = Vector3.One;
 
-                        var color = image.GetPixel( tx,  tz / info.textureSize);
-
-                        color.b = normal.x;
-                        color.a = normal.z;
-
-                        image.SetPixel(tx, tz / info.textureSize, color);
-                        d++;
+                        imgRGBABuffer[textureIndex].b = (byte)(normal.x * 255f);
+                        imgRGBABuffer[textureIndex].a = (byte)(normal.z * 255f);
                     }
                 }
             }
 
+            byte[] bytes = ToByteArray(imgRGBABuffer);
+            image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, bytes);
         }
 
 
-        private Color WriteHeight(Color raw, float height)
+        public float ReadNormalizedHeightByte(RGBA raw)
         {
-            float normalizedHeight = (height - info.patchOffset) / info.patchHeight;
-            UInt16 quantizedHeight = (UInt16)(normalizedHeight * UInt16.MaxValue);
-
-            raw.r8 = Convert.ToInt32((byte)(quantizedHeight & 0xff));
-            raw.g8 = Convert.ToInt32((byte)((quantizedHeight >> 8) & 0xff));
-
-
-            return raw;
-        }
-        public float ReadNormalizedHeight(Color raw)
-        {
-            var test = raw.r8 | (raw.g8 << 8);
+            var test = raw.r | (raw.g << 8);
             UInt16 quantizedHeight = Convert.ToUInt16(test);
 
             float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
@@ -466,6 +526,10 @@ namespace TerrainEditor
         public bool ReadIsHole(Color raw)
         {
             return (raw.b8 + raw.a8) >= (int)(1.9f * byte.MaxValue);
+        }
+        public bool ReadIsHoleByte(RGBA raw)
+        {
+            return (raw.b + raw.a) >= (int)(1.9f * byte.MaxValue);
         }
 
         private void CalculateHeightmapRange(float[] heightmap, ref float[] chunkOffsets, ref float[] chunkHeights)
@@ -617,6 +681,8 @@ namespace TerrainEditor
 
             int d = 0;
 
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(img.GetData());
+
             // Extract heightmap data and denormalize it to get the pure height field
             float patchOffset = info.patchOffset;
             float patchHeight = info.patchHeight;
@@ -640,10 +706,10 @@ namespace TerrainEditor
                         int textureIndex = tz + tx;
                         int heightmapIndex = sz + sx;
 
-                        Color raw = img.GetPixel( tx, tz);
+                        Color raw = img.GetPixel(tx, tz);
 
-                        float normalizedHeight = ReadNormalizedHeight(raw);
-                        bool isHole = ReadIsHole(raw);
+                        float normalizedHeight = ReadNormalizedHeightByte(imgRGBABuffer[textureIndex]);
+                        bool isHole = ReadIsHoleByte(imgRGBABuffer[textureIndex]);
 
                         float height = (normalizedHeight * patchHeight) + patchOffset;
 
@@ -673,6 +739,8 @@ namespace TerrainEditor
             int textureSizeMip = info.textureSize >> collisionLOD;
 
             var img = heightmap.GetImage();
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(img.GetData());
+
 
             int heightMapLength = info.heightMapSize * info.heightMapSize;
             var heightField = new float[heightMapLength];
@@ -694,12 +762,12 @@ namespace TerrainEditor
                             int textureIndexZ = (chunkTextureZ + z) * textureSizeMip;
                             int textureIndexX = chunkTextureX + x;
 
-                            Color raw = img.GetPixel(  textureIndexX, textureIndexZ / textureSizeMip);
+                            int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
 
-                            float normalizedHeight = ReadNormalizedHeight(raw);
+
+                            float normalizedHeight = ReadNormalizedHeightByte(imgRGBABuffer[textureIndex]);
                             float height = (normalizedHeight * info.patchHeight) + info.patchOffset;
-
-                            bool isHole = ReadIsHole(raw);
+                            bool isHole = ReadIsHoleByte(imgRGBABuffer[textureIndex]);
 
                             int heightmapX = chunkStartX + x;
                             int heightmapZ = chunkStartZ + z;
@@ -717,6 +785,7 @@ namespace TerrainEditor
         public float[] ModifyCollision(int collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
         {
             var img = heightmap.GetImage();
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(img.GetData());
 
             // Prepare data
             Vector2 modifiedOffsetRatio = new Vector2((float)modifiedOffset.x / info.heightMapSize, (float)modifiedOffset.y / info.heightMapSize);
@@ -735,29 +804,27 @@ namespace TerrainEditor
             samplesEnd.x = Math.Min(samplesEnd.x, heightFieldSize);
             samplesEnd.y = Math.Min(samplesEnd.y, heightFieldSize);
 
-            // Allocate data
-            int heightFieldDataLength = samplesSize.x * samplesSize.y;
-
             // Setup terrain collision information
             //auto & mip = initData->Mips[collisionLOD];
             int vertexCountEdgeMip = info.vertexCountEdge >> collisionLOD;
             int textureSizeMip = info.textureSize >> collisionLOD;
-            for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
+
+            for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
             {
-                int chunkTextureX = chunkX * vertexCountEdgeMip;
-                int chunkStartX = chunkX * heightFieldChunkSize;
+                int chunkTextureZ = chunkZ * vertexCountEdgeMip;
+                int chunkStartZ = chunkZ * heightFieldChunkSize;
 
                 // Skip unmodified chunks
-                if (chunkStartX >= samplesEnd.x || chunkStartX + vertexCountEdgeMip < samplesOffset.x)
+                if (chunkStartZ >= samplesEnd.y || chunkStartZ + vertexCountEdgeMip < samplesOffset.y)
                     continue;
 
-                for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
+                for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
                 {
-                    int chunkTextureZ = chunkZ * vertexCountEdgeMip;
-                    int chunkStartZ = chunkZ * heightFieldChunkSize;
+                    int chunkTextureX = chunkX * vertexCountEdgeMip;
+                    int chunkStartX = chunkX * heightFieldChunkSize;
 
                     // Skip unmodified chunks
-                    if (chunkStartZ >= samplesEnd.y || chunkStartZ + vertexCountEdgeMip < samplesOffset.y)
+                    if (chunkStartX >= samplesEnd.x || chunkStartX + vertexCountEdgeMip < samplesOffset.x)
                         continue;
 
                     for (int z = 0; z < vertexCountEdgeMip; z++)
@@ -777,15 +844,18 @@ namespace TerrainEditor
                             if (heightmapLocalX < 0 || heightmapLocalX >= samplesSize.x)
                                 continue;
 
-                            Color raw = img.GetPixel( (chunkTextureX + x), (chunkTextureZ + z));
+                            int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
 
-                            float normalizedHeight = ReadNormalizedHeight(raw);
-                            //    float height = (normalizedHeight * info.patchHeight) + info.patchOffset;
 
-                            bool isHole = ReadIsHole(raw);
+                            float normalizedHeight = ReadNormalizedHeightByte(imgRGBABuffer[textureIndex]);
+                            float height = (normalizedHeight * info.patchHeight) + info.patchOffset;
+
+                            bool isHole = ReadIsHoleByte(imgRGBABuffer[textureIndex]);
+
                             int dstIndex = (heightmapLocalX * samplesSize.y) + heightmapLocalZ;
+                            //int dstIndex = heightmapLocalX + (heightmapLocalZ * samplesSize.y);
 
-                            heightFieldData[dstIndex] = normalizedHeight;
+                            heightFieldData[dstIndex] = height;
                         }
                     }
                 }
@@ -877,6 +947,8 @@ namespace TerrainEditor
             PhysicsServer3D.BodySetCollisionMask(terrain.bodyRid, terrain.collisionMask);
 
             updateColliderPosition(terrain);
+
+            GD.Print("[Collider] Cooking time " + (OS.GetTicksMsec() - start) + " ms");
         }
     }
 

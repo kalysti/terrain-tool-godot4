@@ -12,12 +12,14 @@ namespace TerrainEditor
         [Export]
         public Vector2i position = new Vector2i();
 
-        public AABB bounds = new AABB();
+        [Export]
+        public Vector2 offsetUv = new Vector2();
 
+        public AABB bounds = new AABB();
 
         [Export]
         public float TerrainChunkSizeLOD0 = 0.0f;
-        protected Mesh mesh { get; set; }
+        public Mesh mesh { get; set; }
 
         [Export]
         public float offset = 0;
@@ -122,7 +124,8 @@ namespace TerrainEditor
 
         public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture heightMap, Terrain3D tf, Vector3 patchoffset, RID shaderRid)
         {
-            mesh = GenerateMesh(info.chunkSize, 0);
+            var start = OS.GetTicksMsec();
+            mesh = GenerateMesh(patch, info.chunkSize, 0);
             meshId = mesh.GetRid();
 
             float size = (float)info.chunkSize * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
@@ -134,7 +137,6 @@ namespace TerrainEditor
             RenderingServer.InstanceAttachObjectInstanceId(instanceRid, tf.GetInstanceId()); // attach to node
 
             RenderingServer.InstanceSetVisible(instanceRid, true);
-
 
             // RenderingServer.MeshSetCustomAabb(meshId, new AABB(new Vector3(), new Vector3(size, offset, size)));
 
@@ -153,13 +155,20 @@ namespace TerrainEditor
             RenderingServer.MaterialSetParam(materialId, "terrainUvScale", getUVScale());
             RenderingServer.MaterialSetParam(materialId, "terrainCurrentLodLevel", 0);
 
-            var offsetUv = new Vector2((float)(patch.position.x * Terrain3D.CHUNKS_COUNT_EDGE + position.x), (float)(patch.position.y * Terrain3D.CHUNKS_COUNT_EDGE + position.y));
+            offsetUv = new Vector2((float)(patch.patchCoord.x * Terrain3D.CHUNKS_COUNT_EDGE + position.x), (float)(patch.patchCoord.y * Terrain3D.CHUNKS_COUNT_EDGE + position.y));
             RenderingServer.MaterialSetParam(materialId, "terrainUvOffset", offsetUv);
+
+            GD.Print("[Chunk] Draw time " + (OS.GetTicksMsec() - start) + "ms");
 
         }
 
-        private ArrayMesh GenerateMesh(int chunkSize, int lodIndex)
+        private ArrayMesh GenerateMesh(TerrainPatch patch, int chunkSize, int lodIndex)
         {
+            if (patch.meshCache.ContainsKey(lodIndex))
+            {
+                return patch.meshCache[lodIndex].Duplicate() as ArrayMesh;
+            }
+
             int chunkSizeLOD0 = chunkSize;
 
             // Prepare
@@ -170,7 +179,6 @@ namespace TerrainEditor
 
             // Create vertex buffer
             float vertexTexelSnapTexCoord = 1.0f / chunkSize;
-
 
             var st = new SurfaceTool();
             st.Begin(Mesh.PrimitiveType.Triangles);
@@ -221,10 +229,13 @@ namespace TerrainEditor
                 }
             }
 
-            st.GenerateNormals();
-            st.GenerateTangents();
+            //  st.GenerateNormals();
+            // st.GenerateTangents();
 
-            return st.Commit();
+            var mesh = st.Commit();
+            patch.meshCache.Add(lodIndex, mesh);
+
+            return mesh.Duplicate() as ArrayMesh;
         }
     }
 }
