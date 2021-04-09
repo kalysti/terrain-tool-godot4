@@ -33,6 +33,9 @@ namespace TerrainEditor
         [Export]
         public ImageTexture heightmap;
 
+        [Export]
+        public Godot.Collections.Array<ImageTexture> splatmaps = new Godot.Collections.Array<ImageTexture>();
+
         public AABB bounds = new AABB();
 
 
@@ -145,7 +148,7 @@ namespace TerrainEditor
             updateInfo(_chunkSize);
             createChunks();
 
-            var image = createHeightMapTexutre();
+            var image = createImage();
 
             if (heightMapdata == null)
             {
@@ -171,6 +174,15 @@ namespace TerrainEditor
             {
                 heightmap = new ImageTexture();
                 heightmap.CreateFromImage(image);
+
+                var splatmap1 = new ImageTexture();
+                var splatmap2 = new ImageTexture();
+
+                splatmap1.CreateFromImage(createImage());
+                splatmap2.CreateFromImage(createImage());
+
+                splatmaps.Add(splatmap1);
+                splatmaps.Add(splatmap2);
             }
 
             else
@@ -212,7 +224,7 @@ namespace TerrainEditor
             updateColliderPosition(terrainNode);
         }
 
-        private Image createHeightMapTexutre()
+        private Image createImage()
         {
             var initData = new Image();
             initData.Create(info.textureSize, info.textureSize, false, Image.Format.Rgba8);
@@ -312,6 +324,54 @@ namespace TerrainEditor
             }
         }
 
+
+        private void DrawSplatMapOnImage(ref Image image, ref Color[] heightmapData)
+        {
+            var buffer = image.GetData();
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
+
+            var df = 0;
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            {
+                int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
+                int chunkZ = (chunkIndex / Terrain3D.CHUNKS_COUNT_EDGE);
+
+                int chunkTextureX = chunkX * info.vertexCountEdge;
+                int chunkTextureZ = chunkZ * info.vertexCountEdge;
+
+                int chunkHeightmapX = chunkX * info.chunkSize;
+                int chunkHeightmapZ = chunkZ * info.chunkSize;
+
+                for (int z = 0; z < info.vertexCountEdge; z++)
+                {
+                    int tz = (chunkTextureZ + z) * info.textureSize;
+                    int sz = (chunkHeightmapZ + z) * info.heightMapSize;
+
+                    for (int x = 0; x < info.vertexCountEdge; x++)
+                    {
+                        int tx = chunkTextureX + x;
+                        int sx = chunkHeightmapX + x;
+
+                        int textureIndex = tz + tx;
+                        int heightmapIndex = sz + sx;
+
+                        if (textureIndex > df)
+                            df = textureIndex;
+
+                        Color img = heightmapData[heightmapIndex];
+
+                        imgRGBABuffer[textureIndex].r = Convert.ToByte(img.r8);
+                        imgRGBABuffer[textureIndex].g = Convert.ToByte(img.g8);
+                        imgRGBABuffer[textureIndex].b = Convert.ToByte(img.b8);
+                        imgRGBABuffer[textureIndex].a = Convert.ToByte(img.a8);
+                    }
+                }
+            }
+
+            byte[] bytes = ToByteArray(imgRGBABuffer);
+            var newImage = new Image();
+            image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, bytes);
+        }
 
         private void DrawHeightMapOnImage(ref Image image, ref float[] heightmapData)
         {
@@ -674,6 +734,7 @@ namespace TerrainEditor
         }
 
         protected float[] cachedHeightMapData;
+        protected Godot.Collections.Dictionary<int, Color[]> cachedSplatMap;
 
         public float[] CacheHeightData()
         {
@@ -683,6 +744,64 @@ namespace TerrainEditor
                 return cachedHeightMapData;
         }
 
+        public Color[] CacheSplatMap(int id)
+        {
+            if (!cachedSplatMap.ContainsKey(id) || cachedSplatMap[id] == null || cachedSplatMap[id].Length <= 0)
+            {
+                return DoCachingSplatMap(id);
+            }
+            else
+                return cachedSplatMap[id];
+        }
+
+        //todo: take buffers not getpixel
+        protected Color[] DoCachingSplatMap(int id)
+        {
+            // Prepare
+            if (id > splatmaps.Count)
+                return null;
+
+            // Cache all the splatmaps
+            var splatmap = splatmaps[id];
+            var splatmapImg = splatmap.GetImage();
+            int heightMapLength = info.heightMapSize * info.heightMapSize;
+
+            // Allocate data
+            Color[] colors = new Color[heightMapLength];
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(heightmap.GetImage().GetData());
+
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            {
+                int chunkTextureX = chunks[chunkIndex].position.x * info.vertexCountEdge;
+                int chunkTextureZ = chunks[chunkIndex].position.y * info.vertexCountEdge;
+
+                int chunkHeightmapX = chunks[chunkIndex].position.x * info.chunkSize;
+                int chunkHeightmapZ = chunks[chunkIndex].position.y * info.chunkSize;
+
+                for (int z = 0; z < info.vertexCountEdge; z++)
+                {
+                    int tz = (chunkTextureZ + z);
+                    int sz = (chunkHeightmapZ + z) * info.heightMapSize;
+
+                    for (int x = 0; x < info.vertexCountEdge; x++)
+                    {
+                        int tx = chunkTextureX + x;
+                        int sx = chunkHeightmapX + x;
+                        int textureIndex = tz + tx;
+                        int splatmapIndex = sz + sx;
+
+                        colors[splatmapIndex].r8 = Convert.ToByte(imgRGBABuffer[textureIndex].r);
+                        colors[splatmapIndex].r8 = Convert.ToByte(imgRGBABuffer[textureIndex].g);
+                        colors[splatmapIndex].r8 = Convert.ToByte(imgRGBABuffer[textureIndex].b);
+                        colors[splatmapIndex].r8 = Convert.ToByte(imgRGBABuffer[textureIndex].a);
+                    }
+                }
+            }
+
+            return colors;
+        }
+
+        //todo: take buffers not getpixel
         protected float[] DoCaching()
         {
             if (heightmap == null)
@@ -691,16 +810,13 @@ namespace TerrainEditor
                 return null;
             }
 
-            var img = heightmap.GetImage();
             int heightMapLength = info.heightMapSize * info.heightMapSize;
 
             // Allocate data
             float[] _cachedHeightMap = new float[heightMapLength];
             float[] _cachedHolesMask = new float[heightMapLength];
 
-            int d = 0;
-
-            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(img.GetData());
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(heightmap.GetImage().GetData());
 
             // Extract heightmap data and denormalize it to get the pure height field
             float patchOffset = info.patchOffset;
@@ -725,7 +841,6 @@ namespace TerrainEditor
                         int textureIndex = tz + tx;
                         int heightmapIndex = sz + sx;
 
-                        Color raw = img.GetPixel(tx, tz);
 
                         float normalizedHeight = ReadNormalizedHeightByte(imgRGBABuffer[textureIndex]);
                         bool isHole = ReadIsHoleByte(imgRGBABuffer[textureIndex]);
@@ -735,7 +850,6 @@ namespace TerrainEditor
                         _cachedHeightMap[heightmapIndex] = height;
                         _cachedHolesMask[heightmapIndex] = isHole ? 0 : 255;
 
-                        d++;
                     }
                 }
             }

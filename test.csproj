@@ -2,12 +2,4 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference GeneratePathProperty="true" Include="PhysX.Net" Version="1.0.0-alpha" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="PhysX.Net">
-      <HintPath>C:\Users\Highclickers\.nuget\packages\physx.net\1.0.0-alpha\lib\net471\PhysX.Net.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>

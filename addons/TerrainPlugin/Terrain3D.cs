@@ -19,8 +19,6 @@ namespace TerrainEditor
 
         public AABB bounds = new AABB();
 
-        public RID instanceRID;
-
         public Node root;
 
         public void updateTransform()
