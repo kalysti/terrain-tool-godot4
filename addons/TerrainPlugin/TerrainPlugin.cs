@@ -117,7 +117,6 @@ namespace TerrainEditor
                         else
                         {
                             SetMaterialParams(chunk, pos, new Color(1.0f, 0.85f, 0.0f));
-
                         }
                     }
                 }
@@ -198,11 +197,10 @@ namespace TerrainEditor
             {
                 var chunkSize = patch.info.chunkSize;
 
-                var patchSize = chunkSize * Terrain3D.CHUNKS_COUNT_EDGE * Terrain3D.CHUNKS_COUNT_EDGE;
+                var patchSize = chunkSize * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
                 var unitsPerVertexInv = 1.0f / Terrain3D.TERRAIN_UNITS_PER_VERTEX;
 
                 var patchPositionLocal = new Vector3(patch.patchCoord.x * patchSize, 0, patch.patchCoord.y * patchSize);
-
                 var brushBoundsPatchLocalMin = (bMin - patchPositionLocal) * unitsPerVertexInv;
                 var brushBoundsPatchLocalMax = (bMax - patchPositionLocal) * unitsPerVertexInv;
 
@@ -371,7 +369,6 @@ namespace TerrainEditor
                     buffer[id] = sourceHeight + paintAmount * strength;
                 }
             }
-
             patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
 
@@ -385,6 +382,7 @@ namespace TerrainEditor
             {
                 if (patch.getBounds().Intersects(cursorBrush))
                 {
+
                     list.Add(patch);
                 }
             }

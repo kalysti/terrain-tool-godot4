@@ -38,6 +38,8 @@ namespace TerrainEditor
 
         protected RID shapeRid;
 
+        protected RID bodyRid;
+
         [Export]
         public TerrainPatchInfo info = new TerrainPatchInfo();
 
@@ -51,10 +53,17 @@ namespace TerrainEditor
                 shapeRid = null;
             }
 
+            if (bodyRid != null)
+                PhysicsServer3D.BodyClearShapes(bodyRid);
+
             foreach (var chunk in chunks)
             {
                 chunk.Clear();
             }
+
+            if (bodyRid != null)
+                PhysicsServer3D.BodyClearShapes(bodyRid);
+
         }
 
         public void createChunks()
@@ -171,11 +180,18 @@ namespace TerrainEditor
 
         public void Draw(RID scenario, Terrain3D terrainNode, RID shaderRid)
         {
+
             //clear chunks scene
             foreach (var chunk in chunks)
             {
                 chunk.Clear();
             }
+
+            bodyRid = PhysicsServer3D.BodyCreate();
+
+            PhysicsServer3D.BodySetMode(bodyRid, PhysicsServer3D.BodyMode.Static);
+            PhysicsServer3D.BodyAttachObjectInstanceId(bodyRid, terrainNode.GetInstanceId());
+            PhysicsServer3D.BodySetSpace(bodyRid, terrainNode.GetWorld3d().Space);
 
             //create cache
             foreach (var chunk in chunks)
@@ -639,11 +655,13 @@ namespace TerrainEditor
             int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
             int heightFieldLength = heightFieldSize * heightFieldSize;
 
+
             var scale2 = new Vector3((float)info.heightMapSize / heightFieldSize, 1, (float)info.heightMapSize / heightFieldSize);
             var scaleFac = new Vector3(scale2.x * Terrain3D.TERRAIN_UNITS_PER_VERTEX, scale2.x, scale2.x * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
             transform = new Transform();
-            transform.origin = terrain.GlobalTransform.origin + new Vector3(chunks[0].TerrainChunkSizeLOD0 * 2, 0, chunks[0].TerrainChunkSizeLOD0 * 2);
+            transform.origin = terrain.GlobalTransform.origin + new Vector3(chunks[0].TerrainChunkSizeLOD0 * 2, 0, chunks[0].TerrainChunkSizeLOD0 * 2) + offset;
             transform.basis = terrain.GlobalTransform.basis;
+
 
             var scale = transform.basis.Scale;
             scale.x *= Terrain3D.TERRAIN_UNITS_PER_VERTEX;
@@ -651,7 +669,8 @@ namespace TerrainEditor
 
             transform.basis.Scale = scale;
 
-            PhysicsServer3D.BodySetState(terrain.bodyRid, PhysicsServer3D.BodyState.Transform, transform);
+            PhysicsServer3D.BodySetState(bodyRid, PhysicsServer3D.BodyState.Transform, transform);
+
         }
 
         protected float[] cachedHeightMapData;
@@ -895,15 +914,7 @@ namespace TerrainEditor
                     "max_height", bound.End.y
                 }
             });
-            /*
-                        var shape = terrain.GetParent().GetNode("body").GetNode("shape") as CollisionShape3D;
-                        var hm = shape.Shape as HeightMapShape3D;
 
-                        hm.MapWidth = (int)Math.Sqrt(heightMapData.Length);
-                        hm.MapDepth = (int)Math.Sqrt(heightMapData.Length);
-                        hm.MapData = heightMapData;
-
-                        shape.Shape = hm;*/
         }
 
         public void CookCollision(int collisionLOD, Terrain3D terrain)
@@ -918,7 +929,7 @@ namespace TerrainEditor
 
             //create heightmap shape
             shapeRid = PhysicsServer3D.HeightmapShapeCreate();
-            PhysicsServer3D.BodyAddShape(terrain.bodyRid, shapeRid);
+            PhysicsServer3D.BodyAddShape(bodyRid, shapeRid);
             PhysicsServer3D.ShapeSetData(shapeRid, new Godot.Collections.Dictionary() {
                 {
                     "width", (int) Math.Sqrt(heightField.Length)
@@ -933,18 +944,9 @@ namespace TerrainEditor
                     "cell_size", 1.0f
                 }
             });
-            /*
-                        var shape = terrain.GetParent().GetNode("body").GetNode("shape") as CollisionShape3D;
-                        var hm = new HeightMapShape3D();
 
-                        hm.MapWidth = (int)Math.Sqrt(heightField.Length);
-                        hm.MapDepth = (int)Math.Sqrt(heightField.Length);
-                        hm.MapData = heightField;
-
-                        shape.Shape = hm;
-            */
-            PhysicsServer3D.BodySetCollisionLayer(terrain.bodyRid, terrain.collisionLayer);
-            PhysicsServer3D.BodySetCollisionMask(terrain.bodyRid, terrain.collisionMask);
+            PhysicsServer3D.BodySetCollisionLayer(bodyRid, terrain.collisionLayer);
+            PhysicsServer3D.BodySetCollisionMask(bodyRid, terrain.collisionMask);
 
             updateColliderPosition(terrain);
 

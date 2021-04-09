@@ -23,8 +23,6 @@ namespace TerrainEditor
 
         public Node root;
 
-        public RID bodyRid;
-
         public void updateTransform()
         {
             foreach (var patch in terrainPatches)
@@ -33,9 +31,6 @@ namespace TerrainEditor
 
         public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null)
         {
-            if (bodyRid != null)
-                PhysicsServer3D.BodyClearShapes(bodyRid);
-
             Clear();
             terrainPatches.Clear();
 
@@ -112,15 +107,6 @@ namespace TerrainEditor
         }
 
 
-        public void PreInit()
-        {
-            bodyRid = PhysicsServer3D.BodyCreate();
-
-            PhysicsServer3D.BodySetMode(bodyRid, PhysicsServer3D.BodyMode.Static);
-            PhysicsServer3D.BodyAttachObjectInstanceId(bodyRid, GetInstanceId());
-            PhysicsServer3D.BodySetSpace(bodyRid, GetWorld3d().Space);
-        }
-
         public void Init()
         {
             RID scenario = GetWorld3d().Scenario;
@@ -148,11 +134,9 @@ namespace TerrainEditor
             else if (what == NotificationExitWorld)
             {
                 Clear();
-                PhysicsServer3D.FreeRid(bodyRid);
             }
             else if (what == NotificationEnterWorld)
             {
-                PreInit();
                 Init();
             }
             else if (what == NotificationTransformChanged)
@@ -164,7 +148,6 @@ namespace TerrainEditor
         public void Clear()
         {
             GD.Print("Clearing");
-            PhysicsServer3D.BodyClearShapes(bodyRid);
 
             foreach (var patch in terrainPatches)
             {
