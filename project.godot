@@ -20,8 +20,8 @@ _global_script_classes=[ {
 "path": "res://addons/TerrainPlugin/VisualShaderNodeTerrainMaterial3D.gd"
 } ]
 _global_script_class_icons={
-@"VisualShaderNodeTerrainGenerator3D": "",
-@"VisualShaderNodeTerrainMaterial3D": ""
+@"VisualShaderNodeTerrainMaterial3D": "",
+@"VisualShaderNodeTerrainGenerator3D": ""
 }
 
 [application]
