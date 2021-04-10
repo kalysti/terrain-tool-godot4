@@ -24,7 +24,7 @@ namespace TerrainEditor
                 patch.UpdateTransform(this);
         }
 
-        public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null)
+        public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null, Image splatMapImage1 = null, Image splatMapImage2 = null)
         {
             ClearDraw();
 
@@ -64,27 +64,45 @@ namespace TerrainEditor
 
                     float[] heightmapData = new float[heightmapSize * heightmapSize];
 
+                    Color[] splatMapData1 = new Color[heightmapSize * heightmapSize];
+                    Color[] splatMapData2 = new Color[heightmapSize * heightmapSize];
+
                     Vector2 uvPerPatch = Vector2.One / new Vector2(patchX, patchY);
                     float heightmapSizeInv = 1.0f / (heightmapSize - 1);
 
                     Vector2 uvStart = new Vector2(patch.patchCoord.x, patch.patchCoord.y) * uvPerPatch;
-
                     for (int z = 0; z < heightmapSize; z++)
                     {
                         for (int x = 0; x < heightmapSize; x++)
                         {
                             Vector2 uv = uvStart + new Vector2(x * heightmapSizeInv, z * heightmapSizeInv) * uvPerPatch;
-                            Color raw = heightMapImage.GetPixel(x, z);
 
-                            float normalizedHeight = ReadNormalizedHeight(raw);
-                            heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
+                            if (heightMapImage != null)
+                            {
+                                Color raw = heightMapImage.GetPixel(x, z);
+
+                                float normalizedHeight = ReadNormalizedHeight(raw);
+                                heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
+                            }
+
+                            if (splatMapImage1 != null)
+                            {
+                                Color raw = splatMapImage1.GetPixel(x, z);
+                                splatMapData1[z * heightmapSize + x] = raw;
+                            }
+
+                            if (splatMapImage2 != null)
+                            {
+                                Color raw = splatMapImage2.GetPixel(x, z);
+                                splatMapData2[z * heightmapSize + x] = raw;
+                            }
                         }
                     }
 
-                    patch.Init(chunkSize, heightmapData);
+                    patch.Init(chunkSize, heightmapData, splatMapData1, splatMapData2);
                 }
 
-                GD.Print("[Patch]["+patchId +"] Init time " + (OS.GetTicksMsec() - start) + " ms");
+                GD.Print("[Patch][" + patchId + "] Init time " + (OS.GetTicksMsec() - start) + " ms");
                 patchId++;
             }
 

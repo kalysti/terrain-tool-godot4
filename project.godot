@@ -31,8 +31,8 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 @"VisualShaderNodeSplatmapHeight3D": "",
-@"VisualShaderNodeTerrainGenerator3D": "",
 @"VisualShaderNodeTerrainMaterial3D": "",
+@"VisualShaderNodeTerrainGenerator3D": "",
 @"VisualShaderNodeHeightBlending": ""
 }
 

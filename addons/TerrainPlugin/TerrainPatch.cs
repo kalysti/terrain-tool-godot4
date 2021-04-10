@@ -72,12 +72,13 @@ namespace TerrainEditor
         /**
          * Creating a patch by given chunksize and optional exist heightmap datas
          */
-        public void Init(int _chunkSize, float[] heightMapdata = null)
+        public void Init(int _chunkSize, float[] heightMapdata = null, Color[] splatMapData1 = null, Color[] splatMapData2 = null)
         {
             updateInfo(_chunkSize);
             CreateChunks();
 
             var heightmapGen = new TerrainHeightMapGenerator(this);
+            var splatmapGen = new TerrainSplatMapGenerator(this);
             var image = heightmapGen.createImage();
 
             if (heightMapdata == null)
@@ -107,24 +108,40 @@ namespace TerrainEditor
             {
                 heightmap = new ImageTexture();
                 heightmap.CreateFromImage(image);
-
-                var splatmap1 = new ImageTexture();
-                var splatmap2 = new ImageTexture();
-
-                var firstSplatmap = heightmapGen.createImage();
-                firstSplatmap.Fill(new Color(1, 0, 0, 0));
-
-                var secondSplatmap = heightmapGen.createImage();
-                secondSplatmap.Fill(new Color(0, 0, 0, 0));
-
-                splatmap1.CreateFromImage(firstSplatmap);
-                splatmap2.CreateFromImage(secondSplatmap);
-
-                splatmaps.Add(splatmap1);
-                splatmaps.Add(splatmap2);
             }
             else
+            {
                 heightmap.Update(image);
+            }
+
+            var splatmap1 = new ImageTexture();
+            var splatmap2 = new ImageTexture();
+            var firstSplatmap = splatmapGen.createImage();
+            var secondSplatmap = splatmapGen.createImage();
+
+            if (splatMapData1 == null)
+            {
+                firstSplatmap.Fill(new Color(1, 0, 0, 0));
+            }
+            else
+            {
+                splatmapGen.WriteColors(ref firstSplatmap, ref splatMapData1);
+            }
+
+            if (splatMapData2 == null)
+            {
+                secondSplatmap.Fill(new Color(0, 0, 0, 0));
+            }
+            else
+            {
+                splatmapGen.WriteColors(ref secondSplatmap, ref splatMapData2);
+            }
+
+            splatmap1.CreateFromImage(firstSplatmap);
+            splatmap2.CreateFromImage(secondSplatmap);
+
+            splatmaps.Add(splatmap1);
+            splatmaps.Add(splatmap2);
         }
 
         /**

@@ -30,10 +30,16 @@ namespace TerrainEditor
         private SpinBox importHeightScale = new SpinBox();
         private OptionButton chunkSizeControl = new OptionButton();
         private Button chooseTextureButton = new Button();
+        private Button chooseTextureSplatmap1Button = new Button();
+        private Button chooseTextureSplatmap2Button = new Button();
         private FileDialog fileDialog = new FileDialog();
+        private FileDialog fileDialogSplatmap1 = new FileDialog();
+        private FileDialog fileDialogSplatmap2 = new FileDialog();
         private VBoxContainer editorPanel = new VBoxContainer();
         protected Godot.Collections.Dictionary<string, Control> panelControls = new Godot.Collections.Dictionary<string, Control>();
         protected string heightMapPath = null;
+        protected string splatmapPath1 = null;
+        protected string splatmapPath2 = null;
 
         public override bool ForwardSpatialGuiInput(Camera3D camera, InputEvent @event)
         {
@@ -227,9 +233,6 @@ namespace TerrainEditor
 
                 if (currentToolMode == TerrainToolMode.Sculpt)
                 {
-
-
-
                     if (currentSculpMode == TerrainSculptMode.Sculpt)
                     {
                         var mode = new TerrainSculptSculpt(selectedTerrain, applyInformation);
@@ -295,6 +298,7 @@ namespace TerrainEditor
 
             return ab;
         }
+
         /*
         public void refreshEditor(string prop)
         {
@@ -370,6 +374,16 @@ namespace TerrainEditor
             return array.ToArray();
         }
 
+        public void selectFilePathSplatmap1(string path)
+        {
+            splatmapPath1 = path;
+        }
+
+        public void selectFilePathSplatmap2(string path)
+        {
+            splatmapPath2 = path;
+        }
+
         public void selectFilePath(string path)
         {
             heightMapPath = path;
@@ -378,6 +392,8 @@ namespace TerrainEditor
         public void openCreateMenu(int id)
         {
             heightMapPath = null;
+            splatmapPath1 = null;
+            splatmapPath2 = null;
 
             if (id == 0)
                 OpenDialog();
@@ -490,13 +506,25 @@ namespace TerrainEditor
         {
             AddChild(createDialog);
             AddChild(fileDialog);
+            AddChild(fileDialogSplatmap1);
+            AddChild(fileDialogSplatmap2);
 
             createDialog.Connect("confirmed", new Callable(this, "generateTerrain"));
-            chooseTextureButton.Connect("pressed", new Callable(this, "fileDialogOpen"));
+
+            chooseTextureButton.Connect("pressed", new Callable(this, "openFileDialog"));
+            chooseTextureSplatmap1Button.Connect("pressed", new Callable(this, "openFileDialogSplatmap1"));
+            chooseTextureSplatmap2Button.Connect("pressed", new Callable(this, "openFileDialogSplatmap2"));
 
             fileDialog.FileMode = FileDialog.FileModeEnum.OpenFile;
+            fileDialogSplatmap1.FileMode = FileDialog.FileModeEnum.OpenFile;
+            fileDialogSplatmap2.FileMode = FileDialog.FileModeEnum.OpenFile;
+
             fileDialog.Connect("file_selected", new Callable(this, "selectFilePath"));
+            fileDialogSplatmap1.Connect("file_selected", new Callable(this, "selectFilePathSplatmap1"));
+            fileDialogSplatmap2.Connect("file_selected", new Callable(this, "selectFilePathSplatmap2"));
             fileDialog.AddFilter("*.png ; PNG Images");
+            fileDialogSplatmap1.AddFilter("*.png ; PNG Images");
+            fileDialogSplatmap2.AddFilter("*.png ; PNG Images");
 
             createDialog.Title = "Create a terrain";
 
@@ -511,8 +539,8 @@ namespace TerrainEditor
             patchYControl.MaxValue = 10;
             patchYControl.Step = 1;
 
-            importHeightScale.MinValue = -10000;
-            importHeightScale.MaxValue = 10000;
+            importHeightScale.MinValue = -100000;
+            importHeightScale.MaxValue = 100000;
             importHeightScale.Step = 1;
             importHeightScale.Value = 5000;
 
@@ -525,14 +553,14 @@ namespace TerrainEditor
             createMarginInput(vbox, "Patch X Size", patchYControl);
             createMarginInput(vbox, "Patch Y Size", patchXControl);
             createMarginInput(vbox, "Chunk Size", chunkSizeControl);
+
             createMarginInput(vbox, "Choose texture", chooseTextureButton);
+            createMarginInput(vbox, "Choose splatmap1", chooseTextureSplatmap1Button);
+            createMarginInput(vbox, "Choose splatmap2", chooseTextureSplatmap2Button);
+
             createMarginInput(vbox, "Import height scale", importHeightScale);
         }
 
-        public void fileDialogOpen()
-        {
-            fileDialog.PopupCentered();
-        }
 
         public void generateTerrain()
         {
@@ -544,16 +572,29 @@ namespace TerrainEditor
 
                 var heightScale = (int)importHeightScale.Value;
 
+                Image heightMapImage = null;
+                Image splatmap1Image = null;
+                Image splatmap2Image = null;
 
-                Image file = null;
                 if (heightMapPath != null)
                 {
-                    file = new Image();
-                    file.Load(heightMapPath);
+                    heightMapImage = new Image();
+                    heightMapImage.Load(heightMapPath);
                 }
 
+                if (splatmapPath1 != null)
+                {
+                    splatmap1Image = new Image();
+                    splatmap1Image.Load(splatmapPath1);
+                }
 
-                selectedTerrain.Generate(patchX, patchY, chunkSize, heightScale, file);
+                if (splatmapPath2 != null)
+                {
+                    splatmap2Image = new Image();
+                    splatmap2Image.Load(splatmapPath2);
+                }
+
+                selectedTerrain.Generate(patchX, patchY, chunkSize, heightScale, heightMapImage, splatmap1Image, splatmap2Image);
             }
         }
 
@@ -573,14 +614,36 @@ namespace TerrainEditor
 
             vbox.AddChild(vboxRoot);
         }
+
+        private void openFileDialog()
+        {
+            fileDialog.PopupCentered();
+        }
+
+        private void openFileDialogSplatmap1()
+        {
+            fileDialogSplatmap1.PopupCentered();
+        }
+
+        private void openFileDialogSplatmap2(){
+            fileDialogSplatmap2.PopupCentered(); 
+        }
         public override void _ExitTree()
         {
             createDialog.Disconnect("confirmed", new Callable(this, "generateTerrain"));
-            chooseTextureButton.Disconnect("pressed", new Callable(this, "fileDialogOpen"));
+
+            chooseTextureSplatmap1Button.Disconnect("pressed", new Callable(this, "openFileDialogSplatmap1"));
+            chooseTextureSplatmap2Button.Disconnect("pressed", new Callable(this, "openFileDialogSplatmap2"));
+            chooseTextureButton.Disconnect("pressed", new Callable(this, "openFileDialog"));
+
             fileDialog.Disconnect("file_selected", new Callable(this, "selectFilePath"));
+            fileDialogSplatmap1.Disconnect("file_selected", new Callable(this, "selectFilePathSplatmap1"));
+            fileDialogSplatmap2.Disconnect("file_selected", new Callable(this, "selectFilePathSplatmap2"));
 
             RemoveChild(createDialog);
             RemoveChild(fileDialog);
+            RemoveChild(fileDialogSplatmap1);
+            RemoveChild(fileDialogSplatmap2);
 
             if (dockAttached)
                 RemoveControlFromDocks(editorPanel);
