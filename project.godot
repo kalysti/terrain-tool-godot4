@@ -10,23 +10,36 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeHeightBlending",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeHeightBlending.gd"
+}, {
+"base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeSplatmapHeight3D",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeSplatmapHeight3D.gd"
+}, {
+"base": "VisualShaderNodeCustom",
 "class": @"VisualShaderNodeTerrainGenerator3D",
 "language": @"GDScript",
-"path": "res://addons/TerrainPlugin/VisualShaderNodeTerrainGenerator3D.gd"
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd"
 }, {
 "base": "VisualShaderNodeCustom",
 "class": @"VisualShaderNodeTerrainMaterial3D",
 "language": @"GDScript",
-"path": "res://addons/TerrainPlugin/VisualShaderNodeTerrainMaterial3D.gd"
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd"
 } ]
 _global_script_class_icons={
+@"VisualShaderNodeSplatmapHeight3D": "",
 @"VisualShaderNodeTerrainGenerator3D": "",
-@"VisualShaderNodeTerrainMaterial3D": ""
+@"VisualShaderNodeTerrainMaterial3D": "",
+@"VisualShaderNodeHeightBlending": ""
 }
 
 [application]
 
 config/name="test"
+run/main_scene="res://test.tscn"
 run/flush_stdout_on_print.debug=false
 
 [editor_plugins]
@@ -59,7 +72,6 @@ move_forward={
 [physics]
 
 3d/run_on_thread=true
-3d/physics_engine="PhysX"
 
 [rendering]
 

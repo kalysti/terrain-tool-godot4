@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Godot;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace TerrainEditor
 {
@@ -40,6 +41,16 @@ namespace TerrainEditor
     {
         public int i { get; set; }
         public Vector3 v { get; set; }
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RGBA
+    {
+        public byte r;
+        public byte g;
+        public byte b;
+        public byte a;
     }
 
 

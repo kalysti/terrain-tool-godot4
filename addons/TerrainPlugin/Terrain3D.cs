@@ -16,10 +16,7 @@ namespace TerrainEditor
         public const int CHUNKS_COUNT_EDGE = 4;
         public const float TERRAIN_UNITS_PER_VERTEX = 100.0f;
         public const float COLLIDER_MULTIPLIER = 1000.0f;
-
         public AABB bounds = new AABB();
-
-        public Node root;
 
         public void updateTransform()
         {
@@ -29,13 +26,12 @@ namespace TerrainEditor
 
         public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null)
         {
-            Clear();
+            ClearDraw();
+
+            //delete prev patches
             terrainPatches.Clear();
 
-            var start = OS.GetTicksMsec();
-
             float size = (chunkSize - 1) * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
-            int heightmapSize = (chunkSize - 1) * Terrain3D.CHUNKS_COUNT_EDGE + 1;
 
             for (int x = 0; x < patchX; x++)
             {
@@ -47,24 +43,32 @@ namespace TerrainEditor
                     patch.offset = new Vector3(x * size, 0.0f, y * size);
                     patch.ResourceLocalToScene = true;
                     patch.patchCoord = new Vector2i(x, y);
+
                     terrainPatches.Add(patch);
                 }
             }
 
+            int patchId = 0;
             foreach (var patch in terrainPatches)
             {
+                var start = OS.GetTicksMsec();
+                GD.Print("[Generate Time] " + (OS.GetTicksMsec() - start) + " ms");
+
                 if (heightMapImage == null)
                 {
-                    patch.createEmptyHeightmap(chunkSize);
+                    patch.Init(chunkSize);
                 }
                 else
                 {
+                    int heightmapSize = (chunkSize - 1) * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+
                     float[] heightmapData = new float[heightmapSize * heightmapSize];
 
                     Vector2 uvPerPatch = Vector2.One / new Vector2(patchX, patchY);
                     float heightmapSizeInv = 1.0f / (heightmapSize - 1);
+
                     Vector2 uvStart = new Vector2(patch.patchCoord.x, patch.patchCoord.y) * uvPerPatch;
-                    GD.Print("Load image from " + heightmapSize);
+
                     for (int z = 0; z < heightmapSize; z++)
                     {
                         for (int x = 0; x < heightmapSize; x++)
@@ -73,22 +77,19 @@ namespace TerrainEditor
                             Color raw = heightMapImage.GetPixel(x, z);
 
                             float normalizedHeight = ReadNormalizedHeight(raw);
-                            //bool isHole = patch.ReadIsHole(raw);
-
                             heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
                         }
                     }
 
-                    patch.createEmptyHeightmap(chunkSize, heightmapData);
+                    patch.Init(chunkSize, heightmapData);
                 }
+
+                GD.Print("[Patch]["+patchId +"] Init time " + (OS.GetTicksMsec() - start) + " ms");
+                patchId++;
             }
 
 
-            GD.Print("[Generate Time] " + (OS.GetTicksMsec() - start) + " ms");
-
-            start = OS.GetTicksMsec();
-            Init();
-            GD.Print("[Init Time] " + (OS.GetTicksMsec() - start) + " ms");
+            Draw();
 
             var kmX = bounds.Size.x * 0.00001f;
             var kmY = bounds.Size.x * 0.00001f;
@@ -105,16 +106,20 @@ namespace TerrainEditor
         }
 
 
-        public void Init()
+        protected void Draw()
         {
-            RID scenario = GetWorld3d().Scenario;
+            int patchId = 0;
             foreach (var patch in terrainPatches)
             {
-                patch.Draw(scenario, this, terrainDefaultMaterial.Shader.GetRid());
-                patch.CookCollision(0, this);
+                var start = OS.GetTicksMsec();
+
+                patch.Draw(this, terrainDefaultMaterial.Shader.GetRid());
+
+                GD.Print("[Patch][" + patchId + "] Draw time " + (OS.GetTicksMsec() - start) + " ms");
+                patchId++;
             }
 
-            updateBounds();
+            getBounds();
             updateDebug();
         }
 
@@ -131,11 +136,11 @@ namespace TerrainEditor
             }
             else if (what == NotificationExitWorld)
             {
-                Clear();
+                ClearDraw();
             }
             else if (what == NotificationEnterWorld)
             {
-                Init();
+                Draw();
             }
             else if (what == NotificationTransformChanged)
             {
@@ -143,18 +148,18 @@ namespace TerrainEditor
             }
         }
 
-        public void Clear()
+        protected void ClearDraw()
         {
             GD.Print("Clearing");
 
             foreach (var patch in terrainPatches)
             {
-                patch.Clear();
+                patch.ClearDraw();
             }
         }
 
 
-        public void updateBounds()
+        public void getBounds()
         {
             bounds = new AABB();
             foreach (var patch in terrainPatches)

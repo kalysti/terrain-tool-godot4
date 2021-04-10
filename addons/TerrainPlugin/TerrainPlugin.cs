@@ -5,37 +5,35 @@ using System.Collections.Generic;
 using Godot;
 using System;
 using System.Linq;
+using TerrainEditor.Editor.Brush;
+using TerrainEditor.Editor.Sculpt;
+using TerrainEditor.Editor.Paint;
 
 namespace TerrainEditor
 {
     [Tool]
     public partial class TerrainPlugin : EditorPlugin
     {
-
-        public ConfirmationDialog createDialog = new ConfirmationDialog();
-        public Terrain3D selectedTerrain = null;
-
+        protected Terrain3D selectedTerrain = null;
+        protected ConfirmationDialog createDialog = new ConfirmationDialog();
         protected TerrainGizmoPlugin gizmoPlugin = new TerrainGizmoPlugin();
-
         private bool handle_clicked = false;
-
-
-        public TerrainSculptMode currentSculpMode = TerrainSculptMode.Sculpt;
-        public TerrainToolMode currentToolMode = TerrainToolMode.None;
-
+        protected bool dockAttached = false;
+        protected TerrainSculptMode currentSculpMode = TerrainSculptMode.Sculpt;
+        protected TerrainToolMode currentToolMode = TerrainToolMode.None;
 
         private Vector2 mousePosition = Vector2.Zero;
         private Camera3D editorCamera = null;
         private MenuButton menuButton = new MenuButton();
-        SpinBox patchXControl = new SpinBox();
-        SpinBox patchYControl = new SpinBox();
-        SpinBox importHeightScale = new SpinBox();
-
-        OptionButton chunkSizeControl = new OptionButton();
-        Button chooseTextureButton = new Button();
-
-        FileDialog fileDialog = new FileDialog();
-
+        private SpinBox patchXControl = new SpinBox();
+        private SpinBox patchYControl = new SpinBox();
+        private SpinBox importHeightScale = new SpinBox();
+        private OptionButton chunkSizeControl = new OptionButton();
+        private Button chooseTextureButton = new Button();
+        private FileDialog fileDialog = new FileDialog();
+        private VBoxContainer editorPanel = new VBoxContainer();
+        protected Godot.Collections.Dictionary<string, Control> panelControls = new Godot.Collections.Dictionary<string, Control>();
+        protected string heightMapPath = null;
 
         public override bool ForwardSpatialGuiInput(Camera3D camera, InputEvent @event)
         {
@@ -44,9 +42,8 @@ namespace TerrainEditor
             if (selectedTerrain == null)
                 return false;
 
-            if (selectedTerrain.toolMode != TerrainToolMode.None)
+            if (currentToolMode != TerrainToolMode.None)
             {
-
                 if (@event is InputEventMouseButton)
                 {
                     var button = @event as InputEventMouseButton;
@@ -66,9 +63,6 @@ namespace TerrainEditor
                 {
                     var motion = @event as InputEventMouseMotion;
                     mousePosition = motion.Position;
-
-
-                    //return true;
                 }
 
             }
@@ -82,29 +76,34 @@ namespace TerrainEditor
 
 
         /// <inheritdoc />
-        public void SetMaterialParams(TerrainChunk chunk, Vector3 position, Color color)
+        protected void SetMaterialParams(TerrainEditorInfo info, TerrainChunk chunk, Vector3 position, Color color)
         {
+
             // Data 0: XYZ: position, W: radius
             // Data 1: X: falloff, Y: type
-            float halfSize = selectedTerrain.brushSize * 0.5f; // 2000
-            float falloff = halfSize * selectedTerrain.brushFallof; // 1000
+            float halfSize = info.brushSize * 0.5f; // 2000
+            float falloff = halfSize * info.brushFallof; // 1000
             float radius = halfSize - falloff; // 1000
 
-            chunk.UpdateInspectorMaterial(color, new Plane(position, radius), new Plane(falloff, (float)selectedTerrain.brushFallOfType, 0, 0));
+            chunk.UpdateInspectorMaterial(color, new Plane(position, radius), new Plane(falloff, (float)info.brushFallofType, 0, 0));
         }
 
-        public void ResetMaterialParams(TerrainChunk chunk)
+        protected void ResetMaterialParams(TerrainChunk chunk)
         {
             chunk.UpdateInspectorMaterial(new Color(), new Plane(Vector3.Zero, 0f), new Plane(Vector3.Zero, 0f));
         }
 
-        public void DrawInspector(Vector3 pos, bool reset = false)
+        protected void DrawInspector(Vector3 pos, bool reset = false)
         {
             if (selectedTerrain != null && editorCamera != null)
             {
+
+                var applyInformation = getEditorApply();
+                var cursorBrush = CursorBrushBounds(applyInformation, pos);
+
                 TerrainChunk[] selectedChunks = null;
                 if (reset == false)
-                    selectedChunks = GetChunks(pos);
+                    selectedChunks = GetChunks(cursorBrush);
 
                 foreach (var patch in selectedTerrain.terrainPatches)
                 {
@@ -116,7 +115,7 @@ namespace TerrainEditor
                         }
                         else
                         {
-                            SetMaterialParams(chunk, pos, new Color(1.0f, 0.85f, 0.0f));
+                            SetMaterialParams(applyInformation, chunk, pos, new Color(1.0f, 0.85f, 0.0f));
                         }
                     }
                 }
@@ -137,7 +136,6 @@ namespace TerrainEditor
 
                     DrawInspector(cast);
                 }
-
             }
         }
 
@@ -159,8 +157,7 @@ namespace TerrainEditor
 
                 if (result.Count > 0 && result["rid"] != null && result["collider"] == selectedTerrain)
                 {
-                    var positionWorldSpace = (Vector3)result["position"];
-                    return positionWorldSpace;
+                    return (Vector3)result["position"];
                 }
             }
 
@@ -169,23 +166,21 @@ namespace TerrainEditor
 
         protected void DoEditTerrain(Vector3 pos, float delta)
         {
-            bool EditHoles = false;
-
-            float strength = selectedTerrain.toolStrength * delta;
+            var applyInformation = getEditorApply();
+            float strength = applyInformation.strength * delta;
 
             if (strength <= 0.0f)
                 return;
 
-            bool inverted = Input.IsKeyPressed((int)Key.Control);
-
-            if (inverted)
+            applyInformation.inverse = Input.IsKeyPressed((int)Key.Control);
+            if (applyInformation.inverse)
             {
-                strength *= -1;
+                applyInformation.strength *= -1;
             }
-
-            var patches = GetPatches(pos);
+            var cursorBrush = CursorBrushBounds(applyInformation, pos);
+            var patches = GetPatches(cursorBrush);
             float brushExtentY = 10000.0f;
-            float brushSizeHalf = selectedTerrain.brushSize * 0.5f;
+            float brushSizeHalf = applyInformation.brushSize * 0.5f;
 
             // Get brush bounds in terrain local space
             var bMin = selectedTerrain.ToLocal(new Vector3(pos.x - brushSizeHalf, pos.y - brushSizeHalf - brushExtentY, pos.z - brushSizeHalf));
@@ -230,171 +225,54 @@ namespace TerrainEditor
                 if (modifiedSize.x <= 0 || modifiedSize.y <= 0)
                     continue;
 
-                if (selectedTerrain.toolSculptMode == TerrainSculptMode.Sculpt)
+                if (currentToolMode == TerrainToolMode.Sculpt)
                 {
-                    ApplySculpt(inverted, patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                }
-                if (selectedTerrain.toolSculptMode == TerrainSculptMode.Flatten)
-                {
-                    ApplyFlatten(inverted, patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                }
-                if (selectedTerrain.toolSculptMode == TerrainSculptMode.Smooth)
-                {
-                    ApplySmooth(inverted, patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                }
 
 
-            }
-        }
 
-        public float Saturate(float value)
-        {
-            if (value < 0f)
-                return 0f;
-            return value > 1f ? 1f : value;
-        }
-
-
-        public void ApplySmooth(bool invert, TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
-        {
-            var radius = Mathf.Max(Mathf.CeilToInt(selectedTerrain.toolFilterRadius * 0.01f * selectedTerrain.brushSize), 2);
-            var sourceHeightMap = patch.CacheHeightData();
-            var strength = Saturate(editorStrength);
-            var bufferSize = modifiedSize.y * modifiedSize.x;
-            var buffer = new float[bufferSize];
-
-            for (int z = 0; z < modifiedSize.y; z++)
-            {
-                var zz = z + modifiedOffset.y;
-                for (int x = 0; x < modifiedSize.x; x++)
-                {
-                    var id = z * modifiedSize.x + x;
-                    var xx = x + modifiedOffset.x;
-
-                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
-
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
-                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
-                    var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld) * strength;
-                    var max = patch.info.heightMapSize - 1;
-                    if (paintAmount > 0)
+                    if (currentSculpMode == TerrainSculptMode.Sculpt)
                     {
-                        // Blend between the height and the target value
-
-                        float smoothValue = 0;
-                        int smoothValueSamples = 0;
-                        int minX = Math.Max(x - radius + modifiedOffset.x, 0);
-                        int minZ = Math.Max(z - radius + modifiedOffset.y, 0);
-                        int maxX = Math.Min(x + radius + modifiedOffset.x, max);
-                        int maxZ = Math.Min(z + radius + modifiedOffset.y, max);
-                        for (int dz = minZ; dz <= maxZ; dz++)
-                        {
-                            for (int dx = minX; dx <= maxX; dx++)
-                            {
-                                var height = sourceHeightMap[dz * patch.info.heightMapSize + dx];
-                                smoothValue += height;
-                                smoothValueSamples++;
-                            }
-                        }
-
-                        // Normalize
-                        smoothValue /= smoothValueSamples;
-
-                        // Blend between the height and smooth value
-                        buffer[id] = Mathf.Lerp(sourceHeight, smoothValue, paintAmount);
+                        var mode = new TerrainSculptSculpt(selectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                     }
-                    else
+                    if (currentSculpMode == TerrainSculptMode.Flatten)
                     {
-                        buffer[id] = sourceHeight;
+                        var mode = new TerrainFlattenSculpt(selectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                    }
+                    if (currentSculpMode == TerrainSculptMode.Smooth)
+                    {
+                        var mode = new TerrainSmoothSculpt(selectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                     }
                 }
-            }
-
-            patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
-        }
-
-        public void ApplyFlatten(bool invert, TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
-        {
-            var sourceHeightMap = patch.CacheHeightData();
-
-            var targetHeight = selectedTerrain.toolTargetHeight;
-            var strength = Saturate(editorStrength);
-
-            var bufferSize = modifiedSize.y * modifiedSize.x;
-            var buffer = new float[bufferSize];
-
-            for (int z = 0; z < modifiedSize.y; z++)
-            {
-                var zz = z + modifiedOffset.y;
-                for (int x = 0; x < modifiedSize.x; x++)
+                else if (currentToolMode == TerrainToolMode.Paint)
                 {
-                    var xx = x + modifiedOffset.x;
-                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
-
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
-                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
-
-                    var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld);
-
-                    // Blend between the height and the target value
-                    var id = z * modifiedSize.x + x;
-                    buffer[id] = Mathf.Lerp(sourceHeight, targetHeight, paintAmount);
+                    var mode = new TerrainPaintPaint(selectedTerrain, applyInformation);
+                    mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                 }
+
             }
-
-            patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
-        }
-        public void ApplySculpt(bool invert, TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
-        {
-            var sourceHeightMap = patch.CacheHeightData();
-            float strength = editorStrength * 1000.0f;
-
-            var bufferSize = modifiedSize.y * modifiedSize.x;
-            var buffer = new float[bufferSize];
-
-            for (int z = 0; z < modifiedSize.y; z++)
-            {
-                var zz = z + modifiedOffset.y;
-                for (int x = 0; x < modifiedSize.x; x++)
-                {
-                    var xx = x + modifiedOffset.x;
-                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
-
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
-                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
-
-                    var paintAmount = TerrainBrush.Sample(selectedTerrain.brushFallOfType, selectedTerrain.brushFallof, selectedTerrain.brushSize, pos, samplePositionWorld);
-
-                    var id = z * modifiedSize.x + x;
-                    buffer[id] = sourceHeight + paintAmount * strength;
-                }
-            }
-            patch.UpdateHeightMap(selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
 
-
-        public TerrainPatch[] GetPatches(Vector3 hitPosition)
+        protected TerrainPatch[] GetPatches(AABB cursorBrush)
         {
             var list = new Godot.Collections.Array<TerrainPatch>();
-            var cursorBrush = CursorBrushBounds(hitPosition);
-
             foreach (var patch in selectedTerrain.terrainPatches)
             {
                 if (patch.getBounds().Intersects(cursorBrush))
                 {
-
                     list.Add(patch);
                 }
             }
 
             return list.ToArray();
         }
-        public TerrainChunk[] GetChunks(Vector3 hitPosition)
+
+        protected TerrainChunk[] GetChunks(AABB cursorBrush)
         {
             var list = new Godot.Collections.Array<TerrainChunk>();
-            var cursorBrush = CursorBrushBounds(hitPosition);
-
-            foreach (var patch in GetPatches(hitPosition))
+            foreach (var patch in GetPatches(cursorBrush))
             {
                 foreach (var chunk in patch.chunks)
                 {
@@ -408,15 +286,16 @@ namespace TerrainEditor
             return list.ToArray();
         }
 
-        public AABB CursorBrushBounds(Vector3 hitPosition)
+        protected AABB CursorBrushBounds(TerrainEditorInfo info, Vector3 hitPosition)
         {
             float brushExtentY = 10000.0f;
-            float brushSizeHalf = selectedTerrain.brushSize * 0.5f;
+            float brushSizeHalf = info.brushSize * 0.5f;
 
             var ab = new AABB(hitPosition, new Vector3(brushSizeHalf, (brushSizeHalf + brushExtentY), brushSizeHalf));
 
             return ab;
         }
+        /*
         public void refreshEditor(string prop)
         {
             if (selectedTerrain == null) return;
@@ -427,13 +306,13 @@ namespace TerrainEditor
 
                 selectedTerrain.NotifyPropertyListChanged();
             }
-        }
+        }*/
 
         public override void _EnterTree()
         {
             var editor_interface = GetEditorInterface();
-            var inscpector = editor_interface.GetInspector();
-            inscpector.Connect("property_edited", new Callable(this, "refreshEditor"), null, (uint)ConnectFlags.Deferred);
+            //  var inscpector = editor_interface.GetInspector();
+            // inscpector.Connect("property_edited", new Callable(this, "refreshEditor"), null, (uint)ConnectFlags.Deferred);
             var base_control = editor_interface.GetBaseControl();
 
             var script = GD.Load<Script>("res://addons/TerrainPlugin/Terrain3D.cs");
@@ -441,7 +320,6 @@ namespace TerrainEditor
             var scriptPatchhInfo = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatchInfo.cs");
             var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
             var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/test.png");
-
 
             AddCustomType("TerrainPatchInfo", "Resource", scriptPatchhInfo, texture);
             AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);
@@ -458,11 +336,40 @@ namespace TerrainEditor
 
             AddControlToContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
             AddSpatialGizmoPlugin(gizmoPlugin);
-
             createImportMenu();
+
+            editorPanel.Name = "Terrain";
+            AddPanelOptionBox<TerrainToolMode>("mode", "Tool mode", TerrainToolMode.None);
+            AddPanelOptionBox<TerrainSculptMode>("sculpt_mode", "Sculp mode", TerrainSculptMode.Sculpt);
+
+            AddPanelSpinBox("strength", "Strength", 1.2f, 0f, 10f, 0.01f);
+            AddPanelSpinBox("radius", "Filter Radius", 0.4f, 0f, 10f, 0.01f);
+            AddPanelSpinBox("height", "Target Height", 0f, -100000f, 100000f, 0.01f);
+
+            AddPanelSpinBox("noise_amount", "Noise amount", 10000f, 0, 100000f, 0.1f);
+            AddPanelSpinBox("noise_scale", "Noise scale", 128f, 0, 100000f, 0.1f);
+
+            AddPanelSpinBox("brush_size", "Brush size", 4000f, 0f, 1000000f, 0.1f);
+            AddPanelSpinBox("brush_fallof", "Brush fallof", 0.5f, 0f, 1f, 0.1f);
+            AddPanelSpinBox("layer", "Layer", 0f, 0f, 7f, 1f);
+
+            AddPanelOptionBox<BrushFallOfType>("brush_fallof_type", "Fallof type", BrushFallOfType.Smooth);
+
+            refreshPanel();
         }
 
-        public string heightMapPath = null;
+        protected string[] enumToString<T>()
+        {
+            var array = new Godot.Collections.Array<string>();
+            foreach (int i in Enum.GetValues(typeof(T)))
+            {
+                String name = Enum.GetName(typeof(T), i);
+                array.Add(name);
+            }
+
+            return array.ToArray();
+        }
+
         public void selectFilePath(string path)
         {
             heightMapPath = path;
@@ -480,6 +387,105 @@ namespace TerrainEditor
         {
             createDialog.PopupCentered();
         }
+
+        private void AddPanelSpinBox(string name, string text, float def, float min, float max, float step)
+        {
+            var spinbox = new SpinBox();
+
+            spinbox.MinValue = min;
+            spinbox.MaxValue = max;
+            spinbox.Step = step;
+            spinbox.Value = def;
+
+            createMarginInput(editorPanel, text, spinbox);
+            panelControls.Add(name, spinbox);
+        }
+        private void AddPanelOptionBox<T>(string name, string text, T def)
+        {
+            var option = new OptionButton();
+
+            var defualtText = Enum.GetName(typeof(T), def);
+            var selectedID = 0;
+
+            int id = 0;
+            foreach (var opt in enumToString<T>())
+            {
+                option.AddItem(opt, id);
+
+                if (opt == defualtText)
+                    selectedID = id;
+                id++;
+            }
+
+            option.Selected = selectedID;
+            option.Connect("item_selected", new Callable(this, "onPanelControlSelected"));
+
+            createMarginInput(editorPanel, text, option);
+            panelControls.Add(name, option);
+
+        }
+
+        private T getPanelControlValue<T>(string name)
+        {
+            var control = panelControls[name] as OptionButton;
+            return (T)Enum.Parse(typeof(T), control.GetItemText(control.GetSelectedId()));
+        }
+
+        private float getPanelControlFloatValue(string name)
+        {
+            var control = panelControls[name] as SpinBox;
+            return (float)control.Value;
+        }
+
+        private TerrainEditorInfo getEditorApply()
+        {
+            var st = new TerrainEditorInfo();
+
+            st.brushFallof = getPanelControlFloatValue("brush_fallof");
+            st.brushSize = getPanelControlFloatValue("brush_size");
+            st.strength = getPanelControlFloatValue("strength");
+            st.radius = getPanelControlFloatValue("radius");
+            st.height = getPanelControlFloatValue("height");
+            st.layer = (int)getPanelControlFloatValue("layer");
+            st.noiseAmount = getPanelControlFloatValue("noise_amount");
+            st.noiseScale = getPanelControlFloatValue("noise_scale");
+            st.brushFallofType = getPanelControlValue<BrushFallOfType>("brush_fallof_type");
+
+            return st;
+        }
+
+        public void onPanelControlSelected(int item_selected)
+        {
+            refreshPanel();
+        }
+
+        private void refreshPanel()
+        {
+            var modeValue = getPanelControlValue<TerrainToolMode>("mode");
+            var sculptValue = getPanelControlValue<TerrainSculptMode>("sculpt_mode");
+
+            hideInspector("sculpt_mode", (modeValue == TerrainToolMode.Sculpt));
+            hideInspector("layer", (modeValue == TerrainToolMode.Paint));
+            hideInspector("strength", (modeValue != TerrainToolMode.None));
+            hideInspector("radius", (modeValue == TerrainToolMode.Sculpt
+                                                         && sculptValue == TerrainSculptMode.Smooth));
+            hideInspector("height", (modeValue == TerrainToolMode.Sculpt
+                                                         && sculptValue == TerrainSculptMode.Flatten));
+            hideInspector("noise_amount", (modeValue == TerrainToolMode.Sculpt
+                                                         && sculptValue == TerrainSculptMode.Noise));
+            hideInspector("noise_scale", (modeValue == TerrainToolMode.Sculpt
+                                                         && sculptValue == TerrainSculptMode.Noise));
+
+            currentToolMode = modeValue;
+            currentSculpMode = sculptValue;
+        }
+
+        private void hideInspector(string control_name, bool visible)
+        {
+            var control = panelControls[control_name].GetParent().GetParent() as Control;
+            control.Visible = visible;
+        }
+
         protected void createImportMenu()
         {
             AddChild(createDialog);
@@ -553,6 +559,8 @@ namespace TerrainEditor
 
         private void createMarginInput(VBoxContainer vbox, string text, Control control)
         {
+            var vboxRoot = new VBoxContainer();
+
             var margin = new MarginContainer();
             var label = new Label();
             label.Text = text;
@@ -560,8 +568,10 @@ namespace TerrainEditor
             margin.AddThemeConstantOverride("margin_left", 0);
             margin.AddChild(control);
 
-            vbox.AddChild(label);
-            vbox.AddChild(margin);
+            vboxRoot.AddChild(label);
+            vboxRoot.AddChild(margin);
+
+            vbox.AddChild(vboxRoot);
         }
         public override void _ExitTree()
         {
@@ -571,6 +581,10 @@ namespace TerrainEditor
 
             RemoveChild(createDialog);
             RemoveChild(fileDialog);
+
+            if (dockAttached)
+                RemoveControlFromDocks(editorPanel);
+
             RemoveCustomType("Terrain3D");
             RemoveCustomType("TerrainPatch");
             RemoveCustomType("TerrainPatchInfo");
@@ -578,6 +592,9 @@ namespace TerrainEditor
 
             RemoveSpatialGizmoPlugin(gizmoPlugin);
             RemoveControlFromContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
+
+            editorPanel.Free();
+            panelControls.Clear();
         }
 
         public override bool Handles(Godot.Object @object)
@@ -589,20 +606,25 @@ namespace TerrainEditor
             if (!visible)
                 Edit(null);
         }
+
         public override void Edit(Godot.Object @object)
         {
             if (@object != null && @object is Terrain3D)
             {
                 menuButton.Visible = true;
                 selectedTerrain = @object as Terrain3D;
-                selectedTerrain.root = GetEditorInterface().GetEditedSceneRoot();
                 selectedTerrain.NotifyPropertyListChanged();
+                AddControlToDock(DockSlot.RightUl, editorPanel);
+                dockAttached = true;
             }
             else
             {
+
+                RemoveControlFromDocks(editorPanel);
                 menuButton.Visible = false;
                 selectedTerrain = null;
                 handle_clicked = false;
+                dockAttached = false;
             }
         }
 
