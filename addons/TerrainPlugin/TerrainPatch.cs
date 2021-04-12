@@ -50,6 +50,11 @@ namespace TerrainEditor
         {
             cachedHeightMapData = null;
 
+            foreach (var chunk in chunks)
+            {
+                chunk.ClearDraw();
+            }
+
             if (shapeRid != null)
             {
                 PhysicsServer3D.FreeRid(shapeRid);
@@ -57,15 +62,10 @@ namespace TerrainEditor
             }
 
             if (bodyRid != null)
-                PhysicsServer3D.BodyClearShapes(bodyRid);
-
-            foreach (var chunk in chunks)
             {
-                chunk.ClearDraw();
-            }
-
-            if (bodyRid != null)
                 PhysicsServer3D.BodyClearShapes(bodyRid);
+                bodyRid = null;
+            }
 
         }
 

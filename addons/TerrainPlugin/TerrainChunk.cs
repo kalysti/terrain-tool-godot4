@@ -49,27 +49,22 @@ namespace TerrainEditor
 
         public void ClearDraw()
         {
-            if (instanceRid != null)
-            {
-                RenderingServer.FreeRid(instanceRid);
-                instanceRid = null;
-            }
-
-            if (materialId != null)
-            {
-                RenderingServer.FreeRid(materialId);
-                materialId = null;
-            }
 
             if (meshId != null)
             {
                 RenderingServer.FreeRid(meshId);
-                meshId = null;
+            }
+
+            if (instanceRid != null)
+            {
+                RenderingServer.FreeRid(instanceRid);
             }
 
             mesh = null;
             materialInUse = null;
-
+            meshId = null;
+            materialId = null;
+            instanceRid = null;
         }
 
         public Transform UpdateTransform(TerrainPatchInfo info, Transform terrainTransform, Vector3 patchoffset)
@@ -128,7 +123,7 @@ namespace TerrainEditor
         public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
         {
 
-           // var shaderRid = shader.GetRid();
+            // var shaderRid = shader.GetRid();
             mesh = GenerateMesh(patch, info.chunkSize, 0);
             meshId = mesh.GetRid();
 
@@ -149,9 +144,9 @@ namespace TerrainEditor
 
             //   materialId = RenderingServer.MaterialCreate();
             materialInUse = mat.Duplicate() as Material;
-            materialId =  materialInUse.GetRid();
+            materialId = materialInUse.GetRid();
 
-           // RenderingServer.MaterialSetShader(materialId, shaderRid);
+            // RenderingServer.MaterialSetShader(materialId, shaderRid);
             RenderingServer.InstanceGeometrySetMaterialOverride(instanceRid, materialId);
 
             RenderingServer.MaterialSetParam(materialId, "terrainHeightMap", heightMap);
@@ -233,8 +228,8 @@ namespace TerrainEditor
                 }
             }
 
-              st.GenerateNormals();
-             st.GenerateTangents();
+            st.GenerateNormals();
+            st.GenerateTangents();
 
             var mesh = st.Commit();
             patch.meshCache.Add(lodIndex, mesh);

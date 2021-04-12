@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=59 format=2]
+[gd_resource type="ShaderMaterial" load_steps=60 format=2]
 
 [ext_resource path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" type="Script" id=1]
 [ext_resource path="res://TestTextures/Pave/PavingStones046_2K_Displacement.jpg" type="Texture2D" id=2]
@@ -102,7 +102,7 @@ uniform_name = "Layer1_AO"
 texture_type = 1
 
 [sub_resource type="VisualShaderNodeCustom" id=17]
-default_input_values = [ 0, Vector3( 20, 20, 0 ) ]
+default_input_values = [ 0, Vector3( 10, 10, 0 ) ]
 script = ExtResource( 6 )
 
 [sub_resource type="VisualShaderNodeCustom" id=18]
@@ -118,18 +118,18 @@ default_input_values = [  ]
 script = ExtResource( 16 )
 
 [sub_resource type="VisualShaderNodeCustom" id=21]
-default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 0.0 ]
+default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 1.0 ]
 script = ExtResource( 5 )
 
 [sub_resource type="VisualShaderNodeCustom" id=22]
-default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 0.0 ]
+default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 1.0 ]
 script = ExtResource( 5 )
 
 [sub_resource type="VisualShaderNodeVectorDecompose" id=23]
 default_input_values = [ 0, Vector3( 0, 0, 0 ) ]
 
 [sub_resource type="VisualShaderNodeCustom" id=24]
-default_input_values = [ 0, Vector3( 20, 20, 0 ) ]
+default_input_values = [ 0, Vector3( 10, 10, 0 ) ]
 script = ExtResource( 6 )
 
 [sub_resource type="VisualShaderNodeCustom" id=25]
@@ -173,15 +173,19 @@ script = ExtResource( 22 )
 default_input_values = [ 0, 0.0, 1, 1.8 ]
 operator = 2
 
-[sub_resource type="VisualShaderNodeFloatConstant" id=36]
+[sub_resource type="VisualShaderNodeFloatConstant" id=34]
 default_input_values = [  ]
 constant = 1.2
 
-[sub_resource type="VisualShaderNodeCustom" id=34]
+[sub_resource type="VisualShaderNodeVec3Constant" id=37]
+default_input_values = [  ]
+constant = Vector3( 120, 120, 0 )
+
+[sub_resource type="VisualShaderNodeCustom" id=35]
 default_input_values = [  ]
 script = ExtResource( 1 )
 
-[sub_resource type="VisualShader" id=35]
+[sub_resource type="VisualShader" id=36]
 code = "shader_type spatial;
 render_mode depth_draw_always, specular_schlick_ggx;
 
@@ -507,18 +511,20 @@ void vertex() {
 }
 
 void fragment() {
+// Vector:80
+	vec3 n_out80p0 = vec3(120.000000, 120.000000, 0.000000);
+
 // UVMultiply3D:46
-	vec3 n_in46p0 = vec3(10.00000, 10.00000, 0.00000);
 	vec3 n_out46p0;
 	{
-		vec2 scaled = UV * vec2(n_in46p0.x, n_in46p0.y);
+		vec2 scaled = UV * vec2(n_out80p0.x, n_out80p0.y);
 		n_out46p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
 // AntiTiling3D:60
 	float n_in60p6 = 0.50000;
 	float n_in60p7 = 1.00000;
-	float n_in60p8 = 0.00000;
+	float n_in60p8 = 1.00000;
 	mat4 n_out60p0;
 	mat4 n_out60p1;
 	{
@@ -554,17 +560,16 @@ void fragment() {
 	}
 
 // UVMultiply3D:51
-	vec3 n_in51p0 = vec3(20.00000, 20.00000, 0.00000);
 	vec3 n_out51p0;
 	{
-		vec2 scaled = UV * vec2(n_in51p0.x, n_in51p0.y);
+		vec2 scaled = UV * vec2(n_out80p0.x, n_out80p0.y);
 		n_out51p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
 // AntiTiling3D:62
 	float n_in62p6 = 0.50000;
 	float n_in62p7 = 1.00000;
-	float n_in62p8 = 0.00000;
+	float n_in62p8 = 1.00000;
 	mat4 n_out62p0;
 	mat4 n_out62p1;
 	{
@@ -635,18 +640,17 @@ void fragment() {
 			avg2 = n_out62p0[1].r;
 		}
 		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
-		result[0].rgb = HeightLerp(n_in58p3, n_out60p0[0].rgb, avg1, n_out62p0[0].rgb, avg2, n_out59p2);
-		result[1].rgb = HeightLerp(n_in58p3, n_out60p0[1].rgb, avg1, n_out62p0[1].rgb, avg2, n_out59p2);
-		result[2].rgb = HeightLerp(n_in58p3, n_out60p0[2].rgb, avg1, n_out62p0[2].rgb, avg2, n_out59p2);
-		result[3].rgb = HeightLerp(n_in58p3, n_out60p0[3].rgb, avg1, n_out62p0[3].rgb, avg2, n_out59p2);
+		result[0].rgb = HeightLerp(n_in58p3, n_out60p0[0].rgb, avg1, n_out62p0[0].rgb, avg2, n_out59p0);
+		result[1].rgb = HeightLerp(n_in58p3, n_out60p0[1].rgb, avg1, n_out62p0[1].rgb, avg2, n_out59p0);
+		result[2].rgb = HeightLerp(n_in58p3, n_out60p0[2].rgb, avg1, n_out62p0[2].rgb, avg2, n_out59p0);
+		result[3].rgb = HeightLerp(n_in58p3, n_out60p0[3].rgb, avg1, n_out62p0[3].rgb, avg2, n_out59p0);
 		n_out58p0 = result;
 	}
 
 // UVMultiply3D:69
-	vec3 n_in69p0 = vec3(20.00000, 20.00000, 0.00000);
 	vec3 n_out69p0;
 	{
-		vec2 scaled = UV * vec2(n_in69p0.x, n_in69p0.y);
+		vec2 scaled = UV * vec2(n_out80p0.x, n_out80p0.y);
 		n_out69p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
@@ -702,10 +706,10 @@ void fragment() {
 			avg2 = n_out70p0[1].r;
 		}
 		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
-		result[0].rgb = HeightLerp(n_in76p3, n_out58p0[0].rgb, avg1, n_out70p0[0].rgb, avg2, n_out59p1);
-		result[1].rgb = HeightLerp(n_in76p3, n_out58p0[1].rgb, avg1, n_out70p0[1].rgb, avg2, n_out59p1);
-		result[2].rgb = HeightLerp(n_in76p3, n_out58p0[2].rgb, avg1, n_out70p0[2].rgb, avg2, n_out59p1);
-		result[3].rgb = HeightLerp(n_in76p3, n_out58p0[3].rgb, avg1, n_out70p0[3].rgb, avg2, n_out59p1);
+		result[0].rgb = HeightLerp(n_in76p3, n_out58p0[0].rgb, avg1, n_out70p0[0].rgb, avg2, n_out59p3);
+		result[1].rgb = HeightLerp(n_in76p3, n_out58p0[1].rgb, avg1, n_out70p0[1].rgb, avg2, n_out59p3);
+		result[2].rgb = HeightLerp(n_in76p3, n_out58p0[2].rgb, avg1, n_out70p0[2].rgb, avg2, n_out59p3);
+		result[3].rgb = HeightLerp(n_in76p3, n_out58p0[3].rgb, avg1, n_out70p0[3].rgb, avg2, n_out59p3);
 		n_out76p0 = result;
 	}
 
@@ -759,20 +763,20 @@ void light() {
 
 }
 "
-graph_offset = Vector2( -2103.83, -1762.64 )
+graph_offset = Vector2( -2032.28, -1659.43 )
 version = "4.0"
 modes/depth_draw = 1
 nodes/vertex/0/position = Vector2( -820, -640 )
-nodes/vertex/2/node = SubResource( 34 )
+nodes/vertex/2/node = SubResource( 35 )
 nodes/vertex/2/position = Vector2( -1200, -640 )
 nodes/vertex/connections = PackedInt32Array( 2, 0, 0, 0, 2, 2, 0, 1 )
 nodes/fragment/0/position = Vector2( 340, -1260 )
 nodes/fragment/2/node = SubResource( 4 )
-nodes/fragment/2/position = Vector2( -1260, -1220 )
+nodes/fragment/2/position = Vector2( -1620, -1220 )
 nodes/fragment/3/node = SubResource( 7 )
-nodes/fragment/3/position = Vector2( -900, -1220 )
+nodes/fragment/3/position = Vector2( -1280, -1220 )
 nodes/fragment/4/node = SubResource( 10 )
-nodes/fragment/4/position = Vector2( -740, -1220 )
+nodes/fragment/4/position = Vector2( -1100, -1220 )
 nodes/fragment/5/node = SubResource( 15 )
 nodes/fragment/5/position = Vector2( -1600, -840 )
 nodes/fragment/10/node = SubResource( 1 )
@@ -782,7 +786,7 @@ nodes/fragment/11/position = Vector2( -640, 900 )
 nodes/fragment/14/node = SubResource( 3 )
 nodes/fragment/14/position = Vector2( 180, 1000 )
 nodes/fragment/28/node = SubResource( 5 )
-nodes/fragment/28/position = Vector2( -1080, -1220 )
+nodes/fragment/28/position = Vector2( -1460, -1220 )
 nodes/fragment/29/node = SubResource( 6 )
 nodes/fragment/29/position = Vector2( -1380, -840 )
 nodes/fragment/30/node = SubResource( 8 )
@@ -792,7 +796,7 @@ nodes/fragment/39/position = Vector2( -920, 900 )
 nodes/fragment/46/node = SubResource( 11 )
 nodes/fragment/46/position = Vector2( -1320, -920 )
 nodes/fragment/47/node = SubResource( 12 )
-nodes/fragment/47/position = Vector2( -1420, -1220 )
+nodes/fragment/47/position = Vector2( -1760, -1220 )
 nodes/fragment/48/node = SubResource( 13 )
 nodes/fragment/48/position = Vector2( -1200, -840 )
 nodes/fragment/49/node = SubResource( 14 )
@@ -804,17 +808,17 @@ nodes/fragment/51/position = Vector2( -1600, -620 )
 nodes/fragment/57/node = SubResource( 18 )
 nodes/fragment/57/position = Vector2( -100, -900 )
 nodes/fragment/58/node = SubResource( 19 )
-nodes/fragment/58/position = Vector2( -320, -960 )
+nodes/fragment/58/position = Vector2( -280, -1040 )
 nodes/fragment/59/node = SubResource( 20 )
-nodes/fragment/59/position = Vector2( -460, -800 )
+nodes/fragment/59/position = Vector2( -520, -880 )
 nodes/fragment/60/node = SubResource( 21 )
-nodes/fragment/60/position = Vector2( -780, -1000 )
+nodes/fragment/60/position = Vector2( -920, -1000 )
 nodes/fragment/62/node = SubResource( 22 )
-nodes/fragment/62/position = Vector2( -740, -880 )
+nodes/fragment/62/position = Vector2( -800, -720 )
 nodes/fragment/63/node = SubResource( 23 )
 nodes/fragment/63/position = Vector2( -40, -1080 )
 nodes/fragment/69/node = SubResource( 24 )
-nodes/fragment/69/position = Vector2( -980, -20 )
+nodes/fragment/69/position = Vector2( -1620, -320 )
 nodes/fragment/70/node = SubResource( 25 )
 nodes/fragment/70/position = Vector2( -740, -200 )
 nodes/fragment/71/node = SubResource( 26 )
@@ -828,17 +832,19 @@ nodes/fragment/74/position = Vector2( -1600, -20 )
 nodes/fragment/75/node = SubResource( 30 )
 nodes/fragment/75/position = Vector2( -1400, -20 )
 nodes/fragment/76/node = SubResource( 31 )
-nodes/fragment/76/position = Vector2( -200, -680 )
+nodes/fragment/76/position = Vector2( -300, -820 )
 nodes/fragment/77/node = SubResource( 32 )
 nodes/fragment/77/position = Vector2( 140, -1340 )
 nodes/fragment/78/node = SubResource( 33 )
 nodes/fragment/78/position = Vector2( 180, -1160 )
-nodes/fragment/79/node = SubResource( 36 )
+nodes/fragment/79/node = SubResource( 34 )
 nodes/fragment/79/position = Vector2( 240, -740 )
-nodes/fragment/connections = PackedInt32Array( 59, 2, 58, 2, 2, 2, 60, 0, 47, 2, 60, 4, 28, 2, 60, 2, 3, 2, 60, 1, 4, 2, 60, 3, 60, 0, 58, 0, 46, 0, 60, 5, 51, 0, 62, 5, 5, 2, 62, 0, 29, 2, 62, 1, 48, 2, 62, 2, 49, 2, 62, 3, 50, 2, 62, 4, 57, 0, 0, 0, 62, 0, 58, 1, 57, 2, 0, 8, 57, 3, 63, 0, 69, 0, 70, 5, 71, 2, 70, 0, 72, 2, 70, 1, 73, 2, 70, 2, 74, 2, 70, 3, 75, 2, 70, 4, 70, 0, 76, 1, 59, 1, 76, 2, 76, 0, 57, 0, 58, 0, 76, 0, 77, 0, 0, 5, 57, 4, 0, 6, 63, 0, 78, 0, 78, 0, 0, 3, 79, 0, 0, 9 )
+nodes/fragment/80/node = SubResource( 37 )
+nodes/fragment/80/position = Vector2( -2140, -880 )
+nodes/fragment/connections = PackedInt32Array( 2, 2, 60, 0, 47, 2, 60, 4, 28, 2, 60, 2, 3, 2, 60, 1, 4, 2, 60, 3, 60, 0, 58, 0, 46, 0, 60, 5, 51, 0, 62, 5, 5, 2, 62, 0, 29, 2, 62, 1, 48, 2, 62, 2, 49, 2, 62, 3, 50, 2, 62, 4, 57, 0, 0, 0, 62, 0, 58, 1, 57, 2, 0, 8, 57, 3, 63, 0, 69, 0, 70, 5, 71, 2, 70, 0, 72, 2, 70, 1, 73, 2, 70, 2, 74, 2, 70, 3, 75, 2, 70, 4, 70, 0, 76, 1, 76, 0, 57, 0, 58, 0, 76, 0, 77, 0, 0, 5, 57, 4, 0, 6, 63, 0, 78, 0, 78, 0, 0, 3, 79, 0, 0, 9, 80, 0, 46, 0, 80, 0, 51, 0, 80, 0, 69, 0, 59, 3, 76, 2, 59, 0, 58, 2 )
 
 [resource]
-shader = SubResource( 35 )
+shader = SubResource( 36 )
 shader_param/terrainUvScale = null
 shader_param/terrainUvOffset = null
 shader_param/terrainChunkSize = null

@@ -38,28 +38,51 @@ namespace TerrainEditor.Editor.Paint
                     var id = z * modifiedSize.x + x;
 
                     // buffer[id] = new Color(0, 0, 0, 1);
-                    buffer[id] = new Color();
-                    
+                    buffer[id] = source;
+
+                    var dstWeight = 0f;
+
                     if (colorComponent == 0)
                     {
-                        buffer[id].r = Mathf.Clamp(source.r + paintAmount, 0f, 1f);
+                        dstWeight = source.r + paintAmount;
                     }
                     else if (colorComponent == 1)
                     {
-                        buffer[id].g = Mathf.Clamp(source.g + paintAmount, 0f, 1f);
+                        dstWeight = source.g + paintAmount;
                     }
                     else if (colorComponent == 2)
                     {
-                        buffer[id].b = Mathf.Clamp(source.b + paintAmount, 0f, 1f);
+                        dstWeight = source.b + paintAmount;
                     }
                     else if (colorComponent == 3)
                     {
-                        buffer[id].a = Mathf.Clamp(source.a + paintAmount, 0f, 1f);
+                        dstWeight = source.a + paintAmount;
+                    }
+
+                    if (dstWeight >= 1.0f)
+                    {
+                        buffer[id] = Colors.Transparent;
+                    }
+
+                    if (colorComponent == 0)
+                    {
+                        buffer[id].r = Mathf.Clamp(dstWeight, 0f, 1f);
+                    }
+                    else if (colorComponent == 1)
+                    {
+                        buffer[id].g = Mathf.Clamp(dstWeight, 0f, 1f);
+                    }
+                    else if (colorComponent == 2)
+                    {
+                        buffer[id].b = Mathf.Clamp(dstWeight, 0f, 1f);
+                    }
+                    else if (colorComponent == 3)
+                    {
+                        buffer[id].a = Mathf.Clamp(dstWeight, 0f, 1f);
                     }
                 }
             }
 
-            GD.Print("apply");
             patch.UpdateSplatMap(splatmapIndex, selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
     }
