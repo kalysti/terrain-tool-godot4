@@ -10,9 +10,19 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "VisualShaderNodeCustom",
-"class": @"VisualShaderNodeHeightBlending",
+"class": @"VisualShaderNodeAntiTiling3D",
 "language": @"GDScript",
-"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeHeightBlending.gd"
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd"
+}, {
+"base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeDepthBlending3D",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeDepthBlending3D.gd"
+}, {
+"base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeNoisePerlin2D",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeNoisePerlin2D.gd"
 }, {
 "base": "VisualShaderNodeCustom",
 "class": @"VisualShaderNodeSplatmapHeight3D",
@@ -28,12 +38,32 @@ _global_script_classes=[ {
 "class": @"VisualShaderNodeTerrainMaterial3D",
 "language": @"GDScript",
 "path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd"
+}, {
+"base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeTexturePack3D",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeTexturePack3D.gd"
+}, {
+"base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeTextureUnpack3D",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeTextureUnpack3D.gd"
+}, {
+"base": "VisualShaderNodeCustom",
+"class": @"VisualShaderNodeUVMultiply3D",
+"language": @"GDScript",
+"path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeUVMultiply3D.gd"
 } ]
 _global_script_class_icons={
+@"VisualShaderNodeUVMultiply3D": "",
+@"VisualShaderNodeTextureUnpack3D": "",
 @"VisualShaderNodeSplatmapHeight3D": "",
-@"VisualShaderNodeTerrainMaterial3D": "",
+@"VisualShaderNodeAntiTiling3D": "",
 @"VisualShaderNodeTerrainGenerator3D": "",
-@"VisualShaderNodeHeightBlending": ""
+@"VisualShaderNodeTerrainMaterial3D": "",
+@"VisualShaderNodeNoisePerlin2D": "",
+@"VisualShaderNodeTexturePack3D": "",
+@"VisualShaderNodeDepthBlending3D": ""
 }
 
 [application]

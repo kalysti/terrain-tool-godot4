@@ -59,7 +59,9 @@ namespace TerrainEditor.Editor.Paint
 
                 }
             }
-            
+
+            GD.Print("apply");
+
             patch.UpdateSplatMap(splatmapIndex, selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
     }

@@ -20,7 +20,9 @@ namespace TerrainEditor
         public override Godot.Collections.Array _GetPropertyList()
         {
             var arr = new Godot.Collections.Array();
-           
+
+            var test = new VisualShaderNodeCustom();
+
             arr.Add(new Godot.Collections.Dictionary()
             {
                 {"name", "Terrain Group"},

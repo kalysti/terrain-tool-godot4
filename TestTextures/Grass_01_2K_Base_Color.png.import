@@ -2,28 +2,26 @@
 
 importer="texture"
 type="StreamTexture2D"
-path.s3tc="res://.godot/imported/Grass_01_2K_Base_Color.png-ca4e0c158d132b85df3726b3954025ac.s3tc.stex"
-path.etc2="res://.godot/imported/Grass_01_2K_Base_Color.png-ca4e0c158d132b85df3726b3954025ac.etc2.stex"
+path="res://.godot/imported/Grass_01_2K_Base_Color.png-ca4e0c158d132b85df3726b3954025ac.stex"
 metadata={
-"imported_formats": [ "s3tc", "etc2" ],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://TestTextures/Grass_01_2K_Base_Color.png"
-dest_files=[ "res://.godot/imported/Grass_01_2K_Base_Color.png-ca4e0c158d132b85df3726b3954025ac.s3tc.stex", "res://.godot/imported/Grass_01_2K_Base_Color.png-ca4e0c158d132b85df3726b3954025ac.etc2.stex" ]
+dest_files=[ "res://.godot/imported/Grass_01_2K_Base_Color.png-ca4e0c158d132b85df3726b3954025ac.stex" ]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
 compress/streamed=false
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -32,5 +30,5 @@ process/premult_alpha=false
 process/invert_color=false
 process/HDR_as_SRGB=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
 svg/scale=1.0

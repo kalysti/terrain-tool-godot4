@@ -34,6 +34,8 @@ namespace TerrainEditor
 
         protected RID materialId;
 
+        protected Material materialInUse;
+
         protected RID meshId;
 
         public AABB getBounds(TerrainPatchInfo info, Vector3 patchOffset)
@@ -66,6 +68,7 @@ namespace TerrainEditor
             }
 
             mesh = null;
+            materialInUse = null;
 
         }
 
@@ -122,9 +125,10 @@ namespace TerrainEditor
             RenderingServer.MaterialSetParam(materialId, "terrainDefaultMaterial", image);
         }
 
-        public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, RID shaderRid)
+        public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
         {
-          
+
+           // var shaderRid = shader.GetRid();
             mesh = GenerateMesh(patch, info.chunkSize, 0);
             meshId = mesh.GetRid();
 
@@ -143,10 +147,11 @@ namespace TerrainEditor
             RenderingServer.MeshSetCustomAabb(meshId, new AABB(new Vector3(), new Vector3(size, height, size)));
             RenderingServer.InstanceSetCustomAabb(instanceRid, new AABB(new Vector3(), new Vector3(size, height, size)));
 
-            materialId = RenderingServer.MaterialCreate();
+            //   materialId = RenderingServer.MaterialCreate();
+            materialInUse = mat.Duplicate() as Material;
+            materialId =  materialInUse.GetRid();
 
-            RenderingServer.MaterialSetShader(materialId, shaderRid);
-
+           // RenderingServer.MaterialSetShader(materialId, shaderRid);
             RenderingServer.InstanceGeometrySetMaterialOverride(instanceRid, materialId);
 
             RenderingServer.MaterialSetParam(materialId, "terrainHeightMap", heightMap);
@@ -154,16 +159,11 @@ namespace TerrainEditor
             RenderingServer.MaterialSetParam(materialId, "terrainNextLodChunkSize", 1);
             RenderingServer.MaterialSetParam(materialId, "terrainUvScale", getUVScale());
             RenderingServer.MaterialSetParam(materialId, "terrainCurrentLodLevel", 0);
-
             RenderingServer.MaterialSetParam(materialId, "terrainSplatmap1", splatMaps[0]);
             RenderingServer.MaterialSetParam(materialId, "terrainSplatmap2", splatMaps[1]);
 
-            
-
             offsetUv = new Vector2((float)(patch.patchCoord.x * Terrain3D.CHUNKS_COUNT_EDGE + position.x), (float)(patch.patchCoord.y * Terrain3D.CHUNKS_COUNT_EDGE + position.y));
             RenderingServer.MaterialSetParam(materialId, "terrainUvOffset", offsetUv);
-
-
         }
 
         public ArrayMesh GenerateMesh(TerrainPatch patch, int chunkSize, int lodIndex)
@@ -233,8 +233,8 @@ namespace TerrainEditor
                 }
             }
 
-            //  st.GenerateNormals();
-            // st.GenerateTangents();
+              st.GenerateNormals();
+             st.GenerateTangents();
 
             var mesh = st.Commit();
             patch.meshCache.Add(lodIndex, mesh);

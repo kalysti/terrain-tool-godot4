@@ -99,6 +99,8 @@ namespace TerrainEditor
             {
                 chunk.offset = chunkOffsets[chunkIndex];
                 chunk.height = chunkHeights[chunkIndex];
+                chunk.UpdateHeightmap(info);
+                chunkIndex++;
             }
 
             heightmapGen.WriteHeights(ref image, ref heightMapdata);
@@ -142,12 +144,15 @@ namespace TerrainEditor
 
             splatmaps.Add(splatmap1);
             splatmaps.Add(splatmap2);
+
+            cachedHeightMapData = heightMapdata;
+            cachedHeightMapData = heightMapdata;
         }
 
         /**
          * Drawing a patch by attaching chunks to render device
          */
-        public void Draw(Terrain3D terrainNode, RID shaderRid)
+        public void Draw(Terrain3D terrainNode, Material mat)
         {
             RID scenario = terrainNode.GetWorld3d().Scenario;
 
@@ -171,7 +176,7 @@ namespace TerrainEditor
             {
                 var start = OS.GetTicksMsec();
 
-                chunk.Draw(this, info, scenario, ref heightmap, ref splatmaps, terrainNode, getOffset(), shaderRid);
+                chunk.Draw(this, info, scenario, ref heightmap, ref splatmaps, terrainNode, getOffset(), mat);
                 chunk.UpdateTransform(info, terrainNode.GlobalTransform, getOffset());
                 chunk.SetDefaultMaterial(terrainNode.terrainDefaultTexture);
 
@@ -181,6 +186,12 @@ namespace TerrainEditor
 
             //Creating collider
             CreateCollider(0, terrainNode);
+
+
+            terrainNode.getBounds();
+            terrainNode.updateDebug();
+
+            UpdateTransform(terrainNode);
         }
 
         public void UpdateTransform(Terrain3D terrainNode)
@@ -285,12 +296,6 @@ namespace TerrainEditor
             var image = splatmaps[splatmapIndex].GetImage().Duplicate() as Image;
             var data = CacheSplatMap(splatmapIndex);
 
-            GD.Print("start snap");
-            GD.Print(data[0].r8);
-            GD.Print(data[0].g8);
-            GD.Print(data[0].b8);
-            GD.Print(data[0].a8);
-            GD.Print("stop snap");
             if (modifiedOffset.x < 0 || modifiedOffset.y < 0 ||
                 modifiedSize.x <= 0 || modifiedSize.y <= 0 ||
                 modifiedOffset.x + modifiedSize.x > info.heightMapSize ||
@@ -414,7 +419,6 @@ namespace TerrainEditor
 
         public Color[] CacheSplatMap(int id)
         {
-            GD.Print(id);
             if (cachedSplatMap == null || cachedSplatMap.Count != 2)
             {
                 cachedSplatMap = new Godot.Collections.Array<Color[]>();

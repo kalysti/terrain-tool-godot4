@@ -56,7 +56,7 @@ namespace TerrainEditor
 
                 if (heightMapImage == null)
                 {
-                    patch.Init(chunkSize);
+                    patch.Init( chunkSize);
                 }
                 else
                 {
@@ -99,7 +99,7 @@ namespace TerrainEditor
                         }
                     }
 
-                    patch.Init(chunkSize, heightmapData, splatMapData1, splatMapData2);
+                    patch.Init( chunkSize, heightmapData, splatMapData1, splatMapData2);
                 }
 
                 GD.Print("[Patch][" + patchId + "] Init time " + (OS.GetTicksMsec() - start) + " ms");
@@ -131,7 +131,7 @@ namespace TerrainEditor
             {
                 var start = OS.GetTicksMsec();
 
-                patch.Draw(this, terrainDefaultMaterial.Shader.GetRid());
+                patch.Draw(this, terrainDefaultMaterial);
 
                 GD.Print("[Patch][" + patchId + "] Draw time " + (OS.GetTicksMsec() - start) + " ms");
                 patchId++;

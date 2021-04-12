@@ -117,6 +117,7 @@ namespace TerrainEditor
                     {
                         if (selectedChunks == null || !selectedChunks.Contains(chunk))
                         {
+
                             ResetMaterialParams(chunk);
                         }
                         else
