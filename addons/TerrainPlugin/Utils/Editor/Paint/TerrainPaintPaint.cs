@@ -38,7 +38,7 @@ namespace TerrainEditor.Editor.Paint
                     var id = z * modifiedSize.x + x;
 
                     // buffer[id] = new Color(0, 0, 0, 1);
-                    buffer[id] = source;
+                    buffer[id] = new Color();
                     
                     if (colorComponent == 0)
                     {
@@ -56,12 +56,10 @@ namespace TerrainEditor.Editor.Paint
                     {
                         buffer[id].a = Mathf.Clamp(source.a + paintAmount, 0f, 1f);
                     }
-
                 }
             }
 
             GD.Print("apply");
-
             patch.UpdateSplatMap(splatmapIndex, selectedTerrain, buffer, modifiedOffset, modifiedSize);
         }
     }
