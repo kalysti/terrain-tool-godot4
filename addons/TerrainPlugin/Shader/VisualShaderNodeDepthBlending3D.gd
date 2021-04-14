@@ -91,6 +91,15 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr += "float avg1 = (tex1.r + tex1.g + tex1.b) / 3.0f;\n"
 	heightStr += "float avg2 = (tex2.r + tex2.g + tex2.b) / 3.0f;\n"
 
+	heightStr += "vec3 bump1 = "+input_vars[0]+"[2].rgb;\n"
+	heightStr += "vec3 bump2 = "+input_vars[1]+"[2].rgb;\n"
+
+	heightStr += "bump1.xy = bump1.xy / bump1.z;\n"
+	heightStr += "bump2.xy = bump2.xy / bump2.z;\n"
+	
+	heightStr += "bump1.z = 1.0;\n"
+	heightStr += "bump2.z = 1.0;\n"
+
 	heightStr += "if("+input_vars[4]+" == false) { \n"
 	heightStr += "	avg1 = "+input_vars[0]+"[1].r;\n"
 	heightStr += "	avg2 = "+input_vars[1]+"[1].r;\n"
@@ -100,6 +109,8 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr += "result[0].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[0].rgb, avg1, "+input_vars[1]+"[0].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr += "result[1].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[1].rgb, avg1, "+input_vars[1]+"[1].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr += "result[2].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[2].rgb, avg1, "+input_vars[1]+"[2].rgb, avg2, "+input_vars[2]+");\n"
+	#needs to finish it
+	#heightStr += "result[2].rgb =  normalize(mix(bump1, bump2, "+input_vars[2]+") * 2.0 - 1.0);\n"
 	heightStr += "result[3].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[3].rgb, avg1, "+input_vars[1]+"[3].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr +=  output_vars[0]+" = result;\n"
 

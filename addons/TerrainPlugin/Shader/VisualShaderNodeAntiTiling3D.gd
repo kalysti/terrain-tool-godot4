@@ -135,12 +135,12 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr +=  "packedMixed[0].rgb = colorMapRot.rgb;\n"
 	heightStr +=  "packedMixed[1].r = dispMapRot.r;\n"
 	heightStr +=  "packedMixed[2].rg = normalMapRot.rg;\n"
-	heightStr +=  "packedMixed[3].rg = roughMapRot.rg;\n"
+	heightStr +=  "packedMixed[3].r = roughMapRot.r;\n"
 	heightStr +=  "packedMixed[3].b = aoMapRot.r;\n"
 
 	heightStr +=  "packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  "+input_vars[8]+");\n"
 	heightStr +=  "packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  "+input_vars[8]+");\n"
-	heightStr +=  "packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  "+input_vars[8]+");\n"
+	heightStr +=  "packedMixed[2] = normalize(mix(packedOriginal[2], packedMixed[2],  "+input_vars[8]+") * 2.0 - 1.0);\n"
 	heightStr +=  "packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  "+input_vars[8]+");\n"
 
 	heightStr +=  output_vars[1]+" = packedOriginal;\n"

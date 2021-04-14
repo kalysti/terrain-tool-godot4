@@ -24,6 +24,33 @@ namespace TerrainEditor
                 patch.UpdateTransform(this);
         }
 
+        void CacheNeighbors()
+        {
+            for (int pathIndex = 0; pathIndex < terrainPatches.Count(); pathIndex++)
+            {
+                var patch = terrainPatches[pathIndex];
+                for (int chunkIndex = 0; chunkIndex < CHUNKS_COUNT; chunkIndex++)
+                {
+                    patch.chunks[chunkIndex].CacheNeighbors(this, patch);
+                }
+            }
+        }
+
+        public TerrainPatch GetPatch(int x, int z)
+        {
+            for (int i = 0; i < terrainPatches.Count(); i++)
+            {
+                var patch = terrainPatches[i];
+                if (patch.patchCoord.x == x && patch.patchCoord.y == z)
+                {
+                    return patch;
+                }
+            }
+
+            return null;
+        }
+
+
         public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null, Image splatMapImage1 = null, Image splatMapImage2 = null)
         {
             ClearDraw();
@@ -48,6 +75,7 @@ namespace TerrainEditor
                 }
             }
 
+
             int patchId = 0;
             foreach (var patch in terrainPatches)
             {
@@ -56,7 +84,7 @@ namespace TerrainEditor
 
                 if (heightMapImage == null)
                 {
-                    patch.Init( chunkSize);
+                    patch.Init(chunkSize);
                 }
                 else
                 {
@@ -99,7 +127,7 @@ namespace TerrainEditor
                         }
                     }
 
-                    patch.Init( chunkSize, heightmapData, splatMapData1, splatMapData2);
+                    patch.Init(chunkSize, heightmapData, splatMapData1, splatMapData2);
                 }
 
                 GD.Print("[Patch][" + patchId + "] Init time " + (OS.GetTicksMsec() - start) + " ms");
@@ -110,7 +138,7 @@ namespace TerrainEditor
             Draw();
 
             var kmX = bounds.Size.x * 0.00001f;
-            var kmY = bounds.Size.x * 0.00001f;
+            var kmY = bounds.Size.z * 0.00001f;
             GD.Print("[Init Size] " + kmX + "x" + kmY + "km");
         }
 
@@ -126,6 +154,8 @@ namespace TerrainEditor
 
         protected void Draw()
         {
+            CacheNeighbors();
+
             int patchId = 0;
             foreach (var patch in terrainPatches)
             {

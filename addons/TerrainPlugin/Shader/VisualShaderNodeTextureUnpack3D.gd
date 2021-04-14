@@ -59,7 +59,7 @@ func _get_output_port_type(port):
 		2:
 			return VisualShaderNode.PORT_TYPE_VECTOR
 		3:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_SCALAR
 		4:
 			return VisualShaderNode.PORT_TYPE_SCALAR
 
@@ -75,7 +75,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr +=  output_vars[0]+" = "+input_vars[0]+"[0].rgb;\n"
 	heightStr +=  output_vars[1]+" = "+input_vars[0]+"[1].r;\n"
 	heightStr +=  output_vars[2]+" = vec3("+input_vars[0]+"[2].r, "+input_vars[0]+"[2].g, 0f);\n"
-	heightStr +=  output_vars[3]+" = vec3("+input_vars[0]+"[3].r, "+input_vars[0]+"[3].g, 0f);\n"
+	heightStr +=  output_vars[3]+" = "+input_vars[0]+"[3].r;\n"
 	heightStr +=  output_vars[4]+" = "+input_vars[0]+"[3].b;\n"
 
 	return heightStr;

@@ -38,6 +38,11 @@ namespace TerrainEditor
 
         protected RID meshId;
 
+        protected Godot.Collections.Array<TerrainChunk> _neighbors = new Godot.Collections.Array<TerrainChunk>();
+
+        [Export]
+        public int _cachedDrawLOD;
+
         public AABB getBounds(TerrainPatchInfo info, Vector3 patchOffset)
         {
             float size = (float)info.chunkSize * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
@@ -45,6 +50,20 @@ namespace TerrainEditor
             bounds = new AABB(origin, new Vector3(size, height, size));
 
             return bounds;
+        }
+
+        protected Plane getNeightbors()
+        {
+            int lod = _cachedDrawLOD;
+            int minLod = Math.Max(lod + 1, 0);
+
+            Plane pl = new Plane();
+            pl.x = (float)Math.Clamp(_neighbors[0]._cachedDrawLOD, lod, minLod);
+            pl.y = (float)Math.Clamp(_neighbors[1]._cachedDrawLOD, lod, minLod);
+            pl.z = (float)Math.Clamp(_neighbors[2]._cachedDrawLOD, lod, minLod);
+            pl.D = (float)Math.Clamp(_neighbors[3]._cachedDrawLOD, lod, minLod);
+
+            return pl;
         }
 
         public void ClearDraw()
@@ -120,8 +139,72 @@ namespace TerrainEditor
             RenderingServer.MaterialSetParam(materialId, "terrainDefaultMaterial", image);
         }
 
+
+        public void CacheNeighbors(Terrain3D terrainNode, TerrainPatch currentPatch)
+        {
+            _neighbors.Clear();
+            _neighbors.Add(this);
+            _neighbors.Add(this);
+            _neighbors.Add(this);
+            _neighbors.Add(this);
+
+            // 0: bottom
+            if (position.y > 0)
+            {
+                _neighbors[0] = currentPatch.chunks[(position.y - 1) * Terrain3D.CHUNKS_COUNT_EDGE + position.x];
+            }
+            else
+            {
+                var patch = terrainNode.GetPatch(position.x, position.y - 1);
+                if (patch != null)
+                    _neighbors[0] = patch.chunks[(Terrain3D.CHUNKS_COUNT_EDGE - 1) * Terrain3D.CHUNKS_COUNT_EDGE + position.x];
+            }
+
+            // 1: left
+            if (position.x > 0)
+            {
+                _neighbors[1] = currentPatch.chunks[position.y * Terrain3D.CHUNKS_COUNT_EDGE + (position.x - 1)];
+            }
+            else
+            {
+                var patch = terrainNode.GetPatch(position.x - 1, position.y);
+                if (patch != null)
+                    _neighbors[1] = patch.chunks[position.y * Terrain3D.CHUNKS_COUNT_EDGE + (Terrain3D.CHUNKS_COUNT_EDGE - 1)];
+            }
+
+            // 2: right 
+            if (position.x < Terrain3D.CHUNKS_COUNT_EDGE - 1)
+            {
+                _neighbors[2] = currentPatch.chunks[position.y * Terrain3D.CHUNKS_COUNT_EDGE + (position.x + 1)];
+            }
+            else
+            {
+                var patch = terrainNode.GetPatch(position.x + 1, position.y);
+                if (patch != null)
+                    _neighbors[2] = patch.chunks[position.y * Terrain3D.CHUNKS_COUNT_EDGE];
+            }
+
+            // 3: top
+            if (position.y < Terrain3D.CHUNKS_COUNT_EDGE - 1)
+            {
+                _neighbors[3] = currentPatch.chunks[(position.y + 1) * Terrain3D.CHUNKS_COUNT_EDGE + position.x];
+            }
+            else
+            {
+                var patch = terrainNode.GetPatch(position.x, position.y + 1);
+                if (patch != null)
+                    _neighbors[3] = patch.chunks[position.x];
+            }
+        }
+
+
+
         public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
         {
+            _cachedDrawLOD = 0;
+            int lod = _cachedDrawLOD;
+            int minLod = Math.Max(lod + 1, 0);
+            int chunkSize = info.chunkSize;
 
             // var shaderRid = shader.GetRid();
             mesh = GenerateMesh(patch, info.chunkSize, 0);
@@ -149,13 +232,20 @@ namespace TerrainEditor
             // RenderingServer.MaterialSetShader(materialId, shaderRid);
             RenderingServer.InstanceGeometrySetMaterialOverride(instanceRid, materialId);
 
+            var nextChunkSizeLod = (float) (((info.chunkSize + 1) >> (lod + 1)) - 1);
+
             RenderingServer.MaterialSetParam(materialId, "terrainHeightMap", heightMap);
             RenderingServer.MaterialSetParam(materialId, "terrainChunkSize", TerrainChunkSizeLOD0);
-            RenderingServer.MaterialSetParam(materialId, "terrainNextLodChunkSize", 1);
+            RenderingServer.MaterialSetParam(materialId, "terrainNextLodChunkSize", nextChunkSizeLod);
+            GD.Print(nextChunkSizeLod);
+
             RenderingServer.MaterialSetParam(materialId, "terrainUvScale", getUVScale());
-            RenderingServer.MaterialSetParam(materialId, "terrainCurrentLodLevel", 0);
+            RenderingServer.MaterialSetParam(materialId, "terrainCurrentLodLevel", lod);
             RenderingServer.MaterialSetParam(materialId, "terrainSplatmap1", splatMaps[0]);
             RenderingServer.MaterialSetParam(materialId, "terrainSplatmap2", splatMaps[1]);
+            RenderingServer.MaterialSetParam(materialId, "terrainNeighborLod", getNeightbors());
+            RenderingServer.MaterialSetParam(materialId, "terrainSmoothing", true);
+
 
             offsetUv = new Vector2((float)(patch.patchCoord.x * Terrain3D.CHUNKS_COUNT_EDGE + position.x), (float)(patch.patchCoord.y * Terrain3D.CHUNKS_COUNT_EDGE + position.y));
             RenderingServer.MaterialSetParam(materialId, "terrainUvOffset", offsetUv);
@@ -171,7 +261,7 @@ namespace TerrainEditor
             int chunkSizeLOD0 = chunkSize;
 
             // Prepare
-            int vertexCount = (chunkSize + 1) >> lodIndex;
+            int vertexCount = (chunkSize + 1) >> lodIndex; // 32
             chunkSize = vertexCount - 1;
             int indexCount = chunkSize * chunkSize * 2 * 3;
             int vertexCount2 = vertexCount * vertexCount;
@@ -179,16 +269,16 @@ namespace TerrainEditor
             // Create vertex buffer
             float vertexTexelSnapTexCoord = 1.0f / chunkSize;
 
+            GD.Print(vertexTexelSnapTexCoord);
+
             var st = new SurfaceTool();
             st.Begin(Mesh.PrimitiveType.Triangles);
-
             for (int z = 0; z < vertexCount; z++)
             {
                 for (int x = 0; x < vertexCount; x++)
                 {
                     var buff = new Vector3(x * vertexTexelSnapTexCoord, 0f, z * vertexTexelSnapTexCoord);
 
-                    //  uv_buffer.Add(new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord));
                     // Smooth LODs morphing based on Barycentric coordinates to morph to the lower LOD near chunk edges
                     var coord = new Quat(buff.z, buff.x, 1.0f - buff.x, 1.0f - buff.z);
 
@@ -201,11 +291,12 @@ namespace TerrainEditor
                     color.b = Convert.ToSingle(Math.Pow(coord.z, AdjustPower));
                     color.a = Convert.ToSingle(Math.Pow(coord.w, AdjustPower));
 
+
                     st.SetColor(color);
                     st.SetUv(new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord));
-                    st.AddVertex(buff); //x
+                    //GD.Print(new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord));
 
-                    ///     color_buffer.Add(color);
+                    st.AddVertex(buff); //x
                 }
             }
 

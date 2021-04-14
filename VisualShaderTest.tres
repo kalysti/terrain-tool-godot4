@@ -22,164 +22,155 @@
 [ext_resource path="res://TestTextures/Pave/PavingStones046_2K_AmbientOcclusion.jpg" type="Texture2D" id=20]
 [ext_resource path="res://TestTextures/Pave/PavingStones046_2K_Roughness.jpg" type="Texture2D" id=21]
 [ext_resource path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd" type="Script" id=22]
+[ext_resource path="res://osm-heightmap.png" type="Texture2D" id=23]
 
 [sub_resource type="VisualShaderNodeTextureUniform" id=1]
-default_input_values = [  ]
-uniform_name = "Layer2_Dis"
-texture_type = 1
-
-[sub_resource type="VisualShaderNodeTextureUniform" id=2]
-default_input_values = [  ]
-uniform_name = "Layer2"
-texture_type = 1
-
-[sub_resource type="VisualShaderNodeTextureUniform" id=3]
-default_input_values = [  ]
-uniform_name = "Layer3_Dis"
-texture_type = 1
-
-[sub_resource type="VisualShaderNodeTextureUniform" id=4]
 default_input_values = [  ]
 uniform_name = "Layer0"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=5]
+[sub_resource type="VisualShaderNodeTextureUniform" id=2]
 default_input_values = [  ]
 uniform_name = "Layer0_Normal"
 texture_type = 2
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=6]
+[sub_resource type="VisualShaderNodeTextureUniform" id=3]
 default_input_values = [  ]
 uniform_name = "Layer1_Disp"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=7]
+[sub_resource type="VisualShaderNodeTextureUniform" id=4]
 default_input_values = [  ]
 uniform_name = "Layer0_Dis"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=8]
-default_input_values = [  ]
-uniform_name = "Layer2_Normal"
-texture_type = 2
-
-[sub_resource type="VisualShaderNodeInput" id=9]
-default_input_values = [  ]
-input_name = "uv"
-
-[sub_resource type="VisualShaderNodeTextureUniform" id=10]
+[sub_resource type="VisualShaderNodeTextureUniform" id=5]
 default_input_values = [  ]
 uniform_name = "Layer0_Roughnes"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeCustom" id=11]
-default_input_values = [ 0, Vector3( 10, 10, 0 ) ]
+[sub_resource type="VisualShaderNodeCustom" id=6]
+default_input_values = [ 0, Vector3( 1, 1, 0 ) ]
 script = ExtResource( 6 )
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=12]
+[sub_resource type="VisualShaderNodeTextureUniform" id=7]
 default_input_values = [  ]
 uniform_name = "Layer0_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=13]
+[sub_resource type="VisualShaderNodeTextureUniform" id=8]
 default_input_values = [  ]
 uniform_name = "Layer1_Normal"
 texture_type = 2
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=14]
+[sub_resource type="VisualShaderNodeTextureUniform" id=9]
 default_input_values = [  ]
 uniform_name = "Layer1_Roughness"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=15]
+[sub_resource type="VisualShaderNodeTextureUniform" id=10]
 default_input_values = [  ]
 uniform_name = "Layer1"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=16]
+[sub_resource type="VisualShaderNodeTextureUniform" id=11]
 default_input_values = [  ]
 uniform_name = "Layer1_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeCustom" id=17]
-default_input_values = [ 0, Vector3( 10, 10, 0 ) ]
+[sub_resource type="VisualShaderNodeCustom" id=12]
+default_input_values = [ 0, Vector3( 1, 1, 0 ) ]
 script = ExtResource( 6 )
 
-[sub_resource type="VisualShaderNodeCustom" id=18]
+[sub_resource type="VisualShaderNodeCustom" id=13]
 default_input_values = [ 0, Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ) ]
 script = ExtResource( 4 )
 
-[sub_resource type="VisualShaderNodeCustom" id=19]
+[sub_resource type="VisualShaderNodeCustom" id=14]
 default_input_values = [ 0, Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ), 1, Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ), 2, 0.5, 3, 0.05, 4, false ]
 script = ExtResource( 3 )
 
-[sub_resource type="VisualShaderNodeCustom" id=20]
+[sub_resource type="VisualShaderNodeCustom" id=15]
 default_input_values = [  ]
 script = ExtResource( 16 )
 
-[sub_resource type="VisualShaderNodeCustom" id=21]
-default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 1.0 ]
-script = ExtResource( 5 )
-
-[sub_resource type="VisualShaderNodeCustom" id=22]
-default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 1.0 ]
-script = ExtResource( 5 )
-
-[sub_resource type="VisualShaderNodeVectorDecompose" id=23]
-default_input_values = [ 0, Vector3( 0, 0, 0 ) ]
-
-[sub_resource type="VisualShaderNodeCustom" id=24]
-default_input_values = [ 0, Vector3( 10, 10, 0 ) ]
-script = ExtResource( 6 )
-
-[sub_resource type="VisualShaderNodeCustom" id=25]
+[sub_resource type="VisualShaderNodeCustom" id=16]
 default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 0.0 ]
 script = ExtResource( 5 )
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=26]
+[sub_resource type="VisualShaderNodeCustom" id=17]
+default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 0.0 ]
+script = ExtResource( 5 )
+
+[sub_resource type="VisualShaderNodeCustom" id=18]
+default_input_values = [ 0, Vector3( 1, 1, 0 ) ]
+script = ExtResource( 6 )
+
+[sub_resource type="VisualShaderNodeCustom" id=19]
+default_input_values = [ 5, Vector3( 0, 0, 0 ), 6, 0.5, 7, 1.0, 8, 0.0 ]
+script = ExtResource( 5 )
+
+[sub_resource type="VisualShaderNodeTextureUniform" id=20]
 default_input_values = [  ]
 uniform_name = "Layer3"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=27]
+[sub_resource type="VisualShaderNodeTextureUniform" id=21]
 default_input_values = [  ]
 uniform_name = "Layer2_Dis2"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=28]
+[sub_resource type="VisualShaderNodeTextureUniform" id=22]
 default_input_values = [  ]
 uniform_name = "Layer2_Normal2"
 texture_type = 2
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=29]
+[sub_resource type="VisualShaderNodeTextureUniform" id=23]
 default_input_values = [  ]
 uniform_name = "Layer2_Roughnes2"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=30]
+[sub_resource type="VisualShaderNodeTextureUniform" id=24]
 default_input_values = [  ]
 uniform_name = "Layer2_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeCustom" id=31]
+[sub_resource type="VisualShaderNodeCustom" id=25]
 default_input_values = [ 0, Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ), 1, Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ), 2, 0.5, 3, 0.05, 4, false ]
 script = ExtResource( 3 )
 
-[sub_resource type="VisualShaderNodeCustom" id=32]
+[sub_resource type="VisualShaderNodeCustom" id=26]
 default_input_values = [  ]
 script = ExtResource( 22 )
 
-[sub_resource type="VisualShaderNodeFloatOp" id=33]
-default_input_values = [ 0, 0.0, 1, 1.8 ]
-operator = 2
+[sub_resource type="VisualShaderNodeFloatOp" id=27]
+default_input_values = [ 0, 0.0, 1, 0.3 ]
+operator = 3
+
+[sub_resource type="VisualShaderNodeVec3Constant" id=28]
+default_input_values = [  ]
+constant = Vector3( 30, 30, 30 )
+
+[sub_resource type="VisualShaderNodeFloatConstant" id=29]
+default_input_values = [  ]
+
+[sub_resource type="VisualShaderNodeFloatConstant" id=30]
+default_input_values = [  ]
+
+[sub_resource type="VisualShaderNodeFloatConstant" id=31]
+default_input_values = [  ]
+
+[sub_resource type="VisualShaderNodeFloatConstant" id=32]
+default_input_values = [  ]
+constant = 0.3
+
+[sub_resource type="VisualShaderNodeFloatConstant" id=33]
+default_input_values = [  ]
+constant = 0.02
 
 [sub_resource type="VisualShaderNodeFloatConstant" id=34]
 default_input_values = [  ]
-constant = 1.2
-
-[sub_resource type="VisualShaderNodeVec3Constant" id=37]
-default_input_values = [  ]
-constant = Vector3( 120, 120, 0 )
+constant = 1.0
 
 [sub_resource type="VisualShaderNodeCustom" id=35]
 default_input_values = [  ]
@@ -215,7 +206,7 @@ uniform sampler2D Layer2_AO : hint_albedo;
 
 		uniform float terrainChunkSize = 0;
 		uniform float terrainNextLodChunkSize = 0;
-		uniform float terrainNeighborLodLevel = 0;
+		uniform vec4 terrainNeighborLod = vec4(0,0,0,0);
 		uniform float terrainCurrentLodLevel = 0;
 		uniform bool terrainSmoothing = false;
 		
@@ -223,7 +214,7 @@ uniform sampler2D Layer2_AO : hint_albedo;
 		uniform sampler2D terrainSplatmap2 : hint_albedo;
 		uniform bool terrainSplatMapDebug = false;
 
-		float calculateLOD(bool _smoothing, float _currentLod, float _neighborLod, vec2 xy, vec4 morph)
+		float calculateLOD(bool _smoothing, float _currentLod, vec4 _neighborLod, vec2 xy, vec4 morph)
 		{
 			if(_smoothing)
 			{
@@ -268,12 +259,6 @@ uniform sampler2D Layer2_AO : hint_albedo;
 			return mat3(tangent, bitangent, normal);
 		}
 
-		vec4 getHeightmap(vec2 uv, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
-
-			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
-			return textureLod(heightmap, heightmapUVs, currentLODLevel);
-		}
-
 		float getHeight(vec4 heightmapValue)
 		{
 			int heightR = int((heightmapValue.x * 255.0));
@@ -290,27 +275,25 @@ uniform sampler2D Layer2_AO : hint_albedo;
 			float c = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
 			vec3 normal = vec3(normalTemp.x, sqrt(1.0 -c), normalTemp.y);
 			bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
+			normal = normalize(normal);
 
 			if (isHole)
 			{
 				normal = vec3(0, 1, 0);
 			}
 			
-			normal = normalize(normal);
 			mat3 tangents  = CalcTangentBasisFromWorldNormal(normal);
 
 			return tangents[2];
 		}
 
-		vec3 getPosition(float _terrainChunkSize, float _terrainCurrentLodLevel, float _terrainNeighborLodLevel, bool _smoothing, float _terrainNextLodChunkSize, vec4 color, vec2 uv)
+		vec3 getPosition(vec2 uv, float _terrainChunkSize, float _terrainCurrentLodLevel, bool _smoothing, float _terrainNextLodChunkSize, float lodCalculated)
 		{
 			float lodValue = _terrainCurrentLodLevel;
 			vec2 positionXZ = vec2(0,0);
 
 			if(_smoothing)
 			{		
-					float lodCalculated = calculateLOD(_smoothing, _terrainCurrentLodLevel, _terrainNeighborLodLevel, uv, color);
-
 					vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
 					float morphAlpha = lodCalculated - _terrainCurrentLodLevel;
 
@@ -328,6 +311,26 @@ uniform sampler2D Layer2_AO : hint_albedo;
 		//	NORMAL = triangles[2];
 
 		//	UV =  positionXZ * (1.0f / _terrainChunkSize) + OffsetUV;
+		}
+
+		vec4 getHeightmap(vec2 uv, bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
+
+			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
+
+			if(_smoothing)
+			{
+
+				vec4 heightmapValueThisLOD = textureLod( heightmap, heightmapUVs, _currentLODLevel);
+				vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
+				vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
+				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1f);
+				vec4 heightmapValue = mix(heightmapValueThisLOD, heightmapValueNextLOD, morphAlpha);
+
+				return heightmapValue;
+			}
+			else {
+				return textureLod(heightmap, heightmapUVs, _currentLODLevel);
+			}
 		}
 
 
@@ -490,9 +493,9 @@ void vertex() {
 	float n_out2p4;
 	vec3 n_out2p5;
 	{
-		vec4 heightMapValues = getHeightmap(UV, terrainUvScale, terrainHeightMap, terrainCurrentLodLevel);
+		float lodCalculated = calculateLOD(terrainSmoothing, terrainCurrentLodLevel, terrainNeighborLod, UV, COLOR);float lodValue = terrainCurrentLodLevel;float morphAlpha = lodCalculated - terrainCurrentLodLevel;vec4 heightMapValues = getHeightmap(UV, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);
 		float height = getHeight(heightMapValues);
-		vec3 position = getPosition(terrainChunkSize, terrainCurrentLodLevel, terrainNeighborLodLevel, terrainSmoothing, terrainNextLodChunkSize, COLOR, UV);
+		vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);
 		vec3 normal = getNormal(heightMapValues);
 		position.y = height;
 		n_out2p0 = position;
@@ -506,13 +509,12 @@ void vertex() {
 
 // Output:0
 	VERTEX = n_out2p0;
-	NORMAL = n_out2p2;
 
 }
 
 void fragment() {
 // Vector:80
-	vec3 n_out80p0 = vec3(120.000000, 120.000000, 0.000000);
+	vec3 n_out80p0 = vec3(30.000000, 30.000000, 30.000000);
 
 // UVMultiply3D:46
 	vec3 n_out46p0;
@@ -521,10 +523,14 @@ void fragment() {
 		n_out46p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
+// ScalarFloat:84
+	float n_out84p0 = 0.300000;
+
+// ScalarFloat:81
+	float n_out81p0 = 0.000000;
+
 // AntiTiling3D:60
-	float n_in60p6 = 0.50000;
 	float n_in60p7 = 1.00000;
-	float n_in60p8 = 1.00000;
 	mat4 n_out60p0;
 	mat4 n_out60p1;
 	{
@@ -540,7 +546,7 @@ void fragment() {
 		packedOriginal[3].rg = roughMap.rg;
 		packedOriginal[3].b = aoMap.r;
 		n_out60p1 = packedOriginal;
-		vec2 newUv = rotatedUV(n_out46p0.xy, n_in60p7, n_in60p6);vec4 colorMapRot = texture(Layer0, newUv);
+		vec2 newUv = rotatedUV(n_out46p0.xy, n_in60p7, n_out84p0);vec4 colorMapRot = texture(Layer0, newUv);
 		vec4 dispMapRot = texture(Layer0_Dis,  newUv);
 		vec4 normalMapRot = texture(Layer0_Normal,  newUv);
 		vec4 roughMapRot = texture(Layer0_Roughnes,  newUv);
@@ -549,12 +555,12 @@ void fragment() {
 		packedMixed[0].rgb = colorMapRot.rgb;
 		packedMixed[1].r = dispMapRot.r;
 		packedMixed[2].rg = normalMapRot.rg;
-		packedMixed[3].rg = roughMapRot.rg;
+		packedMixed[3].r = roughMapRot.r;
 		packedMixed[3].b = aoMapRot.r;
-		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_in60p8);
-		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_in60p8);
-		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  n_in60p8);
-		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_in60p8);
+		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_out81p0);
+		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_out81p0);
+		packedMixed[2] = normalize(mix(packedOriginal[2], packedMixed[2],  n_out81p0) * 2.0 - 1.0);
+		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_out81p0);
 		n_out60p1 = packedOriginal;
 		n_out60p0 = packedMixed;
 	}
@@ -566,10 +572,12 @@ void fragment() {
 		n_out51p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
+// ScalarFloat:83
+	float n_out83p0 = 0.000000;
+
 // AntiTiling3D:62
 	float n_in62p6 = 0.50000;
 	float n_in62p7 = 1.00000;
-	float n_in62p8 = 1.00000;
 	mat4 n_out62p0;
 	mat4 n_out62p1;
 	{
@@ -594,12 +602,12 @@ void fragment() {
 		packedMixed[0].rgb = colorMapRot.rgb;
 		packedMixed[1].r = dispMapRot.r;
 		packedMixed[2].rg = normalMapRot.rg;
-		packedMixed[3].rg = roughMapRot.rg;
+		packedMixed[3].r = roughMapRot.r;
 		packedMixed[3].b = aoMapRot.r;
-		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_in62p8);
-		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_in62p8);
-		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  n_in62p8);
-		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_in62p8);
+		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_out83p0);
+		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_out83p0);
+		packedMixed[2] = normalize(mix(packedOriginal[2], packedMixed[2],  n_out83p0) * 2.0 - 1.0);
+		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_out83p0);
 		n_out62p1 = packedOriginal;
 		n_out62p0 = packedMixed;
 	}
@@ -631,19 +639,25 @@ void fragment() {
 	bool n_in58p4 = false;
 	mat4 n_out58p0;
 	{
-		vec3 tex1 = n_out60p0[0].rgb;
-		vec3 tex2 = n_out62p0[0].rgb;
+		vec3 tex1 = n_out60p1[0].rgb;
+		vec3 tex2 = n_out62p1[0].rgb;
 		float avg1 = (tex1.r + tex1.g + tex1.b) / 3.0f;
 		float avg2 = (tex2.r + tex2.g + tex2.b) / 3.0f;
+		vec3 bump1 = n_out60p1[2].rgb;
+		vec3 bump2 = n_out62p1[2].rgb;
+		bump1.xy = bump1.xy / bump1.z;
+		bump2.xy = bump2.xy / bump2.z;
+		bump1.z = 1.0;
+		bump2.z = 1.0;
 		if(n_in58p4 == false) { 
-			avg1 = n_out60p0[1].r;
-			avg2 = n_out62p0[1].r;
+			avg1 = n_out60p1[1].r;
+			avg2 = n_out62p1[1].r;
 		}
 		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
-		result[0].rgb = HeightLerp(n_in58p3, n_out60p0[0].rgb, avg1, n_out62p0[0].rgb, avg2, n_out59p0);
-		result[1].rgb = HeightLerp(n_in58p3, n_out60p0[1].rgb, avg1, n_out62p0[1].rgb, avg2, n_out59p0);
-		result[2].rgb = HeightLerp(n_in58p3, n_out60p0[2].rgb, avg1, n_out62p0[2].rgb, avg2, n_out59p0);
-		result[3].rgb = HeightLerp(n_in58p3, n_out60p0[3].rgb, avg1, n_out62p0[3].rgb, avg2, n_out59p0);
+		result[0].rgb = HeightLerp(n_in58p3, n_out60p1[0].rgb, avg1, n_out62p1[0].rgb, avg2, n_out59p0);
+		result[1].rgb = HeightLerp(n_in58p3, n_out60p1[1].rgb, avg1, n_out62p1[1].rgb, avg2, n_out59p0);
+		result[2].rgb =  normalize(mix(n_out60p1[2].rgb, n_out62p1[2].rgb, n_out59p0) * 2.0 - 1.0);
+		result[3].rgb = HeightLerp(n_in58p3, n_out60p1[3].rgb, avg1, n_out62p1[3].rgb, avg2, n_out59p0);
 		n_out58p0 = result;
 	}
 
@@ -654,10 +668,12 @@ void fragment() {
 		n_out69p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
+// ScalarFloat:82
+	float n_out82p0 = 0.000000;
+
 // AntiTiling3D:70
 	float n_in70p6 = 0.50000;
 	float n_in70p7 = 1.00000;
-	float n_in70p8 = 0.00000;
 	mat4 n_out70p0;
 	mat4 n_out70p1;
 	{
@@ -682,34 +698,42 @@ void fragment() {
 		packedMixed[0].rgb = colorMapRot.rgb;
 		packedMixed[1].r = dispMapRot.r;
 		packedMixed[2].rg = normalMapRot.rg;
-		packedMixed[3].rg = roughMapRot.rg;
+		packedMixed[3].r = roughMapRot.r;
 		packedMixed[3].b = aoMapRot.r;
-		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_in70p8);
-		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_in70p8);
-		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  n_in70p8);
-		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_in70p8);
+		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_out82p0);
+		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_out82p0);
+		packedMixed[2] = normalize(mix(packedOriginal[2], packedMixed[2],  n_out82p0) * 2.0 - 1.0);
+		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_out82p0);
 		n_out70p1 = packedOriginal;
 		n_out70p0 = packedMixed;
 	}
 
+// ScalarFloat:87
+	float n_out87p0 = 0.020000;
+
 // DepthBlending3D:76
-	float n_in76p3 = 0.05000;
 	bool n_in76p4 = false;
 	mat4 n_out76p0;
 	{
 		vec3 tex1 = n_out58p0[0].rgb;
-		vec3 tex2 = n_out70p0[0].rgb;
+		vec3 tex2 = n_out70p1[0].rgb;
 		float avg1 = (tex1.r + tex1.g + tex1.b) / 3.0f;
 		float avg2 = (tex2.r + tex2.g + tex2.b) / 3.0f;
+		vec3 bump1 = n_out58p0[2].rgb;
+		vec3 bump2 = n_out70p1[2].rgb;
+		bump1.xy = bump1.xy / bump1.z;
+		bump2.xy = bump2.xy / bump2.z;
+		bump1.z = 1.0;
+		bump2.z = 1.0;
 		if(n_in76p4 == false) { 
 			avg1 = n_out58p0[1].r;
-			avg2 = n_out70p0[1].r;
+			avg2 = n_out70p1[1].r;
 		}
 		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
-		result[0].rgb = HeightLerp(n_in76p3, n_out58p0[0].rgb, avg1, n_out70p0[0].rgb, avg2, n_out59p3);
-		result[1].rgb = HeightLerp(n_in76p3, n_out58p0[1].rgb, avg1, n_out70p0[1].rgb, avg2, n_out59p3);
-		result[2].rgb = HeightLerp(n_in76p3, n_out58p0[2].rgb, avg1, n_out70p0[2].rgb, avg2, n_out59p3);
-		result[3].rgb = HeightLerp(n_in76p3, n_out58p0[3].rgb, avg1, n_out70p0[3].rgb, avg2, n_out59p3);
+		result[0].rgb = HeightLerp(n_out87p0, n_out58p0[0].rgb, avg1, n_out70p1[0].rgb, avg2, n_out59p2);
+		result[1].rgb = HeightLerp(n_out87p0, n_out58p0[1].rgb, avg1, n_out70p1[1].rgb, avg2, n_out59p2);
+		result[2].rgb =  normalize(mix(n_out58p0[2].rgb, n_out70p1[2].rgb, n_out59p2) * 2.0 - 1.0);
+		result[3].rgb = HeightLerp(n_out87p0, n_out58p0[3].rgb, avg1, n_out70p1[3].rgb, avg2, n_out59p2);
 		n_out76p0 = result;
 	}
 
@@ -717,24 +741,15 @@ void fragment() {
 	vec3 n_out57p0;
 	float n_out57p1;
 	vec3 n_out57p2;
-	vec3 n_out57p3;
+	float n_out57p3;
 	float n_out57p4;
 	{
 		n_out57p0 = n_out76p0[0].rgb;
 		n_out57p1 = n_out76p0[1].r;
 		n_out57p2 = vec3(n_out76p0[2].r, n_out76p0[2].g, 0f);
-		n_out57p3 = vec3(n_out76p0[3].r, n_out76p0[3].g, 0f);
+		n_out57p3 = n_out76p0[3].r;
 		n_out57p4 = n_out76p0[3].b;
 	}
-
-// VectorDecompose:63
-	float n_out63p0 = n_out57p3.x;
-	float n_out63p1 = n_out57p3.y;
-	float n_out63p2 = n_out57p3.z;
-
-// FloatOp:78
-	float n_in78p1 = 1.80000;
-	float n_out78p0 = n_out63p0 * n_in78p1;
 
 // TerrainMaterial3D:77
 	vec3 n_out77p0;
@@ -745,16 +760,14 @@ void fragment() {
 		n_out77p1 = material.rgb;
 	}
 
-// ScalarFloat:79
-	float n_out79p0 = 1.200000;
+// ScalarFloat:88
+	float n_out88p0 = 1.000000;
 
 // Output:0
 	ALBEDO = n_out57p0;
-	ROUGHNESS = n_out78p0;
 	EMISSION = n_out77p0;
-	AO = n_out57p4;
 	NORMAL_MAP = n_out57p2;
-	NORMAL_MAP_DEPTH = n_out79p0;
+	NORMAL_MAP_DEPTH = n_out88p0;
 
 }
 
@@ -763,95 +776,93 @@ void light() {
 
 }
 "
-graph_offset = Vector2( -2032.28, -1659.43 )
+graph_offset = Vector2( -398.326, -1717.44 )
 version = "4.0"
 modes/depth_draw = 1
-nodes/vertex/0/position = Vector2( -820, -640 )
+nodes/vertex/0/position = Vector2( -840, -640 )
 nodes/vertex/2/node = SubResource( 35 )
-nodes/vertex/2/position = Vector2( -1200, -640 )
-nodes/vertex/connections = PackedInt32Array( 2, 0, 0, 0, 2, 2, 0, 1 )
-nodes/fragment/0/position = Vector2( 340, -1260 )
-nodes/fragment/2/node = SubResource( 4 )
+nodes/vertex/2/position = Vector2( -1620, -680 )
+nodes/vertex/connections = PackedInt32Array( 2, 0, 0, 0 )
+nodes/fragment/0/position = Vector2( 1000, -1360 )
+nodes/fragment/2/node = SubResource( 1 )
 nodes/fragment/2/position = Vector2( -1620, -1220 )
-nodes/fragment/3/node = SubResource( 7 )
+nodes/fragment/3/node = SubResource( 4 )
 nodes/fragment/3/position = Vector2( -1280, -1220 )
-nodes/fragment/4/node = SubResource( 10 )
+nodes/fragment/4/node = SubResource( 5 )
 nodes/fragment/4/position = Vector2( -1100, -1220 )
-nodes/fragment/5/node = SubResource( 15 )
+nodes/fragment/5/node = SubResource( 10 )
 nodes/fragment/5/position = Vector2( -1600, -840 )
-nodes/fragment/10/node = SubResource( 1 )
-nodes/fragment/10/position = Vector2( -320, 880 )
-nodes/fragment/11/node = SubResource( 2 )
-nodes/fragment/11/position = Vector2( -640, 900 )
-nodes/fragment/14/node = SubResource( 3 )
-nodes/fragment/14/position = Vector2( 180, 1000 )
-nodes/fragment/28/node = SubResource( 5 )
+nodes/fragment/28/node = SubResource( 2 )
 nodes/fragment/28/position = Vector2( -1460, -1220 )
-nodes/fragment/29/node = SubResource( 6 )
+nodes/fragment/29/node = SubResource( 3 )
 nodes/fragment/29/position = Vector2( -1380, -840 )
-nodes/fragment/30/node = SubResource( 8 )
-nodes/fragment/30/position = Vector2( 0, 1160 )
-nodes/fragment/39/node = SubResource( 9 )
-nodes/fragment/39/position = Vector2( -920, 900 )
-nodes/fragment/46/node = SubResource( 11 )
+nodes/fragment/46/node = SubResource( 6 )
 nodes/fragment/46/position = Vector2( -1320, -920 )
-nodes/fragment/47/node = SubResource( 12 )
+nodes/fragment/47/node = SubResource( 7 )
 nodes/fragment/47/position = Vector2( -1760, -1220 )
-nodes/fragment/48/node = SubResource( 13 )
+nodes/fragment/48/node = SubResource( 8 )
 nodes/fragment/48/position = Vector2( -1200, -840 )
-nodes/fragment/49/node = SubResource( 14 )
+nodes/fragment/49/node = SubResource( 9 )
 nodes/fragment/49/position = Vector2( -1600, -540 )
-nodes/fragment/50/node = SubResource( 16 )
+nodes/fragment/50/node = SubResource( 11 )
 nodes/fragment/50/position = Vector2( -1400, -540 )
-nodes/fragment/51/node = SubResource( 17 )
+nodes/fragment/51/node = SubResource( 12 )
 nodes/fragment/51/position = Vector2( -1600, -620 )
-nodes/fragment/57/node = SubResource( 18 )
-nodes/fragment/57/position = Vector2( -100, -900 )
-nodes/fragment/58/node = SubResource( 19 )
-nodes/fragment/58/position = Vector2( -280, -1040 )
-nodes/fragment/59/node = SubResource( 20 )
-nodes/fragment/59/position = Vector2( -520, -880 )
-nodes/fragment/60/node = SubResource( 21 )
-nodes/fragment/60/position = Vector2( -920, -1000 )
-nodes/fragment/62/node = SubResource( 22 )
-nodes/fragment/62/position = Vector2( -800, -720 )
-nodes/fragment/63/node = SubResource( 23 )
-nodes/fragment/63/position = Vector2( -40, -1080 )
-nodes/fragment/69/node = SubResource( 24 )
+nodes/fragment/57/node = SubResource( 13 )
+nodes/fragment/57/position = Vector2( -260, -1200 )
+nodes/fragment/58/node = SubResource( 14 )
+nodes/fragment/58/position = Vector2( -460, -1040 )
+nodes/fragment/59/node = SubResource( 15 )
+nodes/fragment/59/position = Vector2( -540, -760 )
+nodes/fragment/60/node = SubResource( 16 )
+nodes/fragment/60/position = Vector2( -740, -1020 )
+nodes/fragment/62/node = SubResource( 17 )
+nodes/fragment/62/position = Vector2( -860, -740 )
+nodes/fragment/69/node = SubResource( 18 )
 nodes/fragment/69/position = Vector2( -1620, -320 )
-nodes/fragment/70/node = SubResource( 25 )
+nodes/fragment/70/node = SubResource( 19 )
 nodes/fragment/70/position = Vector2( -740, -200 )
-nodes/fragment/71/node = SubResource( 26 )
+nodes/fragment/71/node = SubResource( 20 )
 nodes/fragment/71/position = Vector2( -1620, -260 )
-nodes/fragment/72/node = SubResource( 27 )
+nodes/fragment/72/node = SubResource( 21 )
 nodes/fragment/72/position = Vector2( -1400, -240 )
-nodes/fragment/73/node = SubResource( 28 )
+nodes/fragment/73/node = SubResource( 22 )
 nodes/fragment/73/position = Vector2( -1200, -240 )
-nodes/fragment/74/node = SubResource( 29 )
+nodes/fragment/74/node = SubResource( 23 )
 nodes/fragment/74/position = Vector2( -1600, -20 )
-nodes/fragment/75/node = SubResource( 30 )
+nodes/fragment/75/node = SubResource( 24 )
 nodes/fragment/75/position = Vector2( -1400, -20 )
-nodes/fragment/76/node = SubResource( 31 )
-nodes/fragment/76/position = Vector2( -300, -820 )
-nodes/fragment/77/node = SubResource( 32 )
+nodes/fragment/76/node = SubResource( 25 )
+nodes/fragment/76/position = Vector2( -120, -860 )
+nodes/fragment/77/node = SubResource( 26 )
 nodes/fragment/77/position = Vector2( 140, -1340 )
-nodes/fragment/78/node = SubResource( 33 )
-nodes/fragment/78/position = Vector2( 180, -1160 )
-nodes/fragment/79/node = SubResource( 34 )
-nodes/fragment/79/position = Vector2( 240, -740 )
-nodes/fragment/80/node = SubResource( 37 )
+nodes/fragment/78/node = SubResource( 27 )
+nodes/fragment/78/position = Vector2( -80, -1300 )
+nodes/fragment/80/node = SubResource( 28 )
 nodes/fragment/80/position = Vector2( -2140, -880 )
-nodes/fragment/connections = PackedInt32Array( 2, 2, 60, 0, 47, 2, 60, 4, 28, 2, 60, 2, 3, 2, 60, 1, 4, 2, 60, 3, 60, 0, 58, 0, 46, 0, 60, 5, 51, 0, 62, 5, 5, 2, 62, 0, 29, 2, 62, 1, 48, 2, 62, 2, 49, 2, 62, 3, 50, 2, 62, 4, 57, 0, 0, 0, 62, 0, 58, 1, 57, 2, 0, 8, 57, 3, 63, 0, 69, 0, 70, 5, 71, 2, 70, 0, 72, 2, 70, 1, 73, 2, 70, 2, 74, 2, 70, 3, 75, 2, 70, 4, 70, 0, 76, 1, 76, 0, 57, 0, 58, 0, 76, 0, 77, 0, 0, 5, 57, 4, 0, 6, 63, 0, 78, 0, 78, 0, 0, 3, 79, 0, 0, 9, 80, 0, 46, 0, 80, 0, 51, 0, 80, 0, 69, 0, 59, 3, 76, 2, 59, 0, 58, 2 )
+nodes/fragment/81/node = SubResource( 29 )
+nodes/fragment/81/position = Vector2( -1340, -980 )
+nodes/fragment/82/node = SubResource( 30 )
+nodes/fragment/82/position = Vector2( -900, 20 )
+nodes/fragment/83/node = SubResource( 31 )
+nodes/fragment/83/position = Vector2( -1060, -540 )
+nodes/fragment/84/node = SubResource( 32 )
+nodes/fragment/84/position = Vector2( -1020, -880 )
+nodes/fragment/87/node = SubResource( 33 )
+nodes/fragment/87/position = Vector2( -180, -680 )
+nodes/fragment/88/node = SubResource( 34 )
+nodes/fragment/88/position = Vector2( 558.456, -1134.2 )
+nodes/fragment/connections = PackedInt32Array( 2, 2, 60, 0, 47, 2, 60, 4, 28, 2, 60, 2, 3, 2, 60, 1, 4, 2, 60, 3, 46, 0, 60, 5, 51, 0, 62, 5, 5, 2, 62, 0, 29, 2, 62, 1, 48, 2, 62, 2, 49, 2, 62, 3, 50, 2, 62, 4, 69, 0, 70, 5, 71, 2, 70, 0, 72, 2, 70, 1, 73, 2, 70, 2, 74, 2, 70, 3, 75, 2, 70, 4, 58, 0, 76, 0, 80, 0, 46, 0, 80, 0, 51, 0, 80, 0, 69, 0, 59, 0, 58, 2, 77, 0, 0, 5, 81, 0, 60, 8, 76, 0, 57, 0, 59, 2, 76, 2, 82, 0, 70, 8, 83, 0, 62, 8, 84, 0, 60, 6, 57, 3, 78, 0, 87, 0, 76, 3, 57, 0, 0, 0, 88, 0, 0, 9, 62, 1, 58, 1, 60, 1, 58, 0, 70, 1, 76, 1, 57, 2, 0, 8 )
 
 [resource]
 shader = SubResource( 36 )
-shader_param/terrainUvScale = null
+shader_param/terrainUvScale = Plane( 0.5, 0.5, 0, 0 )
 shader_param/terrainUvOffset = null
-shader_param/terrainChunkSize = null
-shader_param/terrainNextLodChunkSize = null
-shader_param/terrainNeighborLodLevel = null
+shader_param/terrainChunkSize = 3100.0
+shader_param/terrainNextLodChunkSize = 31.0
+shader_param/terrainNeighborLod = Plane( 0, 0, 0, 0 )
 shader_param/terrainCurrentLodLevel = null
-shader_param/terrainSmoothing = null
+shader_param/terrainSmoothing = true
 shader_param/terrainSplatMapDebug = null
 shader_param/BrushData0 = null
 shader_param/BrushData1 = null
@@ -871,3 +882,4 @@ shader_param/Layer2_Dis2 = ExtResource( 2 )
 shader_param/Layer2_Normal2 = ExtResource( 19 )
 shader_param/Layer2_Roughnes2 = ExtResource( 21 )
 shader_param/Layer2_AO = ExtResource( 20 )
+shader_param/terrainHeightMap = ExtResource( 23 )

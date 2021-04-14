@@ -55,15 +55,15 @@ _global_script_classes=[ {
 "path": "res://addons/TerrainPlugin/Shader/VisualShaderNodeUVMultiply3D.gd"
 } ]
 _global_script_class_icons={
-@"VisualShaderNodeAntiTiling3D": "",
-@"VisualShaderNodeSplatmapHeight3D": "",
-@"VisualShaderNodeTextureUnpack3D": "",
 @"VisualShaderNodeUVMultiply3D": "",
-@"VisualShaderNodeTerrainMaterial3D": "",
+@"VisualShaderNodeTextureUnpack3D": "",
+@"VisualShaderNodeSplatmapHeight3D": "",
+@"VisualShaderNodeAntiTiling3D": "",
 @"VisualShaderNodeTerrainGenerator3D": "",
+@"VisualShaderNodeTerrainMaterial3D": "",
 @"VisualShaderNodeNoisePerlin2D": "",
-@"VisualShaderNodeDepthBlending3D": "",
-@"VisualShaderNodeTexturePack3D": ""
+@"VisualShaderNodeTexturePack3D": "",
+@"VisualShaderNodeDepthBlending3D": ""
 }
 
 [application]

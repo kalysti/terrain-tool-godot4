@@ -66,7 +66,7 @@ func _get_global_code(mode):
 
 		uniform float terrainChunkSize = 0;
 		uniform float terrainNextLodChunkSize = 0;
-		uniform float terrainNeighborLodLevel = 0;
+		uniform vec4 terrainNeighborLod = vec4(0,0,0,0);
 		uniform float terrainCurrentLodLevel = 0;
 		uniform bool terrainSmoothing = false;
 		
@@ -74,7 +74,7 @@ func _get_global_code(mode):
 		uniform sampler2D terrainSplatmap2 : hint_albedo;
 		uniform bool terrainSplatMapDebug = false;
 
-		float calculateLOD(bool _smoothing, float _currentLod, float _neighborLod, vec2 xy, vec4 morph)
+		float calculateLOD(bool _smoothing, float _currentLod, vec4 _neighborLod, vec2 xy, vec4 morph)
 		{
 			if(_smoothing)
 			{
@@ -119,12 +119,6 @@ func _get_global_code(mode):
 			return mat3(tangent, bitangent, normal);
 		}
 
-		vec4 getHeightmap(vec2 uv, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
-
-			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
-			return textureLod(heightmap, heightmapUVs, currentLODLevel);
-		}
-
 		float getHeight(vec4 heightmapValue)
 		{
 			int heightR = int((heightmapValue.x * 255.0));
@@ -141,27 +135,25 @@ func _get_global_code(mode):
 			float c = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
 			vec3 normal = vec3(normalTemp.x, sqrt(1.0 -c), normalTemp.y);
 			bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
+			normal = normalize(normal);
 
 			if (isHole)
 			{
 				normal = vec3(0, 1, 0);
 			}
 			
-			normal = normalize(normal);
 			mat3 tangents  = CalcTangentBasisFromWorldNormal(normal);
 
 			return tangents[2];
 		}
 
-		vec3 getPosition(float _terrainChunkSize, float _terrainCurrentLodLevel, float _terrainNeighborLodLevel, bool _smoothing, float _terrainNextLodChunkSize, vec4 color, vec2 uv)
+		vec3 getPosition(vec2 uv, float _terrainChunkSize, float _terrainCurrentLodLevel, bool _smoothing, float _terrainNextLodChunkSize, float lodCalculated)
 		{
 			float lodValue = _terrainCurrentLodLevel;
 			vec2 positionXZ = vec2(0,0);
 
 			if(_smoothing)
 			{		
-					float lodCalculated = calculateLOD(_smoothing, _terrainCurrentLodLevel, _terrainNeighborLodLevel, uv, color);
-
 					vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
 					float morphAlpha = lodCalculated - _terrainCurrentLodLevel;
 
@@ -181,16 +173,39 @@ func _get_global_code(mode):
 		//	UV =  positionXZ * (1.0f / _terrainChunkSize) + OffsetUV;
 		}
 
+		vec4 getHeightmap(vec2 uv, bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
+
+			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
+
+			if(_smoothing)
+			{
+
+				vec4 heightmapValueThisLOD = textureLod( heightmap, heightmapUVs, _currentLODLevel);
+				vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
+				vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
+				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1f);
+				vec4 heightmapValue = mix(heightmapValueThisLOD, heightmapValueNextLOD, morphAlpha);
+
+				return heightmapValue;
+			}
+			else {
+				return textureLod(heightmap, heightmapUVs, _currentLODLevel);
+			}
+		}
+
 
 	"""
 
 func _get_code(input_vars, output_vars, mode, type):
 
 	var heightStr = ""
-
-	heightStr = "vec4 heightMapValues = getHeightmap(UV, terrainUvScale, terrainHeightMap, terrainCurrentLodLevel);\n"
+	heightStr += "float lodCalculated = calculateLOD(terrainSmoothing, terrainCurrentLodLevel, terrainNeighborLod, UV, COLOR);";
+	heightStr += "float lodValue = terrainCurrentLodLevel;";
+	heightStr += "float morphAlpha = lodCalculated - terrainCurrentLodLevel;";
+	
+	heightStr += "vec4 heightMapValues = getHeightmap(UV, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);\n"
 	heightStr += "float height = getHeight(heightMapValues);\n"
-	heightStr += "vec3 position = getPosition(terrainChunkSize, terrainCurrentLodLevel, terrainNeighborLodLevel, terrainSmoothing, terrainNextLodChunkSize, COLOR, UV);\n"
+	heightStr += "vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);\n"
 	heightStr += "vec3 normal = getNormal(heightMapValues);\n"
 	heightStr += "position.y = height;\n"
 
