@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=60 format=2]
+[gd_resource type="ShaderMaterial" load_steps=59 format=2]
 
 [ext_resource path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" type="Script" id=1]
 [ext_resource path="res://TestTextures/Pave/PavingStones046_2K_Displacement.jpg" type="Texture2D" id=2]
@@ -22,7 +22,6 @@
 [ext_resource path="res://TestTextures/Pave/PavingStones046_2K_AmbientOcclusion.jpg" type="Texture2D" id=20]
 [ext_resource path="res://TestTextures/Pave/PavingStones046_2K_Roughness.jpg" type="Texture2D" id=21]
 [ext_resource path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd" type="Script" id=22]
-[ext_resource path="res://osm-heightmap.png" type="Texture2D" id=23]
 
 [sub_resource type="VisualShaderNodeTextureUniform" id=1]
 default_input_values = [  ]
@@ -656,7 +655,7 @@ void fragment() {
 		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
 		result[0].rgb = HeightLerp(n_in58p3, n_out60p1[0].rgb, avg1, n_out62p1[0].rgb, avg2, n_out59p0);
 		result[1].rgb = HeightLerp(n_in58p3, n_out60p1[1].rgb, avg1, n_out62p1[1].rgb, avg2, n_out59p0);
-		result[2].rgb =  normalize(mix(n_out60p1[2].rgb, n_out62p1[2].rgb, n_out59p0) * 2.0 - 1.0);
+		result[2].rgb = HeightLerp(n_in58p3, n_out60p1[2].rgb, avg1, n_out62p1[2].rgb, avg2, n_out59p0);
 		result[3].rgb = HeightLerp(n_in58p3, n_out60p1[3].rgb, avg1, n_out62p1[3].rgb, avg2, n_out59p0);
 		n_out58p0 = result;
 	}
@@ -732,7 +731,7 @@ void fragment() {
 		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
 		result[0].rgb = HeightLerp(n_out87p0, n_out58p0[0].rgb, avg1, n_out70p1[0].rgb, avg2, n_out59p2);
 		result[1].rgb = HeightLerp(n_out87p0, n_out58p0[1].rgb, avg1, n_out70p1[1].rgb, avg2, n_out59p2);
-		result[2].rgb =  normalize(mix(n_out58p0[2].rgb, n_out70p1[2].rgb, n_out59p2) * 2.0 - 1.0);
+		result[2].rgb = HeightLerp(n_out87p0, n_out58p0[2].rgb, avg1, n_out70p1[2].rgb, avg2, n_out59p2);
 		result[3].rgb = HeightLerp(n_out87p0, n_out58p0[3].rgb, avg1, n_out70p1[3].rgb, avg2, n_out59p2);
 		n_out76p0 = result;
 	}
@@ -776,7 +775,7 @@ void light() {
 
 }
 "
-graph_offset = Vector2( -398.326, -1717.44 )
+graph_offset = Vector2( -3614.86, -1753.63 )
 version = "4.0"
 modes/depth_draw = 1
 nodes/vertex/0/position = Vector2( -840, -640 )
@@ -882,4 +881,3 @@ shader_param/Layer2_Dis2 = ExtResource( 2 )
 shader_param/Layer2_Normal2 = ExtResource( 19 )
 shader_param/Layer2_Roughnes2 = ExtResource( 21 )
 shader_param/Layer2_AO = ExtResource( 20 )
-shader_param/terrainHeightMap = ExtResource( 23 )

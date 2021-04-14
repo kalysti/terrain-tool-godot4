@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture2D"
-path.s3tc="res://.godot/imported/LEFT.png-9b92c680ee72646b81d7264de8e3ed8c.s3tc.stex"
-path.etc2="res://.godot/imported/LEFT.png-9b92c680ee72646b81d7264de8e3ed8c.etc2.stex"
+path.s3tc="res://.godot/imported/512x512 Texel Density Texture 1.png-b9063af931a9b3bd4f64dd26259f6c9a.s3tc.stex"
+path.etc2="res://.godot/imported/512x512 Texel Density Texture 1.png-b9063af931a9b3bd4f64dd26259f6c9a.etc2.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc2" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://LEFT.png"
-dest_files=[ "res://.godot/imported/LEFT.png-9b92c680ee72646b81d7264de8e3ed8c.s3tc.stex", "res://.godot/imported/LEFT.png-9b92c680ee72646b81d7264de8e3ed8c.etc2.stex" ]
+source_file="res://TestTextures/512x512 Texel Density Texture 1.png"
+dest_files=[ "res://.godot/imported/512x512 Texel Density Texture 1.png-b9063af931a9b3bd4f64dd26259f6c9a.s3tc.stex", "res://.godot/imported/512x512 Texel Density Texture 1.png-b9063af931a9b3bd4f64dd26259f6c9a.etc2.stex" ]
 
 [params]
 
