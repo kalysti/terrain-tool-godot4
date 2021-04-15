@@ -595,6 +595,8 @@ namespace TerrainEditor
                     splatmap2Image.Load(splatmapPath2);
                 }
 
+                GD.Print("Scale by " + heightScale);
+
                 selectedTerrain.Generate(patchX, patchY, chunkSize, heightScale, heightMapImage, splatmap1Image, splatmap2Image);
             }
         }

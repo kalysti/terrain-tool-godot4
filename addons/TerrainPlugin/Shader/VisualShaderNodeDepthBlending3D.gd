@@ -108,9 +108,9 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr += "mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));\n"
 	heightStr += "result[0].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[0].rgb, avg1, "+input_vars[1]+"[0].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr += "result[1].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[1].rgb, avg1, "+input_vars[1]+"[1].rgb, avg2, "+input_vars[2]+");\n"
-	heightStr += "result[2].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[2].rgb, avg1, "+input_vars[1]+"[2].rgb, avg2, "+input_vars[2]+");\n"
+	heightStr += "result[2].rgb = mix( "+input_vars[0]+"[2].rgb,  "+input_vars[1]+"[2].rgb, "+input_vars[2]+");\n"
 	#needs to finish it
-	#heightStr += "result[2].rgb =  normalize(mix(bump1, bump2, "+input_vars[2]+") * 2.0 - 1.0);\n"
+	#heightStr += "result[2].rgb =  normalize((mix(bump1, bump2, "+input_vars[2]+") * 2.0) - 1.0);\n"
 	heightStr += "result[3].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[3].rgb, avg1, "+input_vars[1]+"[3].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr +=  output_vars[0]+" = result;\n"
 

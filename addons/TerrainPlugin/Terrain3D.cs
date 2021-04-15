@@ -24,6 +24,13 @@ namespace TerrainEditor
                 patch.UpdateTransform(this);
         }
 
+        public void UpdateSettings()
+        {
+
+            foreach (var patch in terrainPatches)
+                patch.UpdateSettings(this);
+        }
+
         void CacheNeighbors()
         {
             for (int pathIndex = 0; pathIndex < terrainPatches.Count(); pathIndex++)
@@ -108,8 +115,8 @@ namespace TerrainEditor
                             if (heightMapImage != null)
                             {
                                 Color raw = heightMapImage.GetPixel(x, z);
-
                                 float normalizedHeight = ReadNormalizedHeight(raw);
+
                                 heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
                             }
 
@@ -179,10 +186,7 @@ namespace TerrainEditor
         public override void _Notification(int what)
         {
 
-            if (what == NotificationVisibilityChanged)
-            {
-            }
-            else if (what == NotificationExitWorld)
+            if (what == NotificationExitWorld)
             {
                 ClearDraw();
             }
@@ -193,6 +197,10 @@ namespace TerrainEditor
             else if (what == NotificationTransformChanged)
             {
                 updateTransform();
+            }
+            else if (what == NotificationVisibilityChanged)
+            {
+                UpdateSettings();
             }
         }
 

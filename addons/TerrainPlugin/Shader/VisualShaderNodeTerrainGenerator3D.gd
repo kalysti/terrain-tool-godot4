@@ -24,7 +24,7 @@ func _get_input_port_count():
 	return 0
 
 func _get_output_port_count():
-	return 6
+	return 8
 
 func _get_output_port_name(port):
 	match port:
@@ -35,10 +35,14 @@ func _get_output_port_name(port):
 		2:
 			return "normal"
 		3:
-			return "red"
+			return "tangent"
 		4:
-			return "green"
+			return "bionormal"
 		5:
+			return "red"
+		6:
+			return "green"
+		7:
 			return "uv"
 
 
@@ -51,10 +55,14 @@ func _get_output_port_type(port):
 		2:
 			return VisualShaderNode.PORT_TYPE_VECTOR
 		3:
-			return VisualShaderNode.PORT_TYPE_SCALAR
+			return VisualShaderNode.PORT_TYPE_VECTOR
 		4:
-			return VisualShaderNode.PORT_TYPE_SCALAR
+			return VisualShaderNode.PORT_TYPE_VECTOR
 		5:
+			return VisualShaderNode.PORT_TYPE_SCALAR
+		6:
+			return VisualShaderNode.PORT_TYPE_SCALAR
+		7:
 			return VisualShaderNode.PORT_TYPE_VECTOR
 
 func _get_global_code(mode):
@@ -112,11 +120,11 @@ func _get_global_code(mode):
 				return _currentLod;
 		}
 
-		mat3 CalcTangentBasisFromWorldNormal(vec3 normal)
+		mat3 CalcTangentBasisFromWorldNormal(vec3 normaltest)
 		{
-			vec3 tangent = cross(normal, vec3(1, 0, 0));
-			vec3 bitangent = cross(normal, tangent);
-			return mat3(tangent, bitangent, normal);
+			vec3 tangenttest = cross(normaltest, vec3(1, 0, 0));
+			vec3 bitangenttest = cross(normaltest, tangenttest);
+			return mat3(tangenttest, bitangenttest, normaltest);
 		}
 
 		float getHeight(vec4 heightmapValue)
@@ -128,23 +136,22 @@ func _get_global_code(mode):
 			return float(sum) / 65535.0;
 		}
 
-		vec3 getNormal(vec4 heightmapValue)
+		mat3 getNormal(vec4 heightmapValue)
 		{
 			vec2 normalTemp = vec2(heightmapValue.b, heightmapValue.a) * 2.0f - 1.0f;
 
 			float c = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
-			vec3 normal = vec3(normalTemp.x, sqrt(1.0 -c), normalTemp.y);
+			vec3 normaltest = vec3(normalTemp.x, sqrt(1.0 -c), normalTemp.y);
 			bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
-			normal = normalize(normal);
+			normaltest = normalize(normaltest);
 
 			if (isHole)
 			{
-				normal = vec3(0, 1, 0);
+				normaltest = vec3(0, 1, 0);
 			}
 			
-			mat3 tangents  = CalcTangentBasisFromWorldNormal(normal);
-
-			return tangents[2];
+			mat3 tangents  = CalcTangentBasisFromWorldNormal(normaltest);
+			return tangents;
 		}
 
 		vec3 getPosition(vec2 uv, float _terrainChunkSize, float _terrainCurrentLodLevel, bool _smoothing, float _terrainNextLodChunkSize, float lodCalculated)
@@ -166,11 +173,7 @@ func _get_global_code(mode):
 			}
 			
 			return vec3(positionXZ.x, 0f, positionXZ.y);
-		
-		//	VERTEX = position;
-		//	NORMAL = triangles[2];
-
-		//	UV =  positionXZ * (1.0f / _terrainChunkSize) + OffsetUV;
+	
 		}
 
 		vec4 getHeightmap(vec2 uv, bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
@@ -206,17 +209,19 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr += "vec4 heightMapValues = getHeightmap(UV, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);\n"
 	heightStr += "float height = getHeight(heightMapValues);\n"
 	heightStr += "vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);\n"
-	heightStr += "vec3 normal = getNormal(heightMapValues);\n"
+	heightStr += "mat3 calculatedNormal = getNormal(heightMapValues);\n"
 	heightStr += "position.y = height;\n"
 
 	heightStr += output_vars[0] + " = position;\n"
 	heightStr += output_vars[1] + " = height;\n" 
-	heightStr += output_vars[2] + " = normal;\n"
-	
-	heightStr += output_vars[3] + " = heightMapValues.r;\n"
-	heightStr += output_vars[4] + " = heightMapValues.g;\n"
+	heightStr += output_vars[2] + " = calculatedNormal[2];\n"
+	heightStr += output_vars[3] + " = calculatedNormal[0];\n"
+	heightStr += output_vars[4] + " = calculatedNormal[1];\n"
+
+	heightStr += output_vars[5] + " = heightMapValues.r;\n"
+	heightStr += output_vars[6] + " = heightMapValues.g;\n"
 	heightStr += "vec2 newUV = vec2(position.x, position.z) * (1.0f / terrainChunkSize) + terrainUvOffset;\n"
-	heightStr += output_vars[5] + " = vec3(newUV.x, newUV.y, 0.0);\n"
+	heightStr += output_vars[7] + " = vec3(newUV.x, newUV.y, 0.0);\n"
 
 
 	return heightStr;

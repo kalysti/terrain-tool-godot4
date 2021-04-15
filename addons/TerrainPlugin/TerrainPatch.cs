@@ -194,6 +194,16 @@ namespace TerrainEditor
             UpdateTransform(terrainNode);
         }
 
+        
+       public void UpdateSettings(Terrain3D terrainNode)
+        {
+            foreach (var chunk in chunks)
+            {
+                chunk.UpdateSettings(terrainNode);
+            }
+
+            
+        }
         public void UpdateTransform(Terrain3D terrainNode)
         {
             foreach (var chunk in chunks)
