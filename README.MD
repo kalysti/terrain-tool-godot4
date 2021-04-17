@@ -28,7 +28,7 @@ Currently under development. Tool is written for prototyping in c# but will be c
 	- On each splatmap channel
 - Brushes
 	- Smooth, Linear, Spherical, Tip by given radius, strength and fallof
-- Importing and exporting heightmaps and splatmaps
+- Importing and exporting heightmaps and splatmaps for 16bit raw images (industrial default)
 
 ## Visual Shader Nodes
 
