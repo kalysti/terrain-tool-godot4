@@ -30,6 +30,21 @@ Currently under development. Tool is written for prototyping in c# but will be c
 	- Smooth, Linear, Spherical, Tip by given radius, strength and fallof
 - Importing and exporting heightmaps and splatmaps for 16bit raw images (industrial default)
 
+## Internal format
+
+Import and export of heightmaps are in 16bit raw
+
+- Heightmap
+	- Format: RGBA8
+	- Channel R: 8 bit Height
+	- Channel G: +8 extrabit Heigt
+	- Channel B: Normal X
+	- Channel A: Normal Y
+	- Normal.ONE = HOLE
+- Splatmaps
+	- Format: RGBA8
+	- Channel R to A = Layer 0 - 3
+
 ## Visual Shader Nodes
 
  - TerrainGeneratorNode for Vertex Shader
