@@ -8,6 +8,12 @@ Currently under development. Tool is written for prototyping in c# but will be c
 
 ## Construction
 
+**
+- The terrain is splited in a patch grid (int x, int y) to make the terrain on the fly extensible.
+- Each patch has a constant number of 16 chunks.
+- Each chunk have a chunk size of power of 2 - 1. 
+- **
+
 ![Construction of Terrain Editor](https://i.ibb.co/3T9sp5q/terraintool.png)
 ![Construction of Terrain Editor 2](https://i.ibb.co/8YS53tD/uploadtool2.png)
 
@@ -39,7 +45,7 @@ Import and export of heightmaps are in 16bit raw
 	- Channel R: 8 bit Height
 	- Channel G: +8 extrabit Heigt
 	- Channel B: Normal X
-	- Channel A: Normal Y
+	- Channel A: Normal Z
 	- Normal.ONE = HOLE
 - Splatmaps
 	- Format: RGBA8
