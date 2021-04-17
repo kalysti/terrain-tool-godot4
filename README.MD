@@ -12,6 +12,8 @@ The terrain is splited in a patch grid (int x, int y) to make the terrain on the
 Each patch has a constant number of 16 chunks. 
 Each chunk have a chunk size of power of 2 - 1.
 
+## Screenshots
+
 ![Construction of Terrain Editor](https://i.ibb.co/3T9sp5q/terraintool.png)
 ![Construction of Terrain Editor 2](https://i.ibb.co/8YS53tD/uploadtool2.png)
 
