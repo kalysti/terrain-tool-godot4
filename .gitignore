@@ -16,6 +16,10 @@ export_presets.cfg
 data_*/
 mono_crash.*.json
 
+#test files
+testfiles/
+TestPath/
+
 # System/tool-specific ignores
 .directory
 *~
