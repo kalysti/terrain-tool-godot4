@@ -11,6 +11,11 @@ Currently under development. Tool is written for prototyping in c# but will be c
 ![Construction of Terrain Editor](https://i.ibb.co/3T9sp5q/terraintool.png)
 ![Construction of Terrain Editor 2](https://i.ibb.co/8YS53tD/uploadtool2.png)
 
+## Todo
+- Setup automatic lod level by camera distance
+- Create blank terrain shader template by a button (create terrain shader)
+- Code cleanup and loop reduction
+
 ## Currently supported
 
 - Sculpting
