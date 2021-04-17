@@ -17,11 +17,6 @@ Each chunk have a chunk size of power of 2 - 1.
 ![Construction of Terrain Editor](https://i.ibb.co/3T9sp5q/terraintool.png)
 ![Construction of Terrain Editor 2](https://i.ibb.co/8YS53tD/uploadtool2.png)
 
-## Todo
-- Setup automatic lod level by camera distance
-- Create blank terrain shader template by a button (create terrain shader)
-- Code cleanup and loop reduction
-
 ## Currently supported
 
 - Sculpting
@@ -65,3 +60,10 @@ Import and export of heightmaps are in 16bit raw
 	 - Returns the default material for the editor
  - TerrainSplatmapData for Fragment Shader
 	 - Returns the value of a given splatmap layer
+
+
+## Todo
+- Setup automatic lod level by camera distance
+- Create blank terrain shader template by a button (create terrain shader)
+- Code cleanup and loop reduction
+
