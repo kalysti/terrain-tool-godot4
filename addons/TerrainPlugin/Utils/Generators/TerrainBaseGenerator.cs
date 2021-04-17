@@ -53,7 +53,7 @@ namespace TerrainEditor.Generators
         /**
          * Convert byte Buffer to T buffer (faster writing)
          **/
-        protected static T[] FromByteArray<T>(byte[] source) where T : struct
+        public static T[] FromByteArray<T>(byte[] source) where T : struct
         {
             T[] destination = new T[source.Length / Marshal.SizeOf(typeof(T))];
             GCHandle handle = GCHandle.Alloc(destination, GCHandleType.Pinned);

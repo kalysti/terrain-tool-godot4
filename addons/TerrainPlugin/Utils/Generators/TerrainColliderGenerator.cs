@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using TerrainEditor.Converters;
+using System.Linq;
 
 namespace TerrainEditor.Generators
 {
@@ -20,6 +21,7 @@ namespace TerrainEditor.Generators
          */
         public float[] GenereateLOD(int collisionLod)
         {
+            GD.Print("Create height collider");
             int collisionLOD = Mathf.Clamp(collisionLod, 0, 2);
 
             // Prepare datas
@@ -52,9 +54,7 @@ namespace TerrainEditor.Generators
                         {
                             int textureIndexZ = (chunkTextureZ + z) * textureSizeMip;
                             int textureIndexX = chunkTextureX + x;
-
                             int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
-
 
                             float normalizedHeight = TerrainByteConverter.ReadNormalizedHeightByte(imgRGBABuffer[textureIndex]);
                             float height = (normalizedHeight * patch.info.patchHeight) + patch.info.patchOffset;
@@ -64,7 +64,7 @@ namespace TerrainEditor.Generators
                             int heightmapZ = chunkStartZ + z;
 
                             int dstIndex = heightmapX + (heightmapZ * heightFieldSize);
-                            heightField[dstIndex] = height;
+                            heightField[dstIndex] =  height;
                         }
                     }
                 }
@@ -74,12 +74,13 @@ namespace TerrainEditor.Generators
         }
 
         /**
-         * Modify collider datas
+         * Modify collider datas (todo)
          */
-        public float[] ModifyCollision(int collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
+        public float[] ModifyCollision(byte[] buffer, int collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
         {
-            var img = patch.heightmap.GetImage();
-            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(img.GetData());
+            GD.Print("modify height collider");
+            var newHeightfieldData = (float[]) heightFieldData.Clone() ;
+            RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             // Prepare data
             Vector2 modifiedOffsetRatio = new Vector2((float)modifiedOffset.x / patch.info.heightMapSize, (float)modifiedOffset.y / patch.info.heightMapSize);
@@ -100,7 +101,6 @@ namespace TerrainEditor.Generators
             samplesEnd.y = Math.Min(samplesEnd.y, heightFieldSize);
 
             // Setup terrain collision information
-            //auto & mip = initData->Mips[collisionLOD];
             int vertexCountEdgeMip = patch.info.vertexCountEdge >> collisionLOD;
             int textureSizeMip = patch.info.textureSize >> collisionLOD;
 
@@ -145,17 +145,18 @@ namespace TerrainEditor.Generators
                             float height = (normalizedHeight * patch.info.patchHeight) + patch.info.patchOffset;
 
                             bool isHole = TerrainByteConverter.ReadIsHoleByte(imgRGBABuffer[textureIndex]);
-
                             int dstIndex = (heightmapLocalX * samplesSize.y) + heightmapLocalZ;
-                            //int dstIndex = heightmapLocalX + (heightmapLocalZ * samplesSize.y);
+                           
+                            if(isHole)
+                                height = 0f;
 
-                            heightFieldData[dstIndex] = height;
+                           //newHeightfieldData[dstIndex] = height;
                         }
                     }
                 }
             }
 
-            return heightFieldData;
+            return newHeightfieldData;
         }
     }
 }

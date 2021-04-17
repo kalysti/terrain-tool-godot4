@@ -74,7 +74,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	var heightStr = ""
 	heightStr +=  output_vars[0]+" = "+input_vars[0]+"[0].rgb;\n"
 	heightStr +=  output_vars[1]+" = "+input_vars[0]+"[1].r;\n"
-	heightStr +=  output_vars[2]+" = vec3("+input_vars[0]+"[2].r, "+input_vars[0]+"[2].g, 0f);\n"
+	heightStr +=  output_vars[2]+" = vec3("+input_vars[0]+"[2].r, "+input_vars[0]+"[2].g, "+input_vars[0]+"[2].b);\n"
 	heightStr +=  output_vars[3]+" = "+input_vars[0]+"[3].r;\n"
 	heightStr +=  output_vars[4]+" = "+input_vars[0]+"[3].b;\n"
 

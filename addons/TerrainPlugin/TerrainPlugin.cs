@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 using System.Security.Cryptography;
 using System.Collections.Specialized;
@@ -35,6 +36,7 @@ namespace TerrainEditor
         private FileDialog fileDialog = new FileDialog();
         private FileDialog fileDialogSplatmap1 = new FileDialog();
         private FileDialog fileDialogSplatmap2 = new FileDialog();
+        private FileDialog fileDialogExport = new FileDialog();
         private VBoxContainer editorPanel = new VBoxContainer();
         protected Godot.Collections.Dictionary<string, Control> panelControls = new Godot.Collections.Dictionary<string, Control>();
         protected string heightMapPath = null;
@@ -101,9 +103,8 @@ namespace TerrainEditor
 
         protected void DrawInspector(Vector3 pos, bool reset = false)
         {
-            if (selectedTerrain != null && editorCamera != null)
+            if (selectedTerrain != null && selectedTerrain.IsInsideTree() && editorCamera != null)
             {
-
                 var applyInformation = getEditorApply();
                 var cursorBrush = CursorBrushBounds(applyInformation, pos);
 
@@ -117,7 +118,6 @@ namespace TerrainEditor
                     {
                         if (selectedChunks == null || !selectedChunks.Contains(chunk))
                         {
-
                             ResetMaterialParams(chunk);
                         }
                         else
@@ -132,15 +132,19 @@ namespace TerrainEditor
         public override void _PhysicsProcess(float delta)
         {
             //sculping or painting
-            if (selectedTerrain != null && editorCamera != null)
+            if (selectedTerrain != null && editorCamera != null && selectedTerrain.IsInsideTree())
             {
+
+
                 var start = OS.GetTicksMsec();
                 var cast = DoRayCast(mousePosition);
+
                 if (cast != Vector3.Inf)
                 {
                     if (handle_clicked)
+                    {
                         DoEditTerrain(cast, delta);
-
+                    }
                     DrawInspector(cast);
                 }
             }
@@ -162,9 +166,11 @@ namespace TerrainEditor
                 var space_state = selectedTerrain.GetWorld3d().DirectSpaceState;
                 var result = space_state.IntersectRay(from, from + dir * distance);
 
-                if (result.Count > 0 && result["rid"] != null && result["collider"] == selectedTerrain)
+                if (result.Count > 0 && result["collider"] != null)
                 {
-                    return (Vector3)result["position"];
+                    if (result["collider"] == selectedTerrain)
+                        return (Vector3)result["position"];
+
                 }
             }
 
@@ -239,14 +245,24 @@ namespace TerrainEditor
                         var mode = new TerrainSculptSculpt(selectedTerrain, applyInformation);
                         mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                     }
-                    if (currentSculpMode == TerrainSculptMode.Flatten)
+                    else if (currentSculpMode == TerrainSculptMode.Flatten)
                     {
                         var mode = new TerrainFlattenSculpt(selectedTerrain, applyInformation);
                         mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                     }
-                    if (currentSculpMode == TerrainSculptMode.Smooth)
+                    else if (currentSculpMode == TerrainSculptMode.Smooth)
                     {
                         var mode = new TerrainSmoothSculpt(selectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                    }
+                    else if (currentSculpMode == TerrainSculptMode.Noise)
+                    {
+                        var mode = new TerrainNoiseSculpt(selectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                    }
+                    else if (currentSculpMode == TerrainSculptMode.Holes)
+                    {
+                        var mode = new TerrainHoleSculpt(selectedTerrain, applyInformation);
                         mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
                     }
                 }
@@ -264,7 +280,9 @@ namespace TerrainEditor
             var list = new Godot.Collections.Array<TerrainPatch>();
             foreach (var patch in selectedTerrain.terrainPatches)
             {
-                if (patch.getBounds().Intersects(cursorBrush))
+                var patchBound = patch.getBounds();
+                patchBound.Position += selectedTerrain.GlobalTransform.origin;
+                if (patchBound.Intersects(cursorBrush))
                 {
                     list.Add(patch);
                 }
@@ -280,7 +298,10 @@ namespace TerrainEditor
             {
                 foreach (var chunk in patch.chunks)
                 {
-                    if (chunk.getBounds(patch.info, patch.getOffset()).Intersects(cursorBrush))
+                    var bound = chunk.getBounds(patch.info, patch.getOffset());
+                    bound.Position += selectedTerrain.GlobalTransform.origin;
+
+                    if (bound.Intersects(cursorBrush))
                     {
                         list.Add(chunk);
                     }
@@ -299,19 +320,6 @@ namespace TerrainEditor
 
             return ab;
         }
-
-        /*
-        public void refreshEditor(string prop)
-        {
-            if (selectedTerrain == null) return;
-            if (currentSculpMode != selectedTerrain.toolSculptMode || currentToolMode != selectedTerrain.toolMode)
-            {
-                currentSculpMode = selectedTerrain.toolSculptMode;
-                currentToolMode = selectedTerrain.toolMode;
-
-                selectedTerrain.NotifyPropertyListChanged();
-            }
-        }*/
 
         public override void _EnterTree()
         {
@@ -334,8 +342,11 @@ namespace TerrainEditor
             menuButton.SwitchOnHover = true;
             menuButton.Text = "Terrain";
             menuButton.Icon = texture;
-            menuButton.GetPopup().AddItem("Create terrain");
-            menuButton.GetPopup().AddItem("Import terrain");
+
+            menuButton.GetPopup().AddItem("Create terrain", 0);
+            menuButton.GetPopup().AddItem("Export heightmap (16bit)", 1);
+            menuButton.GetPopup().AddItem("Export splatmap (16bit)", 2);
+
             menuButton.Visible = false;
             menuButton.GetPopup().Connect("id_pressed", new Callable(this, "openCreateMenu"));
 
@@ -359,6 +370,10 @@ namespace TerrainEditor
             AddPanelSpinBox("layer", "Layer", 0f, 0f, 7f, 1f);
 
             AddPanelOptionBox<BrushFallOfType>("brush_fallof_type", "Fallof type", BrushFallOfType.Smooth);
+
+            AddCheckBox("show_aabb", "Show AABB");
+            AddCheckBox("show_collider", "Show Collider (Slow)");
+
 
             refreshPanel();
         }
@@ -397,7 +412,14 @@ namespace TerrainEditor
             splatmapPath2 = null;
 
             if (id == 0)
+            {
                 OpenDialog();
+            }
+            else if (id == 1)
+            {
+                fileDialogExport.MinSize = new Vector2i(400, 400);
+                fileDialogExport.PopupCentered();
+            }
         }
 
         public void OpenDialog()
@@ -417,6 +439,17 @@ namespace TerrainEditor
             createMarginInput(editorPanel, text, spinbox);
             panelControls.Add(name, spinbox);
         }
+        private void AddCheckBox(string name, string text)
+        {
+            var checkbox = new CheckBox();
+
+            createMarginInput(editorPanel, text, checkbox);
+            panelControls.Add(name, checkbox);
+            checkbox.Connect("pressed", new Callable(this, "refreshGizmo"));
+        }
+
+
+
         private void AddPanelOptionBox<T>(string name, string text, T def)
         {
             var option = new OptionButton();
@@ -454,6 +487,12 @@ namespace TerrainEditor
             return (float)control.Value;
         }
 
+        private bool getPanelControlBoolean(string name)
+        {
+            var control = panelControls[name] as CheckBox;
+            return (bool)control.Pressed;
+        }
+
         private TerrainEditorInfo getEditorApply()
         {
             var st = new TerrainEditorInfo();
@@ -476,6 +515,15 @@ namespace TerrainEditor
             refreshPanel();
         }
 
+        private void refreshGizmo()
+        {
+
+            gizmoPlugin.showAABB = getPanelControlBoolean("show_aabb");
+            gizmoPlugin.showCollider = getPanelControlBoolean("show_collider");
+
+            selectedTerrain.UpdateGizmo();
+        }
+
         private void refreshPanel()
         {
             var modeValue = getPanelControlValue<TerrainToolMode>("mode");
@@ -492,7 +540,6 @@ namespace TerrainEditor
                                                          && sculptValue == TerrainSculptMode.Noise));
             hideInspector("noise_scale", (modeValue == TerrainToolMode.Sculpt
                                                          && sculptValue == TerrainSculptMode.Noise));
-
             currentToolMode = modeValue;
             currentSculpMode = sculptValue;
         }
@@ -510,7 +557,9 @@ namespace TerrainEditor
             AddChild(fileDialogSplatmap1);
             AddChild(fileDialogSplatmap2);
 
+            AddChild(fileDialogExport);
             createDialog.Connect("confirmed", new Callable(this, "generateTerrain"));
+            fileDialogExport.Connect("file_selected", new Callable(this, "exportHeightmap"));
 
             chooseTextureButton.Connect("pressed", new Callable(this, "openFileDialog"));
             chooseTextureSplatmap1Button.Connect("pressed", new Callable(this, "openFileDialogSplatmap1"));
@@ -528,6 +577,11 @@ namespace TerrainEditor
             fileDialogSplatmap2.AddFilter("*.png ; PNG Images");
 
             createDialog.Title = "Create a terrain";
+            fileDialogExport.Title = "Export heightmap in 16bit raw";
+            fileDialogExport.FileMode = FileDialog.FileModeEnum.SaveFile;
+            fileDialogExport.ClearFilters();
+            fileDialogExport.AddFilter("*.raw ; 16bit Raw Image");
+            
 
             var vbox = new VBoxContainer();
             createDialog.AddChild(vbox);
@@ -560,6 +614,7 @@ namespace TerrainEditor
             createMarginInput(vbox, "Choose splatmap2", chooseTextureSplatmap2Button);
 
             createMarginInput(vbox, "Import height scale", importHeightScale);
+
         }
 
 
@@ -595,8 +650,6 @@ namespace TerrainEditor
                     splatmap2Image.Load(splatmapPath2);
                 }
 
-                GD.Print("Scale by " + heightScale);
-
                 selectedTerrain.Generate(patchX, patchY, chunkSize, heightScale, heightMapImage, splatmap1Image, splatmap2Image);
             }
         }
@@ -620,16 +673,138 @@ namespace TerrainEditor
 
         private void openFileDialog()
         {
+            fileDialog.MinSize = new Vector2i(400,400);
             fileDialog.PopupCentered();
         }
 
         private void openFileDialogSplatmap1()
         {
+            fileDialogSplatmap1.MinSize = new Vector2i(400, 400);
             fileDialogSplatmap1.PopupCentered();
         }
 
-        private void openFileDialogSplatmap2(){
-            fileDialogSplatmap2.PopupCentered(); 
+        private void openFileDialogSplatmap2()
+        {
+            fileDialogSplatmap2.MinSize = new Vector2i(400, 400);
+            fileDialogSplatmap2.PopupCentered();
+        }
+
+        private void exportHeightmap(string path)
+        {
+            //check of terrain
+            if (selectedTerrain == null)
+            {
+                GD.PrintErr("No terrain selected");
+                return;
+            }
+
+            //check of patches
+            var firstPatch = selectedTerrain.terrainPatches.FirstOrDefault();
+            if (firstPatch == null)
+            {
+                GD.PrintErr("No heightmap found.");
+                return;
+            }
+
+            // Calculate texture size
+            int patchEdgeVertexCount = firstPatch.info.chunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+            int patchVertexCount = patchEdgeVertexCount * patchEdgeVertexCount;
+
+            // Find size of heightmap in patches
+            Vector2i start = firstPatch.patchCoord;
+            Vector2i end = new Vector2i(start);
+
+            for (int i = 0; i < selectedTerrain.GetPatchesCount(); i++)
+            {
+                var patchPos = selectedTerrain.GetPatch(i).patchCoord;
+
+                if (patchPos.x < start.x)
+                    start.x = patchPos.x;
+                if (patchPos.y < start.y)
+                    start.y = patchPos.y;
+                if (patchPos.x > end.x)
+                    end.y = patchPos.x;
+                if (patchPos.y > end.y)
+                    end.y = patchPos.y;
+            }
+
+            Vector2i size = (end + new Vector2i(1, 1)) - start;
+
+            // Allocate - with space for non-existent patches
+            Godot.Collections.Array<float> heightmap = new Godot.Collections.Array<float>();
+            heightmap.Resize(patchVertexCount * size.x * size.y);
+
+            var heightData = firstPatch.CacheHeightData();
+
+            if (heightData == null || heightData.Length <= 0)
+            {
+                GD.PrintErr("Heightmap cache is empty..");
+                return;
+            }
+
+            // Set to any element, where: min < elem < max
+            for (int i = 0; i < heightmap.Count; i++)
+            {
+                heightmap[i] = heightData[0];
+            }
+
+            int heightmapWidth = patchEdgeVertexCount * size.x;
+
+            // Fill heightmap with data
+            for (int patchIndex = 0; patchIndex < selectedTerrain.GetPatchesCount(); patchIndex++)
+            {
+                // Pick a patch
+                var patch = selectedTerrain.GetPatch(patchIndex);
+                var data = patch.CacheHeightData();
+
+                // Beginning of patch
+                int dstIndex = (patch.patchCoord.x - start.x) * patchEdgeVertexCount +
+                        (patch.patchCoord.y - start.y) * size.y * patchVertexCount;
+
+                // Iterate over lines in patch
+                for (int z = 0; z < patchEdgeVertexCount; z++)
+                {
+                    // Iterate over vertices in line
+                    for (int x = 0; x < patchEdgeVertexCount; x++)
+                    {
+                        heightmap[dstIndex + x] = data[z * patchEdgeVertexCount + x];
+                    }
+
+                    dstIndex += heightmapWidth;
+                }
+            }
+
+            // Interpolate to 16-bit int
+            float maxHeight, minHeight;
+            maxHeight = minHeight = heightmap[0];
+            for (int i = 1; i < heightmap.Count(); i++)
+            {
+                float h = heightmap[i];
+                if (maxHeight < h)
+                    maxHeight = h;
+                else if (minHeight > h)
+                    minHeight = h;
+            }
+
+            float maxValue = 65535.0f;
+            float alpha = maxValue / (maxHeight - minHeight);
+
+            // Storage for pixel data
+            System.Collections.Generic.List<byte> byteHeightmap = new System.Collections.Generic.List<byte>();
+            foreach (var elem in heightmap)
+            {
+                var mod = alpha * (elem - minHeight);
+                var uint16val = Convert.ToUInt16(mod);
+                byte[] bytes = BitConverter.GetBytes(uint16val);
+
+                byteHeightmap.AddRange(bytes);
+            }
+
+
+
+            var image = new Image();
+            image.CreateFromData(heightmapWidth, heightmapWidth, false, Image.Format.Rh, byteHeightmap.ToArray());
+            image.SavePng(path);
         }
         public override void _ExitTree()
         {
@@ -638,6 +813,7 @@ namespace TerrainEditor
             chooseTextureSplatmap1Button.Disconnect("pressed", new Callable(this, "openFileDialogSplatmap1"));
             chooseTextureSplatmap2Button.Disconnect("pressed", new Callable(this, "openFileDialogSplatmap2"));
             chooseTextureButton.Disconnect("pressed", new Callable(this, "openFileDialog"));
+            fileDialogExport.Disconnect("file_selected", new Callable(this, "exportHeightmap"));
 
             fileDialog.Disconnect("file_selected", new Callable(this, "selectFilePath"));
             fileDialogSplatmap1.Disconnect("file_selected", new Callable(this, "selectFilePathSplatmap1"));
@@ -647,6 +823,7 @@ namespace TerrainEditor
             RemoveChild(fileDialog);
             RemoveChild(fileDialogSplatmap1);
             RemoveChild(fileDialogSplatmap2);
+            RemoveChild(fileDialogExport);
 
             if (dockAttached)
                 RemoveControlFromDocks(editorPanel);
@@ -685,6 +862,8 @@ namespace TerrainEditor
             }
             else
             {
+                if (selectedTerrain != null)
+                    DrawInspector(Vector3.Zero, true);
 
                 RemoveControlFromDocks(editorPanel);
                 menuButton.Visible = false;

@@ -63,9 +63,8 @@ namespace TerrainEditor.Generators
             return colors;
         }
 
-        public void WriteColors(ref Image image, ref Color[] colorData)
+        public void WriteColors(ref byte[] buffer, ref Color[] colorData)
         {
-            var buffer = image.GetData();
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             var df = 0;
@@ -106,9 +105,7 @@ namespace TerrainEditor.Generators
                 }
             }
 
-            byte[] bytes = ToByteArray(imgRGBABuffer);
-            var newImage = new Image();
-            image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, bytes);
+            buffer = ToByteArray(imgRGBABuffer);
         }
     }
 

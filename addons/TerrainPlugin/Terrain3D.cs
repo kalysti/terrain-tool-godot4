@@ -16,7 +16,6 @@ namespace TerrainEditor
         public const int CHUNKS_COUNT_EDGE = 4;
         public const float TERRAIN_UNITS_PER_VERTEX = 100.0f;
         public const float COLLIDER_MULTIPLIER = 1000.0f;
-        public AABB bounds = new AABB();
 
         public void updateTransform()
         {
@@ -55,6 +54,19 @@ namespace TerrainEditor
             }
 
             return null;
+        }
+
+        public int GetPatchesCount()
+        {
+            return terrainPatches.Count;
+        }
+        
+        public TerrainPatch GetPatch(int idx)
+        {
+            if (terrainPatches.Count >= idx)
+                return terrainPatches[idx];
+            else
+                return null;
         }
 
 
@@ -144,8 +156,8 @@ namespace TerrainEditor
 
             Draw();
 
-            var kmX = bounds.Size.x * 0.00001f;
-            var kmY = bounds.Size.z * 0.00001f;
+            var kmX = getBounds().Size.x * 0.00001f;
+            var kmY = getBounds().Size.z * 0.00001f;
             GD.Print("[Init Size] " + kmX + "x" + kmY + "km");
         }
 
@@ -174,14 +186,9 @@ namespace TerrainEditor
                 patchId++;
             }
 
-            getBounds();
-            updateDebug();
-        }
-
-        public void updateDebug()
-        {
             UpdateGizmo();
         }
+
 
         public override void _Notification(int what)
         {
@@ -215,13 +222,15 @@ namespace TerrainEditor
         }
 
 
-        public void getBounds()
+        public AABB getBounds()
         {
-            bounds = new AABB();
+            var bounds = new AABB();
             foreach (var patch in terrainPatches)
             {
                 bounds = bounds.Merge(patch.getBounds());
             }
+
+            return bounds;
         }
 
     }

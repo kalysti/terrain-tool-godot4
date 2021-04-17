@@ -69,12 +69,6 @@ namespace TerrainEditor
         public void ClearDraw()
         {
 
-            if (materialId != null)
-            {
-                RenderingServer.FreeRid(materialId);
-            }
-
-
             if (meshId != null)
             {
                 RenderingServer.FreeRid(meshId);
@@ -113,11 +107,9 @@ namespace TerrainEditor
 
         public void UpdateHeightmap(TerrainPatchInfo info)
         {
-            float size = (float)info.chunkSize * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
 
             //  if (instanceRid != null)
             //   RenderingServer.InstanceSetCustomAabb(instanceRid, new AABB(new Vector3(), new Vector3(size, offset, size)));
-
             if (materialId != null)
                 RenderingServer.MaterialSetParam(materialId, "uv_scale", getUVScale());
         }
@@ -259,8 +251,6 @@ namespace TerrainEditor
             if (!tf.IsInsideTree())
                 return;
 
-            GD.Print("Update settings");
-
             RenderingServer.InstanceGeometrySetCastShadowsSetting(instanceRid, tf.castShadow);
             switch (tf.giMode)
             {
@@ -298,8 +288,6 @@ namespace TerrainEditor
                 return patch.meshCache[lodIndex].Duplicate() as ArrayMesh;
             }
 
-            GD.Print("chunkSize: " + chunkSize);
-
             int chunkSizeLOD0 = chunkSize;
 
             // Prepare
@@ -335,6 +323,7 @@ namespace TerrainEditor
 
                     st.SetColor(color);
                     st.SetUv(new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord));
+                    
 
                     st.SetNormal(Vector3.Up);
                     st.AddVertex(buff); //x

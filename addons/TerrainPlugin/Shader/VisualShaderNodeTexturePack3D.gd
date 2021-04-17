@@ -74,7 +74,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr = "mat4 packed = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));\n"
 	heightStr +=  "packed[0].rgb =  "+input_vars[0]+".rgb;\n"
 	heightStr +=  "packed[1].r =  "+input_vars[1]+";\n"
-	heightStr +=  "packed[2].rg =  "+input_vars[2]+".rg;\n"
+	heightStr +=  "packed[2].rgb =  "+input_vars[2]+".rgb;\n"
 	heightStr +=  "packed[3].r =  "+input_vars[3]+";\n"
 	heightStr +=  "packed[3].b =  "+input_vars[4]+";\n"
 	heightStr +=  output_vars[0]+" = packed;\n"

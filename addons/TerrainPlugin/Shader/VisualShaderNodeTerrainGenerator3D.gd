@@ -120,11 +120,11 @@ func _get_global_code(mode):
 				return _currentLod;
 		}
 
-		mat3 CalcTangentBasisFromWorldNormal(vec3 normaltest)
+		mat3 CalcTangentBasisFromWorldNormal(vec3 normal)
 		{
-			vec3 tangenttest = cross(normaltest, vec3(1, 0, 0));
-			vec3 bitangenttest = cross(normaltest, tangenttest);
-			return mat3(tangenttest, bitangenttest, normaltest);
+			vec3 tangenttest = cross(normal, vec3(1, 0, 0));
+			vec3 bitangenttest = cross(normal, tangenttest);
+			return mat3(tangenttest, bitangenttest, normal);
 		}
 
 		float getHeight(vec4 heightmapValue)
@@ -136,22 +136,21 @@ func _get_global_code(mode):
 			return float(sum) / 65535.0;
 		}
 
-		mat3 getNormal(vec4 heightmapValue)
+		vec3 getNormal(vec4 heightmapValue)
 		{
 			vec2 normalTemp = vec2(heightmapValue.b, heightmapValue.a) * 2.0f - 1.0f;
 
-			float c = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
-			vec3 normaltest = vec3(normalTemp.x, sqrt(1.0 -c), normalTemp.y);
+			float yNormalSaturated = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
+			vec3 normal = vec3(normalTemp.x, sqrt(1.0 - yNormalSaturated), normalTemp.y);
 			bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
-			normaltest = normalize(normaltest);
+			normal = normalize(normal);
 
 			if (isHole)
 			{
-				normaltest = vec3(0, 1, 0);
+				normal = vec3(0, 1, 0);
 			}
-			
-			mat3 tangents  = CalcTangentBasisFromWorldNormal(normaltest);
-			return tangents;
+
+			return normal;
 		}
 
 		vec3 getPosition(vec2 uv, float _terrainChunkSize, float _terrainCurrentLodLevel, bool _smoothing, float _terrainNextLodChunkSize, float lodCalculated)
@@ -183,7 +182,8 @@ func _get_global_code(mode):
 			if(_smoothing)
 			{
 
-				vec4 heightmapValueThisLOD = textureLod( heightmap, heightmapUVs, _currentLODLevel);
+				//vec4 heightmapValueThisLOD = textureLod( heightmap, heightmapUVs, _currentLODLevel);
+				vec4 heightmapValueThisLOD = texture( heightmap, heightmapUVs);
 				vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
 				vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
 				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1f);
@@ -196,6 +196,20 @@ func _get_global_code(mode):
 			}
 		}
 
+		mat3 RemoveScaleFromLocalToWorld(mat3 localToWorld)
+		{
+			//localToWorld[0] *= WorldInvScale.x;
+			//localToWorld[1] *= WorldInvScale.y;
+			//localToWorld[2] *= WorldInvScale.z;
+
+			return localToWorld;
+		}
+
+		mat3 CalcTangentToWorld(mat4 world, mat3 tangentToLocal)
+		{
+			mat3 localToWorld = RemoveScaleFromLocalToWorld(mat3(world));
+			return  tangentToLocal * localToWorld; 
+		}
 
 	"""
 
@@ -208,15 +222,21 @@ func _get_code(input_vars, output_vars, mode, type):
 	
 	heightStr += "vec4 heightMapValues = getHeightmap(UV, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);\n"
 	heightStr += "float height = getHeight(heightMapValues);\n"
+	
 	heightStr += "vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);\n"
-	heightStr += "mat3 calculatedNormal = getNormal(heightMapValues);\n"
+	heightStr += "mat3 tangentToLocal = CalcTangentBasisFromWorldNormal(getNormal(heightMapValues));\n"
+	heightStr += "mat3 tangentToWorld = CalcTangentToWorld(WORLD_MATRIX, tangentToLocal);\n"
+	heightStr += "vec3 worldNormal = tangentToWorld[2];\n"
+	heightStr += "mat3 calculatedTBNWorld = CalcTangentBasisFromWorldNormal(worldNormal);\n"
+
 	heightStr += "position.y = height;\n"
 
 	heightStr += output_vars[0] + " = position;\n"
 	heightStr += output_vars[1] + " = height;\n" 
-	heightStr += output_vars[2] + " = calculatedNormal[2];\n"
-	heightStr += output_vars[3] + " = calculatedNormal[0];\n"
-	heightStr += output_vars[4] + " = calculatedNormal[1];\n"
+
+	heightStr += output_vars[2] + " = calculatedTBNWorld[2];\n"
+	heightStr += output_vars[3] + " = calculatedTBNWorld[0];\n"
+	heightStr += output_vars[4] + " = calculatedTBNWorld[1];\n"
 
 	heightStr += output_vars[5] + " = heightMapValues.r;\n"
 	heightStr += output_vars[6] + " = heightMapValues.g;\n"

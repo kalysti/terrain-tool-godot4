@@ -17,19 +17,19 @@ namespace TerrainEditor.Generators
         /**
          * Writing heigtmap image to an array for caching
          */
-        public float[] CacheHeightmap()
+        public void CacheHeights(ref float[] _cachedHeightMap, ref byte[] _cachedHolesMask)
         {
             if (patch.heightmap == null)
             {
                 GD.PrintErr("Cant load heightmap");
-                return null;
+                return;
             }
 
             int heightMapLength = patch.info.heightMapSize * patch.info.heightMapSize;
 
             // Allocate data
-            float[] _cachedHeightMap = new float[heightMapLength];
-            float[] _cachedHolesMask = new float[heightMapLength];
+            _cachedHeightMap = new float[heightMapLength];
+            _cachedHolesMask = new byte[heightMapLength];
 
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(patch.heightmap.GetImage().GetData());
 
@@ -47,7 +47,7 @@ namespace TerrainEditor.Generators
 
                 for (int z = 0; z < patch.info.vertexCountEdge; z++)
                 {
-                    int tz = (chunkTextureZ + z);
+                    int tz = (chunkTextureZ + z) * patch.info.textureSize;
                     int sz = (chunkHeightmapZ + z) * patch.info.heightMapSize;
 
                     for (int x = 0; x < patch.info.vertexCountEdge; x++)
@@ -62,22 +62,20 @@ namespace TerrainEditor.Generators
                         float height = (normalizedHeight * patchHeight) + patchOffset;
 
                         _cachedHeightMap[heightmapIndex] = height;
-                        _cachedHolesMask[heightmapIndex] = isHole ? 0 : 255;
+                        _cachedHolesMask[heightmapIndex] = (isHole) ? byte.MinValue : byte.MaxValue;
                     }
                 }
             }
-
-            return _cachedHeightMap;
         }
 
         /**
          * Write height on an image
          */
-        public void WriteHeights(ref Image image, ref float[] heightmapData)
+        public void WriteHeights(ref byte[] buffer, ref float[] heightmapData)
         {
-            var buffer = image.GetData();
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
+            int textureIndexTest = 0;
             for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
             {
                 int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
@@ -102,26 +100,26 @@ namespace TerrainEditor.Generators
                         int textureIndex = tz + tx;
                         int heightmapIndex = sz + sx;
 
-
                         float normalizedHeight = (heightmapData[heightmapIndex] - patch.info.patchOffset) / patch.info.patchHeight;
                         UInt16 quantizedHeight = (UInt16)(normalizedHeight * UInt16.MaxValue);
 
                         imgRGBABuffer[textureIndex].r = (byte)(quantizedHeight & 0xff);
                         imgRGBABuffer[textureIndex].g = (byte)((quantizedHeight >> 8) & 0xff);
+
+                        if (textureIndex > textureIndexTest)
+                            textureIndexTest = textureIndex;
                     }
                 }
             }
 
-            byte[] bytes = ToByteArray(imgRGBABuffer);
-            image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, bytes);
+            buffer = ToByteArray(imgRGBABuffer);
         }
 
         /**
          * Writing normals to image (with smoothing)
          */
-        public void WriteNormals(ref Image image, float[] heightmapData, Godot.Collections.Array<bool> holesMask, Vector2i modifiedOffset, Vector2i modifiedSize)
+        public void WriteNormals(ref byte[] buffer, float[] heightmapData, byte[] holesMask, Vector2i modifiedOffset, Vector2i modifiedSize)
         {
-            var buffer = image.GetData();
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             // Expand the area for the normals to prevent issues on the edges (for the averaged normals)
@@ -130,7 +128,6 @@ namespace TerrainEditor.Generators
             Vector2i normalsStart = new Vector2i(Math.Max(0, modifiedOffset.x - 1), Math.Max(0, modifiedOffset.y - 1));
             Vector2i normalsEnd = new Vector2i(Math.Min(heightMapSize, modifiedEnd.x + 1), Math.Min(heightMapSize, modifiedEnd.y + 1));
             Vector2i normalsSize = normalsEnd - normalsStart;
-
 
             // Prepare memory
             int normalsLength = normalsSize.x * normalsSize.y;
@@ -186,6 +183,7 @@ namespace TerrainEditor.Generators
                     normalsPerVertex[v01.i] += n2;
                     normalsPerVertex[v10.i] += n2;
                     normalsPerVertex[v11.i] += n0;
+
                 }
             }
 
@@ -195,15 +193,23 @@ namespace TerrainEditor.Generators
                 for (int x = 1; x < normalsSize.x - 1; x++)
                 {
                     var n00 = getNormal(0, 0, x, z);
-                    var n01 = getNormal(0, 1, x, z);
                     var n10 = getNormal(1, 0, x, z);
+                    var n01 = getNormal(0, 1, x, z);
                     var n11 = getNormal(1, 1, x, z);
+
                     var n20 = getNormal(2, 0, x, z);
 
                     var n21 = getNormal(2, 1, x, z);
                     var n02 = getNormal(0, 2, x, z);
                     var n12 = getNormal(1, 2, x, z);
                     var n22 = getNormal(2, 2, x, z);
+
+                    /*
+                     * The current vertex is (11). Calculate average for the nearby vertices.
+                     * 00   01   02
+                     * 10  (11)  12
+                     * 20   21   22
+                     */
 
                     // Get four normals for the nearby quads
                     Vector3 avg = (n00.v + n01.v + n02.v + n10.v + n11.v + n12.v + n20.v + n21.v + n22.v) * (1.0f / 9.0f);
@@ -258,25 +264,25 @@ namespace TerrainEditor.Generators
                         int heightmapIndex = hz + hx;
                         int normalIndex = sz + sx;
 
-                        Vector3 normal = (normalsPerVertex[normalIndex].Normalized() * 0.5f) + new Vector3(0.5f, 0.5f, 0.5f);
+                        Vector3 normal = normalsPerVertex[normalIndex].Normalized() * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
 
-                        if (holesMask != null && !holesMask[heightmapIndex])
+                        //its a hole :-)
+                        if (holesMask != null && holesMask.Length >= heightmapIndex && holesMask[heightmapIndex] == 0)
                             normal = Vector3.One;
 
-                        imgRGBABuffer[textureIndex].b = (byte)(normal.x * 255f);
-                        imgRGBABuffer[textureIndex].a = (byte)(normal.z * 255f);
+                        imgRGBABuffer[textureIndex].b = (byte)(normal.x * byte.MaxValue);
+                        imgRGBABuffer[textureIndex].a = (byte)(normal.z * byte.MaxValue);
                     }
                 }
             }
 
-            byte[] bytes = ToByteArray(imgRGBABuffer);
-            image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, bytes);
+            buffer = ToByteArray(imgRGBABuffer);
         }
 
         /**
          * Detect heightmap ranges for chunks
          */
-        public Vector2 CalculateHeightRange(ref float[] heightmap, ref float[] chunkOffsets, ref float[] chunkHeights)
+        public Vector2 CalculateHeightRange(float[] heightmap, ref float[] chunkOffsets, ref float[] chunkHeights)
         {
             float minPatchHeight = float.MaxValue;
             float maxPatchHeight = float.MinValue;
@@ -289,10 +295,10 @@ namespace TerrainEditor.Generators
                 float minHeight = float.MaxValue;
                 float maxHeight = float.MinValue;
 
-                for (int z = 0; z < patch.info.chunkSize + 1; z++)
+                for (int z = 0; z < patch.info.vertexCountEdge; z++)
                 {
                     int sz = (chunkZ + z) * patch.info.heightMapSize;
-                    for (int x = 0; x < patch.info.chunkSize + 1; x++)
+                    for (int x = 0; x < patch.info.vertexCountEdge; x++)
                     {
                         int sx = chunkX + x;
                         float height = heightmap[sz + sx];
@@ -309,7 +315,7 @@ namespace TerrainEditor.Generators
                 maxPatchHeight = Math.Max(maxPatchHeight, maxHeight);
             }
 
-            const double error = 1.0 / UInt16.MaxValue;
+            double error = 1.0 / UInt16.MaxValue;
             minPatchHeight = AlignHeight(minPatchHeight - error, error);
             maxPatchHeight = AlignHeight(maxPatchHeight + error, error);
 

@@ -44,13 +44,10 @@ namespace TerrainEditor
             LIGHTMAP_SCALE_MAX,
         };
 
-
         public override Godot.Collections.Array _GetPropertyList()
         {
             var arr = new Godot.Collections.Array();
             var test = new VisualShaderNodeCustom();
-
-
       
             arr.Add(new Godot.Collections.Dictionary()
             {
