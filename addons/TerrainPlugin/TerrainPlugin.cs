@@ -332,7 +332,7 @@ namespace TerrainEditor
             var scriptPatch = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatch.cs");
             var scriptPatchhInfo = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatchInfo.cs");
             var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
-            var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/test.png");
+            var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/terrain.png");
 
             AddCustomType("TerrainPatchInfo", "Resource", scriptPatchhInfo, texture);
             AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);

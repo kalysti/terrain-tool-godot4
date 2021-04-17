@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace TerrainEditor
 {
-
     [Tool]
     public partial class TerrainPatch : Resource
     {
@@ -37,13 +36,12 @@ namespace TerrainEditor
         [Export]
         public TerrainPatchInfo info = new TerrainPatchInfo();
 
-
         //caches
         protected float[] cachedHeightMapData;
+
         protected byte[] cachedHolesMask;
+
         protected Godot.Collections.Array<Color[]> cachedSplatMap;
-
-
 
         /**
          * Clear rendering device by removing body and collider
@@ -349,7 +347,6 @@ namespace TerrainEditor
             terrain.UpdateGizmo();
         }
 
-
         /** 
          *  Updating splatmap texture, collider and rendering device
          */
@@ -536,7 +533,7 @@ namespace TerrainEditor
 
             UpdateColliderData(terrain, heightField);
             UpdateColliderPosition(terrain);
-            
+
             GD.Print("[Collider] Creation time " + (OS.GetTicksMsec() - start) + " ms");
         }
 
