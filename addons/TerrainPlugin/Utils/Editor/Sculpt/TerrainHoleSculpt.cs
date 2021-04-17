@@ -28,7 +28,7 @@ namespace TerrainEditor.Editor.Sculpt
                     var xx = x + modifiedOffset.x;
                     var sourceMask = sourceHolesData[zz * patch.info.heightMapSize + xx];
 
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceMask , zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
+                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceMask , zz * Terrain3D.UNITS_PER_VERTEX);
                     var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
                     samplePositionWorld.y = pos.y;
 

@@ -30,7 +30,7 @@ namespace TerrainEditor.Generators
             Color[] colors = new Color[heightMapLength];
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(splatmapImg.GetData());
 
-            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
                 int chunkTextureX = patch.chunks[chunkIndex].position.x * patch.info.vertexCountEdge;
                 int chunkTextureZ = patch.chunks[chunkIndex].position.y * patch.info.vertexCountEdge;
@@ -68,10 +68,10 @@ namespace TerrainEditor.Generators
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             var df = 0;
-            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
-                int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
-                int chunkZ = (chunkIndex / Terrain3D.CHUNKS_COUNT_EDGE);
+                int chunkX = (chunkIndex % Terrain3D.PATCH_CHUNK_EDGES);
+                int chunkZ = (chunkIndex / Terrain3D.PATCH_CHUNK_EDGES);
 
                 int chunkTextureX = chunkX * patch.info.vertexCountEdge;
                 int chunkTextureZ = chunkZ * patch.info.vertexCountEdge;

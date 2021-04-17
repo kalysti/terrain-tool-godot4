@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace TerrainEditor
 {
-
     [Tool]
     public partial class TerrainPatchInfo : Resource
     {

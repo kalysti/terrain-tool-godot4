@@ -19,7 +19,7 @@ namespace TerrainEditor.Editor.Sculpt
             var bufferSize = modifiedSize.y * modifiedSize.x;
             var buffer = new float[bufferSize];
 
-            var patchSize = patch.info.chunkSize * Terrain3D.CHUNKS_COUNT_EDGE;
+            var patchSize = patch.info.chunkSize * Terrain3D.PATCH_CHUNK_EDGES;
             var patchOffset = patch.patchCoord * patchSize;
 
             var noise = new PerlinNoise(0, applyInfo.noiseScale, editorStrength * applyInfo.noiseAmount);
@@ -32,7 +32,7 @@ namespace TerrainEditor.Editor.Sculpt
                     var xx = x + modifiedOffset.x;
                     var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
 
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.TERRAIN_UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.TERRAIN_UNITS_PER_VERTEX);
+                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.UNITS_PER_VERTEX);
                     var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
 
                     var noiseSample = noise.Sample(xx + patchOffset.x, zz + patchOffset.y);

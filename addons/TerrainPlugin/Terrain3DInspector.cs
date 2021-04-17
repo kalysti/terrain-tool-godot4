@@ -28,21 +28,6 @@ namespace TerrainEditor
         public int lodMaxDistance = 0;
         public int lodMaxHysteresis = 0;
 
-        public enum GIMode
-        {
-            Disabled,
-            Baked,
-            Dynamic
-        };
-
-        public enum LightmapScale
-        {
-            LIGHTMAP_SCALE_1X,
-            LIGHTMAP_SCALE_2X,
-            LIGHTMAP_SCALE_4X,
-            LIGHTMAP_SCALE_8X,
-            LIGHTMAP_SCALE_MAX,
-        };
 
         public override Godot.Collections.Array _GetPropertyList()
         {

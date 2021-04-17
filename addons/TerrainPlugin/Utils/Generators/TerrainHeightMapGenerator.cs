@@ -37,7 +37,7 @@ namespace TerrainEditor.Generators
             float patchOffset = patch.info.patchOffset;
             float patchHeight = patch.info.patchHeight;
 
-            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
                 int chunkTextureX = patch.chunks[chunkIndex].position.x * patch.info.vertexCountEdge;
                 int chunkTextureZ = patch.chunks[chunkIndex].position.y * patch.info.vertexCountEdge;
@@ -76,10 +76,10 @@ namespace TerrainEditor.Generators
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             int textureIndexTest = 0;
-            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
-                int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
-                int chunkZ = (chunkIndex / Terrain3D.CHUNKS_COUNT_EDGE);
+                int chunkX = (chunkIndex % Terrain3D.PATCH_CHUNK_EDGES);
+                int chunkZ = (chunkIndex / Terrain3D.PATCH_CHUNK_EDGES);
 
                 int chunkTextureX = chunkX * patch.info.vertexCountEdge;
                 int chunkTextureZ = chunkZ * patch.info.vertexCountEdge;
@@ -139,9 +139,9 @@ namespace TerrainEditor.Generators
                   int h = (z + (b)) * heightMapSize + (x + (a));
 
                   Vector3 v = new Vector3();
-                  v.x = (x + (a)) * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
+                  v.x = (x + (a)) * Terrain3D.UNITS_PER_VERTEX;
                   v.y = heightmapData[h]; // << takes time
-                  v.z = (z + (b)) * Terrain3D.TERRAIN_UNITS_PER_VERTEX;
+                  v.z = (z + (b)) * Terrain3D.UNITS_PER_VERTEX;
 
                   return new VertexResult
                   {
@@ -220,10 +220,10 @@ namespace TerrainEditor.Generators
             }
 
             // Write back to the data container
-            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
-                int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE);
-                int chunkZ = (chunkIndex / Terrain3D.CHUNKS_COUNT_EDGE);
+                int chunkX = (chunkIndex % Terrain3D.PATCH_CHUNK_EDGES);
+                int chunkZ = (chunkIndex / Terrain3D.PATCH_CHUNK_EDGES);
 
                 int chunkTextureX = chunkX * patch.info.vertexCountEdge;
                 int chunkTextureZ = chunkZ * patch.info.vertexCountEdge;
@@ -280,17 +280,17 @@ namespace TerrainEditor.Generators
         }
 
         /**
-         * Detect heightmap ranges for chunks
+         * Detect heightmap ranges for chunks and returns a vec2(patchOffset, patchHeight)
          */
         public Vector2 CalculateHeightRange(float[] heightmap, ref float[] chunkOffsets, ref float[] chunkHeights)
         {
             float minPatchHeight = float.MaxValue;
             float maxPatchHeight = float.MinValue;
 
-            for (int chunkIndex = 0; chunkIndex < Terrain3D.CHUNKS_COUNT; chunkIndex++)
+            for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
-                int chunkX = (chunkIndex % Terrain3D.CHUNKS_COUNT_EDGE) * patch.info.chunkSize;
-                int chunkZ = (chunkIndex / Terrain3D.CHUNKS_COUNT_EDGE) * patch.info.chunkSize;
+                int chunkX = (chunkIndex % Terrain3D.PATCH_CHUNK_EDGES) * patch.info.chunkSize;
+                int chunkZ = (chunkIndex / Terrain3D.PATCH_CHUNK_EDGES) * patch.info.chunkSize;
 
                 float minHeight = float.MaxValue;
                 float maxHeight = float.MinValue;

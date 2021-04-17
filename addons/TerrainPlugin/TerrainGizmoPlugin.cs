@@ -110,15 +110,16 @@ namespace TerrainEditor
             }
         }
 
-
         private StandardMaterial3D getDebugMaterial()
         {
             StandardMaterial3D line_material = new StandardMaterial3D();
             line_material.ShadingMode = StandardMaterial3D.ShadingModeEnum.Unshaded;
             line_material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-            line_material.SetFlag(BaseMaterial3D.Flags.SrgbVertexColor, true);
-            line_material.SetFlag(BaseMaterial3D.Flags.AlbedoFromVertexColor, true);
-            line_material.SetAlbedo(new Color(0, 1, 1, 1));
+            line_material.AlbedoColor =  new Color(0, 1, 1, 1);
+
+            line_material.AlbedoTexForceSrgb = true;
+            line_material.VertexColorIsSrgb = true;
+            line_material.VertexColorUseAsAlbedo = true;
 
             return line_material;
         }

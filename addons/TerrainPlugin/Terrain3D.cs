@@ -12,30 +12,33 @@ namespace TerrainEditor
     [Tool]
     public partial class Terrain3D : Node3D
     {
-        public const int CHUNKS_COUNT = 16;
-        public const int CHUNKS_COUNT_EDGE = 4;
-        public const float TERRAIN_UNITS_PER_VERTEX = 100.0f;
-        public const float COLLIDER_MULTIPLIER = 1000.0f;
+        //count of chunks per patch
+        public const int PATCH_CHUNKS_AMOUNT = 16; 
 
-        public void updateTransform()
+        //edges per chunk
+        public const int PATCH_CHUNK_EDGES = 4;
+
+        //units per vertex (also scale factor)
+        public const float UNITS_PER_VERTEX = 100.0f;
+
+        public void UpdatePosition()
         {
             foreach (var patch in terrainPatches)
-                patch.UpdateTransform(this);
+                patch.UpdatePosition(this);
         }
 
         public void UpdateSettings()
         {
-
             foreach (var patch in terrainPatches)
                 patch.UpdateSettings(this);
         }
 
-        void CacheNeighbors()
+        private void CacheNeighbors()
         {
             for (int pathIndex = 0; pathIndex < terrainPatches.Count(); pathIndex++)
             {
                 var patch = terrainPatches[pathIndex];
-                for (int chunkIndex = 0; chunkIndex < CHUNKS_COUNT; chunkIndex++)
+                for (int chunkIndex = 0; chunkIndex < PATCH_CHUNKS_AMOUNT; chunkIndex++)
                 {
                     patch.chunks[chunkIndex].CacheNeighbors(this, patch);
                 }
@@ -77,7 +80,7 @@ namespace TerrainEditor
             //delete prev patches
             terrainPatches.Clear();
 
-            float size = (chunkSize - 1) * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
+            float size = (chunkSize - 1) * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
 
             for (int x = 0; x < patchX; x++)
             {
@@ -107,7 +110,7 @@ namespace TerrainEditor
                 }
                 else
                 {
-                    int heightmapSize = (chunkSize - 1) * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+                    int heightmapSize = (chunkSize - 1) * Terrain3D.PATCH_CHUNK_EDGES + 1;
 
                     float[] heightmapData = new float[heightmapSize * heightmapSize];
 
@@ -158,6 +161,7 @@ namespace TerrainEditor
 
             var kmX = getBounds().Size.x * 0.00001f;
             var kmY = getBounds().Size.z * 0.00001f;
+
             GD.Print("[Init Size] " + kmX + "x" + kmY + "km");
         }
 
@@ -169,9 +173,7 @@ namespace TerrainEditor
             float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
             return normalizedHeight;
         }
-
-
-        protected void Draw()
+        private void Draw()
         {
             CacheNeighbors();
 
@@ -179,7 +181,6 @@ namespace TerrainEditor
             foreach (var patch in terrainPatches)
             {
                 var start = OS.GetTicksMsec();
-
                 patch.Draw(this, terrainDefaultMaterial);
 
                 GD.Print("[Patch][" + patchId + "] Draw time " + (OS.GetTicksMsec() - start) + " ms");
@@ -189,10 +190,8 @@ namespace TerrainEditor
             UpdateGizmo();
         }
 
-
         public override void _Notification(int what)
         {
-
             if (what == NotificationExitWorld)
             {
                 ClearDraw();
@@ -203,7 +202,7 @@ namespace TerrainEditor
             }
             else if (what == NotificationTransformChanged)
             {
-                updateTransform();
+                UpdatePosition();
             }
             else if (what == NotificationVisibilityChanged)
             {
@@ -220,7 +219,6 @@ namespace TerrainEditor
                 patch.ClearDraw();
             }
         }
-
 
         public AABB getBounds()
         {

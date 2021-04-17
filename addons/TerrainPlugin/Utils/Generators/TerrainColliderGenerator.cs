@@ -26,7 +26,7 @@ namespace TerrainEditor.Generators
 
             // Prepare datas
             int heightFieldChunkSize = ((patch.info.chunkSize + 1) >> collisionLOD) - 1;
-            int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+            int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
             int heightFieldLength = heightFieldSize * heightFieldSize;
 
             int vertexCountEdgeMip = patch.info.vertexCountEdge >> collisionLOD;
@@ -38,12 +38,12 @@ namespace TerrainEditor.Generators
             int heightMapLength = patch.info.heightMapSize * patch.info.heightMapSize;
             var heightField = new float[heightMapLength];
 
-            for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
+            for (int chunkZ = 0; chunkZ < Terrain3D.PATCH_CHUNK_EDGES; chunkZ++)
             {
                 int chunkTextureZ = chunkZ * vertexCountEdgeMip;
                 int chunkStartZ = chunkZ * heightFieldChunkSize;
 
-                for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
+                for (int chunkX = 0; chunkX < Terrain3D.PATCH_CHUNK_EDGES; chunkX++)
                 {
                     int chunkTextureX = chunkX * vertexCountEdgeMip;
                     int chunkStartX = chunkX * heightFieldChunkSize;
@@ -88,7 +88,7 @@ namespace TerrainEditor.Generators
 
             int collisionLOD = Mathf.Clamp(collisionLod, 0, 0); //from mip
             int heightFieldChunkSize = ((patch.info.chunkSize + 1) >> collisionLOD) - 1;
-            int heightFieldSize = heightFieldChunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+            int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
 
             Vector2i samplesOffset = new Vector2i(Mathf.FloorToInt(modifiedOffsetRatio.x * (float)heightFieldSize), Mathf.FloorToInt(modifiedOffsetRatio.y * (float)heightFieldSize));
             Vector2i samplesSize = new Vector2i(Mathf.CeilToInt(modifiedSizeRatio.x * (float)heightFieldSize), Mathf.CeilToInt(modifiedSizeRatio.y * (float)heightFieldSize));
@@ -104,7 +104,7 @@ namespace TerrainEditor.Generators
             int vertexCountEdgeMip = patch.info.vertexCountEdge >> collisionLOD;
             int textureSizeMip = patch.info.textureSize >> collisionLOD;
 
-            for (int chunkZ = 0; chunkZ < Terrain3D.CHUNKS_COUNT_EDGE; chunkZ++)
+            for (int chunkZ = 0; chunkZ < Terrain3D.PATCH_CHUNK_EDGES; chunkZ++)
             {
                 int chunkTextureZ = chunkZ * vertexCountEdgeMip;
                 int chunkStartZ = chunkZ * heightFieldChunkSize;
@@ -113,7 +113,7 @@ namespace TerrainEditor.Generators
                 if (chunkStartZ >= samplesEnd.y || chunkStartZ + vertexCountEdgeMip < samplesOffset.y)
                     continue;
 
-                for (int chunkX = 0; chunkX < Terrain3D.CHUNKS_COUNT_EDGE; chunkX++)
+                for (int chunkX = 0; chunkX < Terrain3D.PATCH_CHUNK_EDGES; chunkX++)
                 {
                     int chunkTextureX = chunkX * vertexCountEdgeMip;
                     int chunkStartX = chunkX * heightFieldChunkSize;

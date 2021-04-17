@@ -43,6 +43,22 @@ namespace TerrainEditor
         public Vector3 v { get; set; }
     }
 
+    public enum GIMode
+    {
+        Disabled,
+        Baked,
+        Dynamic
+    };
+
+    public enum LightmapScale
+    {
+        LIGHTMAP_SCALE_1X,
+        LIGHTMAP_SCALE_2X,
+        LIGHTMAP_SCALE_4X,
+        LIGHTMAP_SCALE_8X,
+        LIGHTMAP_SCALE_MAX,
+    };
+
 
     [StructLayout(LayoutKind.Sequential)]
     public struct RGBA

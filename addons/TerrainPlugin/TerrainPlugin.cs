@@ -205,8 +205,8 @@ namespace TerrainEditor
             {
                 var chunkSize = patch.info.chunkSize;
 
-                var patchSize = chunkSize * Terrain3D.TERRAIN_UNITS_PER_VERTEX * Terrain3D.CHUNKS_COUNT_EDGE;
-                var unitsPerVertexInv = 1.0f / Terrain3D.TERRAIN_UNITS_PER_VERTEX;
+                var patchSize = chunkSize * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
+                var unitsPerVertexInv = 1.0f / Terrain3D.UNITS_PER_VERTEX;
 
                 var patchPositionLocal = new Vector3(patch.patchCoord.x * patchSize, 0, patch.patchCoord.y * patchSize);
                 var brushBoundsPatchLocalMin = (bMin - patchPositionLocal) * unitsPerVertexInv;
@@ -707,7 +707,7 @@ namespace TerrainEditor
             }
 
             // Calculate texture size
-            int patchEdgeVertexCount = firstPatch.info.chunkSize * Terrain3D.CHUNKS_COUNT_EDGE + 1;
+            int patchEdgeVertexCount = firstPatch.info.chunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
             int patchVertexCount = patchEdgeVertexCount * patchEdgeVertexCount;
 
             // Find size of heightmap in patches
