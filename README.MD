@@ -6,11 +6,11 @@ Currently under development. Tool is written for prototyping in c# but will be c
  - https://github.com/godotengine/godot/pull/47347 (for godot physics)
  - or https://github.com/godotengine/godot/pull/47508 (bullet physics)
 
-## Construction
+## Read at first
 
-** The terrain is splited in a patch grid (int x, int y) to make the terrain on the fly extensible. **
-** Each patch has a constant number of 16 chunks. **
-** Each chunk have a chunk size of power of 2 - 1. **
+The terrain is splited in a patch grid (int x, int y) to make the terrain on the fly extensible.
+Each patch has a constant number of 16 chunks. 
+Each chunk have a chunk size of power of 2 - 1.
 
 ![Construction of Terrain Editor](https://i.ibb.co/3T9sp5q/terraintool.png)
 ![Construction of Terrain Editor 2](https://i.ibb.co/8YS53tD/uploadtool2.png)
