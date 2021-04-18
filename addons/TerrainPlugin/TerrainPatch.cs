@@ -63,14 +63,14 @@ namespace TerrainEditor
         }
 
         /**
-         * Creating a patch by given chunksize and optional exist heightmap datas
+         * Initalize a patch by given chunksize and optional exist heightmap datas
          */
-        public void Init(int _chunkSize, float[] heightMapdata = null, Color[] splatMapData1 = null, Color[] splatMapData2 = null)
+        public void Init(int _chunkSize)
         {
             //reset prev cache
             cachedHeightMapData = null;
             cachedHolesMask = null;
-            cachedSplatMap = null;
+            cachedSplatMap = new Godot.Collections.Array<Color[]>();
 
             //generate info file
             createInfoResource(_chunkSize);
@@ -91,7 +91,12 @@ namespace TerrainEditor
                 res.TerrainChunkSizeLOD0 = Terrain3D.UNITS_PER_VERTEX * info.chunkSize;
                 chunks.Add(res);
             }
-
+        }
+        /**
+        * Creating a heightmap by given data
+        */
+        public void createHeightmap(float[] heightMapdata = null)
+        {
             //generate heightmap
             var heightmapGen = new TerrainHeightMapGenerator(this);
             var image = heightmapGen.createImage();
@@ -138,19 +143,24 @@ namespace TerrainEditor
             {
                 heightmap.Update(image);
             }
-
-            //creating splatmaps
-            createSplatmap(splatMapData1);
-            createSplatmap(splatMapData2);
         }
 
         /**
          * Creating a splatmap by given data
          */
-        private void createSplatmap(Color[] splatmapDataImport = null)
+        public void createSplatmap(int idx, Color[] splatmapDataImport = null)
         {
-            var splatmapGen = new TerrainSplatMapGenerator(this);
+            if (cachedSplatMap.Count < (idx + 1))
+            {
+                cachedSplatMap.Resize(idx + 1);
+            }
 
+            if (splatmaps.Count < (idx + 1))
+            {
+                splatmaps.Resize(idx + 1);
+            }
+
+            var splatmapGen = new TerrainSplatMapGenerator(this);
             var splatmapImage = splatmapGen.createImage();
             var splatmapTexture = new ImageTexture();
             var splatmapData = splatmapImage.GetData();
@@ -164,11 +174,9 @@ namespace TerrainEditor
                 splatmapGen.WriteColors(ref splatmapData, ref splatmapDataImport);
                 splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
             }
-            
-         
-            splatmapTexture.CreateFromImage(splatmapImage);
-            splatmaps.Add(splatmapTexture);
 
+            splatmapTexture.CreateFromImage(splatmapImage);
+            splatmaps[idx] = splatmapTexture;
         }
 
         /**

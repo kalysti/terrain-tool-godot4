@@ -43,6 +43,13 @@ namespace TerrainEditor
         public Vector3 v { get; set; }
     }
 
+    public enum HeightmapAlgo
+    {
+        R16,
+        RGBA8_Normal,
+        RGBA8_Half,
+        RGB8_Full
+    };
     public enum GIMode
     {
         Disabled,

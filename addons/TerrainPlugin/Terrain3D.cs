@@ -7,6 +7,7 @@ using Godot;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using TerrainEditor.Converters;
 
 namespace TerrainEditor
 {
@@ -89,111 +90,155 @@ namespace TerrainEditor
                     handle.Free();
             }
         }
-
-        public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null, Image splatMapImage1 = null, Image splatMapImage2 = null)
+        /**
+         * Creating a patch grid
+         */
+        public void CreatePatchGrid(int patchX, int patchY, int chunkSize)
         {
             ClearDraw();
 
             //delete prev patches
             terrainPatches.Clear();
 
-            float size = (chunkSize - 1) * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
-
             for (int x = 0; x < patchX; x++)
             {
                 for (int y = 0; y < patchY; y++)
                 {
-                    var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatch.cs").New();
-                    var patch = script as TerrainPatch;
-
-                    patch.offset = new Vector3(x * size, 0.0f, y * size);
-                    patch.ResourceLocalToScene = true;
-                    patch.patchCoord = new Vector2i(x, y);
-
-                    terrainPatches.Add(patch);
+                    createPatch(x, y, chunkSize);
                 }
             }
+        }
 
+        /**
+         * Creating a patch by given coords and chunksize
+         */
+        public void createPatch(Vector2i coord, int chunkSize)
+        {
+            createPatch(coord.x, coord.y, chunkSize);
+        }
 
-            int patchId = 0;
-            foreach (var patch in terrainPatches)
+        /**
+        * Creating a patch by given coords and chunksize
+        */
+        public void createPatch(int x, int y, int chunkSize)
+        {
+            float size = (chunkSize - 1) * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
+
+            var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatch.cs").New();
+            var patch = script as TerrainPatch;
+
+            patch.offset = new Vector3(x * size, 0.0f, y * size);
+            patch.ResourceLocalToScene = true;
+            patch.patchCoord = new Vector2i(x, y);
+
+            terrainPatches.Add(patch);
+            patch.Init(chunkSize);
+
+            patch.createHeightmap();
+            patch.createSplatmap(0);
+            patch.createSplatmap(1);
+        }
+
+        /**
+        * Load heightmap from given image
+        */
+        public Error loadHeightmapFromImage(Vector2i patchCoord, Image heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
+        {
+            var patch = GetPatch(patchCoord.x, patchCoord.y);
+            if (patch == null || heightMapImage == null)
             {
-                var start = OS.GetTicksMsec();
-                GD.Print("[Generate Time] " + (OS.GetTicksMsec() - start) + " ms");
-
-                if (heightMapImage == null)
-                {
-                    patch.Init(chunkSize);
-                }
-                else
-                {
-                    int heightmapSize = (chunkSize - 1) * Terrain3D.PATCH_CHUNK_EDGES + 1;
-
-                    float[] heightmapData = new float[heightmapSize * heightmapSize];
-
-                    Color[] splatMapData1 = new Color[heightmapSize * heightmapSize];
-                    Color[] splatMapData2 = new Color[heightmapSize * heightmapSize];
-
-                    Vector2 uvPerPatch = Vector2.One / new Vector2(patchX, patchY);
-                    float heightmapSizeInv = 1.0f / (heightmapSize - 1);
-                    var byteData = FromByteArray<UInt16>(heightMapImage.GetData());
-
-                    Vector2 uvStart = new Vector2(patch.patchCoord.x, patch.patchCoord.y) * uvPerPatch;
-                    GD.Print("data length: " + byteData.Length);
-
-                    for (int z = 0; z < heightmapSize; z++)
-                    {
-                        for (int x = 0; x < heightmapSize; x++)
-                        {
-                            Vector2 uv = uvStart + new Vector2(x * heightmapSizeInv, z * heightmapSizeInv) * uvPerPatch;
-
-                            if (heightMapImage != null)
-                            {
-                                Color raw = heightMapImage.GetPixel(x, z);
-                                float normalizedHeight = ReadNormalizedHeight(raw);
-                                heightmapData[z * heightmapSize + x] = raw.r * heightmapScale;
-                            }
-
-                            if (splatMapImage1 != null)
-                            {
-                                Color raw = splatMapImage1.GetPixel(x, z);
-                                splatMapData1[z * heightmapSize + x] = raw;
-                            }
-
-                            if (splatMapImage2 != null)
-                            {
-                                Color raw = splatMapImage2.GetPixel(x, z);
-                                splatMapData2[z * heightmapSize + x] = raw;
-                            }
-                        }
-                    }
-
-                    patch.Init(chunkSize, heightmapData, splatMapData1, splatMapData2);
-                }
-
-                GD.Print("[Patch][" + patchId + "] Init time " + (OS.GetTicksMsec() - start) + " ms");
-                patchId++;
+                return Error.FileNotFound;
             }
 
+            if (algo == HeightmapAlgo.R16)
+            {
+                if (heightMapImage.GetFormat() != Image.Format.L8)
+                {
+                    GD.PrintErr("The R16 Algorithm needs a 16bit Image with one channel (red).");
+                    return Error.FileCorrupt;
+                }
+            }
+            if (algo == HeightmapAlgo.RGB8_Full)
+            {
+                if (heightMapImage.GetFormat() != Image.Format.Rgb8 && heightMapImage.GetFormat() != Image.Format.Rgba8)
+                {
+                    GD.PrintErr("The RGB8 Algorithm needs a 8bit RGB or RGBA Image.");
+                    return Error.FileCorrupt;
+                }
+            }
+            if (algo == HeightmapAlgo.RGBA8_Half || algo == HeightmapAlgo.RGBA8_Normal)
+            {
+                if (heightMapImage.GetFormat() != Image.Format.Rgba8)
+                {
+                    GD.PrintErr("The RGB8 Algorithm needs a 8bit RGBA Image.");
+                    return Error.FileCorrupt;
+                }
+            }
 
-            Draw();
+            float[] heightmapData = new float[patch.info.heightMapSize * patch.info.heightMapSize];
+            
+            for (int z = 0; z < patch.info.heightMapSize; z++)
+            {
+                for (int x = 0; x < patch.info.heightMapSize; x++)
+                {
+                    Color raw = heightMapImage.GetPixel(x, z);
+                    if (algo == HeightmapAlgo.RGBA8_Half) //my tool 
+                    {
+                        float normalizedHeight = TerrainByteConverter.ReadNormalizedHeight16Bit(raw);
+                        heightmapData[z * patch.info.heightMapSize + x] = normalizedHeight * heightmapScale;
+                    }
+                    else if (algo == HeightmapAlgo.RGB8_Full) //mapbox default
+                    {
+                        float height = -10000f + ((raw.r8 * 256f * 256f + raw.g8 * 256f + raw.b8) * 0.1f);
+                        float normalizedHeight = height / 50; //reduce because 24bit of mapbox
 
-            var kmX = getBounds().Size.x * 0.00001f;
-            var kmY = getBounds().Size.z * 0.00001f;
+                        heightmapData[z * patch.info.heightMapSize + x] = normalizedHeight * heightmapScale;
+                    }
+                    else if (algo == HeightmapAlgo.R16) //industrial default
+                    {
+                        heightmapData[z * patch.info.heightMapSize + x] = raw.r * heightmapScale;
+                    }
+                }
+            }
 
-            GD.Print("[Init Size] " + kmX + "x" + kmY + "km");
+            patch.createHeightmap(heightmapData);
+            return Error.Ok;
         }
 
-        public float ReadNormalizedHeight(Color raw)
+        /**
+        * Load splatmap from given image
+        */
+        public Error loadSplatmapFromImage(Vector2i patchCoord, int idx, Image splatmapImage)
         {
-            var test = raw.r8 | (raw.g8 << 8);
-            UInt16 quantizedHeight = Convert.ToUInt16(test);
+            var patch = GetPatch(patchCoord.x, patchCoord.y);
+            if (patch == null || splatmapImage == null)
+            {
+                return Error.FileNotFound;
+            }
 
-            float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
-            return normalizedHeight;
+            Color[] splatmapData = new Color[patch.info.heightMapSize * patch.info.heightMapSize];
+
+            for (int z = 0; z < patch.info.heightMapSize; z++)
+            {
+                for (int x = 0; x < patch.info.heightMapSize; x++)
+                {
+                    splatmapData[z * patch.info.heightMapSize + x] = splatmapImage.GetPixel(x, z);
+                }
+            }
+
+            patch.createSplatmap(idx, splatmapData);
+            return Error.Ok;
         }
-        private void Draw()
+
+        public Error Draw()
         {
+            ClearDraw();
+
+            if (terrainPatches.Count <= 0)
+            {
+                return Error.FileNotFound;
+            }
+
             CacheNeighbors();
 
             int patchId = 0;
@@ -207,6 +252,14 @@ namespace TerrainEditor
             }
 
             UpdateGizmo();
+
+
+            var kmX = getBounds().Size.x * 0.00001f;
+            var kmY = getBounds().Size.z * 0.00001f;
+
+            GD.Print("[Draw Size] " + kmX + "x" + kmY + "km");
+
+            return Error.Ok;
         }
 
         public override void _Notification(int what)

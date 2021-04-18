@@ -30,6 +30,7 @@ namespace TerrainEditor
         private SpinBox patchYControl = new SpinBox();
         private SpinBox importHeightScale = new SpinBox();
         private OptionButton chunkSizeControl = new OptionButton();
+        private OptionButton heightmapAlgoControl = new OptionButton();
         private Button chooseTextureButton = new Button();
         private Button chooseTextureSplatmap1Button = new Button();
         private Button chooseTextureSplatmap2Button = new Button();
@@ -329,6 +330,7 @@ namespace TerrainEditor
             var base_control = editor_interface.GetBaseControl();
 
             var script = GD.Load<Script>("res://addons/TerrainPlugin/Terrain3D.cs");
+            var scriptMapBox = GD.Load<Script>("res://addons/TerrainPlugin/TerrainMapBox3D.cs");
             var scriptPatch = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatch.cs");
             var scriptPatchhInfo = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatchInfo.cs");
             var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
@@ -338,6 +340,7 @@ namespace TerrainEditor
             AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);
             AddCustomType("TerrainChunk", "Resource", scriptChunk, texture);
             AddCustomType("Terrain3D", "Node3D", script, texture);
+            AddCustomType("TerrainMapBox3D", "Node3D", scriptMapBox, texture);
 
             menuButton.SwitchOnHover = true;
             menuButton.Text = "Terrain";
@@ -346,6 +349,7 @@ namespace TerrainEditor
             menuButton.GetPopup().AddItem("Create terrain", 0);
             menuButton.GetPopup().AddItem("Export heightmap (16bit)", 1);
             menuButton.GetPopup().AddItem("Export splatmap (16bit)", 2);
+            menuButton.GetPopup().AddItem("Mapbox import", 3);
 
             menuButton.Visible = false;
             menuButton.GetPopup().Connect("id_pressed", new Callable(this, "openCreateMenu"));
@@ -419,6 +423,11 @@ namespace TerrainEditor
             {
                 fileDialogExport.MinSize = new Vector2i(400, 400);
                 fileDialogExport.PopupCentered();
+            }
+            else if (id == 3)
+            {
+                if (selectedTerrain is TerrainMapBox3D)
+                    (selectedTerrain as TerrainMapBox3D).addMapBoxTile();
             }
         }
 
@@ -581,7 +590,7 @@ namespace TerrainEditor
             fileDialogExport.FileMode = FileDialog.FileModeEnum.SaveFile;
             fileDialogExport.ClearFilters();
             fileDialogExport.AddFilter("*.raw ; 16bit Raw Image");
-            
+
 
             var vbox = new VBoxContainer();
             createDialog.AddChild(vbox);
@@ -605,11 +614,20 @@ namespace TerrainEditor
             chunkSizeControl.AddItem("256", 3);
             chunkSizeControl.Selected = 0;
 
+            heightmapAlgoControl.AddItem("R16", 0);
+            heightmapAlgoControl.AddItem("RGBA8_Normal", 1);
+            heightmapAlgoControl.AddItem("RGBA8_Half", 2);
+            heightmapAlgoControl.AddItem("RGB8_Full", 3);
+
+            heightmapAlgoControl.Selected = 0;
+
             createMarginInput(vbox, "Patch X Size", patchYControl);
             createMarginInput(vbox, "Patch Y Size", patchXControl);
             createMarginInput(vbox, "Chunk Size", chunkSizeControl);
 
-            createMarginInput(vbox, "Choose texture", chooseTextureButton);
+            createMarginInput(vbox, "Choose heightmap", chooseTextureButton);
+            createMarginInput(vbox, "Heightmap algo", heightmapAlgoControl);
+
             createMarginInput(vbox, "Choose splatmap1", chooseTextureSplatmap1Button);
             createMarginInput(vbox, "Choose splatmap2", chooseTextureSplatmap2Button);
 
@@ -622,6 +640,8 @@ namespace TerrainEditor
         {
             if (selectedTerrain != null)
             {
+                var typeImport = (HeightmapAlgo) heightmapAlgoControl.GetSelectedId();
+
                 var chunkSize = int.Parse(chunkSizeControl.GetItemText(chunkSizeControl.GetSelectedId()));
                 var patchX = (int)patchXControl.Value;
                 var patchY = (int)patchYControl.Value;
@@ -650,7 +670,18 @@ namespace TerrainEditor
                     splatmap2Image.Load(splatmapPath2);
                 }
 
-                selectedTerrain.Generate(patchX, patchY, chunkSize, heightScale, heightMapImage, splatmap1Image, splatmap2Image);
+                selectedTerrain.CreatePatchGrid(patchX, patchY, chunkSize);
+                GD.Print(typeImport);
+                if (heightMapImage != null)
+                    selectedTerrain.loadHeightmapFromImage(new Vector2i(0, 0), heightMapImage, typeImport);
+
+                if (splatmapPath1 != null)
+                    selectedTerrain.loadSplatmapFromImage(new Vector2i(0, 0), 0, splatmap1Image);
+
+                if (splatmap2Image != null)
+                    selectedTerrain.loadSplatmapFromImage(new Vector2i(0, 0), 1, splatmap2Image);
+
+                selectedTerrain.Draw();
             }
         }
 
@@ -673,7 +704,7 @@ namespace TerrainEditor
 
         private void openFileDialog()
         {
-            fileDialog.MinSize = new Vector2i(400,400);
+            fileDialog.MinSize = new Vector2i(400, 400);
             fileDialog.PopupCentered();
         }
 
@@ -829,6 +860,7 @@ namespace TerrainEditor
                 RemoveControlFromDocks(editorPanel);
 
             RemoveCustomType("Terrain3D");
+            RemoveCustomType("TerrainMapBox3D");
             RemoveCustomType("TerrainPatch");
             RemoveCustomType("TerrainPatchInfo");
             RemoveCustomType("TerrainChunk");

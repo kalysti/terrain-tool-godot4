@@ -11,7 +11,6 @@ namespace TerrainEditor
         public Godot.Collections.Array<TerrainPatch> terrainPatches = new Godot.Collections.Array<TerrainPatch>();
         public ShaderMaterial terrainDefaultMaterial { get; set; }
 
-        public int chunkSize = 32;
         public uint collisionLayer = 1;
         public uint collisionMask = 1;
         public bool collsionEnabled = true;

@@ -46,21 +46,20 @@ namespace TerrainEditor
             return cachedHolesMask;
         }
 
-        public Color[] CacheSplatMap(int id)
+        public Color[] CacheSplatMap(int idx)
         {
-            if (cachedSplatMap == null || cachedSplatMap.Count != 2)
+            if (cachedSplatMap == null || cachedSplatMap.Count < (idx + 1))
             {
-                cachedSplatMap = new Godot.Collections.Array<Color[]>();
-                cachedSplatMap.Resize(2);
+                cachedSplatMap.Resize(idx +1);
             }
 
-            if (cachedSplatMap.Count < id || cachedSplatMap[id] == null || cachedSplatMap[id].Length <= 0)
+            if (cachedSplatMap.Count < idx || cachedSplatMap[idx] == null || cachedSplatMap[idx].Length <= 0)
             {
                 var splatmapGen = new TerrainSplatMapGenerator(this);
-                return splatmapGen.CacheSplatmap(id);
+                return splatmapGen.CacheSplatmap(idx);
             }
             else
-                return cachedSplatMap[id];
+                return cachedSplatMap[idx];
         }
     }
 }

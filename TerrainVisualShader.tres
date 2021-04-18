@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=56 format=2]
+[gd_resource type="ShaderMaterial" load_steps=57 format=2]
 
 [ext_resource path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" type="Script" id=1]
 [ext_resource path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" type="Script" id=2]
@@ -137,35 +137,39 @@ script = ExtResource( 7 )
 default_input_values = [  ]
 constant = 1.0
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=27]
+[sub_resource type="VisualShaderNodeMix" id=27]
+default_input_values = [ 0, Vector3( 0, 0, 0 ), 1, Vector3( 1, 1, 1 ), 2, Vector3( 0.5, 0.5, 0.5 ) ]
+op_type = 1
+
+[sub_resource type="VisualShaderNodeTextureUniform" id=28]
 default_input_values = [  ]
 uniform_name = "Layer_1"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=28]
+[sub_resource type="VisualShaderNodeTextureUniform" id=29]
 default_input_values = [  ]
 uniform_name = "Layer_1_Rough"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=29]
+[sub_resource type="VisualShaderNodeTextureUniform" id=30]
 default_input_values = [  ]
 uniform_name = "Layer_1_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id=30]
+[sub_resource type="VisualShaderNodeTextureUniform" id=31]
 default_input_values = [  ]
 uniform_name = "Layer_2_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeVec3Constant" id=31]
+[sub_resource type="VisualShaderNodeVec3Constant" id=32]
 default_input_values = [  ]
 constant = Vector3( 0.5, 0.5, 0.5 )
 
-[sub_resource type="VisualShaderNodeCustom" id=32]
+[sub_resource type="VisualShaderNodeCustom" id=33]
 default_input_values = [ 0, Vector3( 0, 0, 0 ) ]
 script = ExtResource( 1 )
 
-[sub_resource type="VisualShader" id=33]
+[sub_resource type="VisualShader" id=34]
 code = "shader_type spatial;
 render_mode depth_draw_always, specular_schlick_ggx;
 
@@ -199,8 +203,8 @@ uniform sampler2D Layer_3_AO : hint_albedo;
 		uniform float terrainCurrentLodLevel = 0;
 		uniform bool terrainSmoothing = false;
 		
-		uniform sampler2D terrainSplatmap1 : hint_albedo, filter_linear, repeat_disable;
-		uniform sampler2D terrainSplatmap2 : hint_albedo, filter_linear, repeat_disable;
+		uniform sampler2D terrainSplatmap1 : filter_linear, repeat_disable;
+		uniform sampler2D terrainSplatmap2 : filter_linear, repeat_disable;
 
 		float calculateLOD(bool _smoothing, float _currentLod, vec4 _neighborLod, vec2 xy, vec4 morph)
 		{
@@ -332,65 +336,6 @@ uniform sampler2D Layer_3_AO : hint_albedo;
 		}
 
 	
-// UVMultiply3D
-
-	
-	
-// AntiTiling3D
-
-		float rand(vec2 input) {
-			return fract(sin(dot(input.xy, vec2(12.9898,78.233))) * 43758.5453123);
-		}
-
-		vec2 rotatedUV(vec2 uv, float tiling, float randomize_rotation)
-		{
-			vec2 tiled_UV_raw = uv * tiling;
-			vec2 tiled_UV = fract(tiled_UV_raw) - 0.5f;
-			
-			vec2 unique_val = floor(uv * tiling) / tiling;
-			float rotation = (rand(unique_val) * 2.0f - 1.0f) * randomize_rotation * 3.14f;
-			float cosine = cos(rotation);
-			float sine = sin(rotation);
-			mat2 rotation_mat = mat2(vec2(cosine, -sine), vec2(sine, cosine));
-			return rotation_mat * tiled_UV + 0.5f;
-		}
-		
-	
-// SplatmapHeight3D
-
-
-		vec4 getSplatmap(vec2 uv, float _terrainChunkSize, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
-			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
-
-			float currentChunkSize = (_terrainChunkSize / 100f + 1f) * 4f;
-			float extraPolate = 0.5f / currentChunkSize;
-			heightmapUVs = heightmapUVs + vec2(extraPolate, extraPolate);
-
-			return textureLod(heightmap, heightmapUVs, currentLODLevel);
-		}
-		
-	
-// DepthBlending3D
-
-
-		vec3 HeightBlend(float blending, vec3 input1, float height1, vec3 input2, float height2)
-		{
-			float height_start = max(height1, height2) - blending;
-			float b1 = max(height1 - height_start, 0f);
-			float b2 = max(height2 - height_start, 0f);
-			return ((input1 * b1) + (input2 * b2)) / (b1 + b2);
-		}
-
-		vec3 HeightLerp(float blending, vec3 input1, float height1, vec3 input2, float height2, float lerp)
-		{
-			return HeightBlend(blending, input1, height1 * (1f - lerp), input2, height2 * lerp);
-		}
-
-	
-// TextureUnpack3D
-
-	
-	
 // TerrainMaterial3D
 
 
@@ -485,6 +430,65 @@ uniform sampler2D Layer_3_AO : hint_albedo;
 		}
 
 	
+// UVMultiply3D
+
+	
+	
+// AntiTiling3D
+
+		float rand(vec2 input) {
+			return fract(sin(dot(input.xy, vec2(12.9898,78.233))) * 43758.5453123);
+		}
+
+		vec2 rotatedUV(vec2 uv, float tiling, float randomize_rotation)
+		{
+			vec2 tiled_UV_raw = uv * tiling;
+			vec2 tiled_UV = fract(tiled_UV_raw) - 0.5f;
+			
+			vec2 unique_val = floor(uv * tiling) / tiling;
+			float rotation = (rand(unique_val) * 2.0f - 1.0f) * randomize_rotation * 3.14f;
+			float cosine = cos(rotation);
+			float sine = sin(rotation);
+			mat2 rotation_mat = mat2(vec2(cosine, -sine), vec2(sine, cosine));
+			return rotation_mat * tiled_UV + 0.5f;
+		}
+		
+	
+// SplatmapHeight3D
+
+
+		vec4 getSplatmap(vec2 uv, float _terrainChunkSize, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
+			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
+
+			float currentChunkSize = (_terrainChunkSize / 100f + 1f) * 4f;
+			float extraPolate = 0.5f / currentChunkSize;
+			heightmapUVs = heightmapUVs + vec2(extraPolate, extraPolate);
+
+			return textureLod(heightmap, heightmapUVs, currentLODLevel);
+		}
+		
+	
+// DepthBlending3D
+
+
+		vec3 HeightBlend(float blending, vec3 input1, float height1, vec3 input2, float height2)
+		{
+			float height_start = max(height1, height2) - blending;
+			float b1 = max(height1 - height_start, 0f);
+			float b2 = max(height2 - height_start, 0f);
+			return ((input1 * b1) + (input2 * b2)) / (b1 + b2);
+		}
+
+		vec3 HeightLerp(float blending, vec3 input1, float height1, vec3 input2, float height2, float lerp)
+		{
+			return HeightBlend(blending, input1, height1 * (1f - lerp), input2, height2 * lerp);
+		}
+
+	
+// TextureUnpack3D
+
+	
+	
 
 void vertex() {
 // TerrainGenerator3D:2
@@ -525,6 +529,15 @@ void vertex() {
 }
 
 void fragment() {
+// TerrainMaterial3D:26
+	vec3 n_out26p0;
+	vec3 n_out26p1;
+	{
+		vec4 material = texture(terrainDefaultMaterial, UV);
+		n_out26p0 = genInspectorHighliteTerrain(BrushColor, BrushData0, BrushData1, CAMERA_MATRIX, VERTEX);
+		n_out26p1 = material.rgb;
+	}
+
 // Vector:33
 	vec3 n_out33p0 = vec3(75.000000, 75.000000, 75.000000);
 
@@ -746,20 +759,15 @@ void fragment() {
 		n_out24p4 = n_out23p0[3].b;
 	}
 
-// TerrainMaterial3D:26
-	vec3 n_out26p0;
-	vec3 n_out26p1;
-	{
-		vec4 material = texture(terrainDefaultMaterial, UV);
-		n_out26p0 = genInspectorHighliteTerrain(BrushColor, BrushData0, BrushData1, CAMERA_MATRIX, VERTEX);
-		n_out26p1 = material.rgb;
-	}
+// Mix:36
+	vec3 n_in36p2 = vec3(0.50000, 0.50000, 0.50000);
+	vec3 n_out36p0 = mix(n_out26p1, n_out24p0, n_in36p2);
 
 // ScalarFloat:35
 	float n_out35p0 = 1.000000;
 
 // Output:0
-	ALBEDO = n_out24p0;
+	ALBEDO = n_out36p0;
 	ROUGHNESS = n_out24p3;
 	EMISSION = n_out26p0;
 	AO = n_out24p4;
@@ -777,25 +785,25 @@ void light() {
 
 }
 "
-graph_offset = Vector2( -767.021, -19 )
+graph_offset = Vector2( 1647.64, -117.668 )
 version = "4.0"
 modes/depth_draw = 1
 nodes/vertex/0/position = Vector2( 1120, -320 )
-nodes/vertex/2/node = SubResource( 32 )
+nodes/vertex/2/node = SubResource( 33 )
 nodes/vertex/2/position = Vector2( 560, -280 )
 nodes/vertex/connections = PackedInt32Array( 2, 0, 0, 0, 2, 4, 0, 3, 2, 3, 0, 2, 2, 2, 0, 1 )
-nodes/fragment/0/position = Vector2( 1460, 120 )
+nodes/fragment/0/position = Vector2( 2160, 40 )
 nodes/fragment/2/node = SubResource( 11 )
 nodes/fragment/2/position = Vector2( -280, -120 )
 nodes/fragment/3/node = SubResource( 21 )
 nodes/fragment/3/position = Vector2( -100, -120 )
-nodes/fragment/6/node = SubResource( 27 )
+nodes/fragment/6/node = SubResource( 28 )
 nodes/fragment/6/position = Vector2( -460, -120 )
-nodes/fragment/7/node = SubResource( 28 )
+nodes/fragment/7/node = SubResource( 29 )
 nodes/fragment/7/position = Vector2( 80, -120 )
-nodes/fragment/8/node = SubResource( 29 )
+nodes/fragment/8/node = SubResource( 30 )
 nodes/fragment/8/position = Vector2( 280, -120 )
-nodes/fragment/9/node = SubResource( 30 )
+nodes/fragment/9/node = SubResource( 31 )
 nodes/fragment/9/position = Vector2( 280, 140 )
 nodes/fragment/10/node = SubResource( 1 )
 nodes/fragment/10/position = Vector2( 80, 140 )
@@ -830,7 +838,7 @@ nodes/fragment/24/position = Vector2( 1720, -180 )
 nodes/fragment/25/node = SubResource( 17 )
 nodes/fragment/25/position = Vector2( 260, 80 )
 nodes/fragment/26/node = SubResource( 18 )
-nodes/fragment/26/position = Vector2( 1720, -20 )
+nodes/fragment/26/position = Vector2( 1920, -100 )
 nodes/fragment/28/node = SubResource( 19 )
 nodes/fragment/28/position = Vector2( 540, 60 )
 nodes/fragment/29/node = SubResource( 20 )
@@ -845,14 +853,16 @@ nodes/fragment/34/node = SubResource( 25 )
 nodes/fragment/34/position = Vector2( 960, -60 )
 nodes/fragment/35/node = SubResource( 26 )
 nodes/fragment/35/position = Vector2( 1720, 40 )
-nodes/fragment/connections = PackedInt32Array( 8, 2, 19, 4, 7, 2, 19, 3, 3, 2, 19, 2, 2, 2, 19, 1, 6, 2, 19, 0, 9, 2, 20, 4, 10, 2, 20, 3, 11, 2, 20, 2, 12, 2, 20, 1, 13, 2, 20, 0, 17, 2, 21, 4, 16, 2, 21, 3, 15, 2, 21, 2, 14, 2, 21, 1, 18, 2, 21, 0, 22, 0, 23, 0, 21, 0, 23, 1, 25, 0, 19, 5, 25, 0, 20, 5, 25, 0, 21, 5, 28, 0, 19, 8, 29, 0, 20, 8, 30, 0, 21, 8, 31, 0, 22, 3, 26, 0, 0, 5, 31, 0, 23, 3, 33, 0, 25, 0, 23, 0, 24, 0, 24, 2, 0, 8, 35, 0, 0, 9, 24, 3, 0, 3, 24, 4, 0, 6, 19, 0, 22, 0, 20, 0, 22, 1, 24, 0, 0, 0, 34, 1, 23, 2, 34, 3, 22, 2 )
+nodes/fragment/36/node = SubResource( 27 )
+nodes/fragment/36/position = Vector2( 1960, 0 )
+nodes/fragment/connections = PackedInt32Array( 8, 2, 19, 4, 7, 2, 19, 3, 3, 2, 19, 2, 2, 2, 19, 1, 6, 2, 19, 0, 9, 2, 20, 4, 10, 2, 20, 3, 11, 2, 20, 2, 12, 2, 20, 1, 13, 2, 20, 0, 17, 2, 21, 4, 16, 2, 21, 3, 15, 2, 21, 2, 14, 2, 21, 1, 18, 2, 21, 0, 22, 0, 23, 0, 21, 0, 23, 1, 25, 0, 19, 5, 25, 0, 20, 5, 25, 0, 21, 5, 28, 0, 19, 8, 29, 0, 20, 8, 30, 0, 21, 8, 31, 0, 22, 3, 26, 0, 0, 5, 31, 0, 23, 3, 33, 0, 25, 0, 23, 0, 24, 0, 24, 2, 0, 8, 35, 0, 0, 9, 24, 3, 0, 3, 24, 4, 0, 6, 19, 0, 22, 0, 20, 0, 22, 1, 34, 1, 23, 2, 34, 3, 22, 2, 26, 1, 36, 0, 24, 0, 36, 1, 36, 0, 0, 0 )
 nodes/light/0/position = Vector2( 440, 160 )
-nodes/light/2/node = SubResource( 31 )
+nodes/light/2/node = SubResource( 32 )
 nodes/light/2/position = Vector2( 66.5184, 117.228 )
 nodes/light/connections = PackedInt32Array( 2, 0, 0, 0 )
 
 [resource]
-shader = SubResource( 33 )
+shader = SubResource( 34 )
 shader_param/terrainUvScale = null
 shader_param/terrainUvOffset = null
 shader_param/terrainChunkSize = null
