@@ -35,6 +35,9 @@ namespace TerrainEditor
         //cache for meshes
         public Godot.Collections.Dictionary<int, ArrayMesh> meshCache = new Godot.Collections.Dictionary<int, ArrayMesh>();
 
+
+        [Export]
+        public ArrayMesh currentMesh = null;
         /**
          * Clear rendering device by removing body and collider
          */
@@ -161,7 +164,8 @@ namespace TerrainEditor
                 splatmapGen.WriteColors(ref splatmapData, ref splatmapDataImport);
                 splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
             }
-
+            
+         
             splatmapTexture.CreateFromImage(splatmapImage);
             splatmaps.Add(splatmapTexture);
 
@@ -207,6 +211,8 @@ namespace TerrainEditor
             UpdatePosition(terrainNode);
 
             terrainNode.UpdateGizmo();
+
+            currentMesh = meshCache[0];
         }
 
 

@@ -33,7 +33,7 @@ namespace TerrainEditor.Generators
         /**
          * Convert RGBA Buffer to T buffer (faster reading)
          **/
-        protected static byte[] ToByteArray<T>(T[] source) where T : struct
+        public static byte[] ToByteArray<T>(T[] source) where T : struct
         {
             GCHandle handle = GCHandle.Alloc(source, GCHandleType.Pinned);
             try

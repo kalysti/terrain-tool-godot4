@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Godot;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace TerrainEditor
 {
@@ -13,7 +14,7 @@ namespace TerrainEditor
     public partial class Terrain3D : Node3D
     {
         //count of chunks per patch
-        public const int PATCH_CHUNKS_AMOUNT = 16; 
+        public const int PATCH_CHUNKS_AMOUNT = 16;
 
         //edges per chunk
         public const int PATCH_CHUNK_EDGES = 4;
@@ -63,7 +64,7 @@ namespace TerrainEditor
         {
             return terrainPatches.Count;
         }
-        
+
         public TerrainPatch GetPatch(int idx)
         {
             if (terrainPatches.Count >= idx)
@@ -72,6 +73,22 @@ namespace TerrainEditor
                 return null;
         }
 
+        public static T[] FromByteArray<T>(byte[] source) where T : struct
+        {
+            T[] destination = new T[source.Length / Marshal.SizeOf(typeof(T))];
+            GCHandle handle = GCHandle.Alloc(destination, GCHandleType.Pinned);
+            try
+            {
+                IntPtr pointer = handle.AddrOfPinnedObject();
+                Marshal.Copy(source, 0, pointer, source.Length);
+                return destination;
+            }
+            finally
+            {
+                if (handle.IsAllocated)
+                    handle.Free();
+            }
+        }
 
         public void Generate(int patchX, int patchY, int chunkSize, float heightmapScale = 5000, Image heightMapImage = null, Image splatMapImage1 = null, Image splatMapImage2 = null)
         {
@@ -119,8 +136,11 @@ namespace TerrainEditor
 
                     Vector2 uvPerPatch = Vector2.One / new Vector2(patchX, patchY);
                     float heightmapSizeInv = 1.0f / (heightmapSize - 1);
+                    var byteData = FromByteArray<UInt16>(heightMapImage.GetData());
 
                     Vector2 uvStart = new Vector2(patch.patchCoord.x, patch.patchCoord.y) * uvPerPatch;
+                    GD.Print("data length: " + byteData.Length);
+
                     for (int z = 0; z < heightmapSize; z++)
                     {
                         for (int x = 0; x < heightmapSize; x++)
@@ -131,8 +151,7 @@ namespace TerrainEditor
                             {
                                 Color raw = heightMapImage.GetPixel(x, z);
                                 float normalizedHeight = ReadNormalizedHeight(raw);
-
-                                heightmapData[z * heightmapSize + x] = normalizedHeight * heightmapScale;
+                                heightmapData[z * heightmapSize + x] = raw.r * heightmapScale;
                             }
 
                             if (splatMapImage1 != null)

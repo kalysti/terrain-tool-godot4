@@ -69,5 +69,11 @@ namespace TerrainEditor
         public byte a;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct R16
+    {
+        public UInt16 r;
+    }
+
 
 }

@@ -82,7 +82,6 @@ namespace TerrainEditor
             {
                 RenderingServer.FreeRid(instanceRid);
             }
-
             mesh = null;
             materialInUse = null;
             meshId = null;
@@ -221,12 +220,13 @@ namespace TerrainEditor
             RenderingServer.InstanceAttachObjectInstanceId(instanceRid, tf.GetInstanceId()); // attach to node
             RenderingServer.MeshSetCustomAabb(meshId, new AABB(new Vector3(), new Vector3(size, height, size)));
             RenderingServer.InstanceSetCustomAabb(instanceRid, new AABB(new Vector3(), new Vector3(size, height, size)));
-
+        
             materialInUse = mat.Duplicate() as Material;
             materialId = materialInUse.GetRid();
 
             RenderingServer.InstanceGeometrySetMaterialOverride(instanceRid, materialId);
             var nextChunkSizeLod = (float)(((info.chunkSize + 1) >> (lod + 1)) - 1);
+            
 
             RenderingServer.MaterialSetParam(materialId, "terrainHeightMap", heightMap);
             RenderingServer.MaterialSetParam(materialId, "terrainChunkSize", TerrainChunkSizeLOD0);
@@ -255,7 +255,9 @@ namespace TerrainEditor
             if (!tf.IsInsideTree())
                 return;
 
+            RenderingServer.InstanceSetVisible(instanceRid, tf.IsVisibleInTree());
             RenderingServer.InstanceGeometrySetCastShadowsSetting(instanceRid, tf.castShadow);
+
             switch (tf.giMode)
             {
                 case GIMode.Disabled:
@@ -278,10 +280,9 @@ namespace TerrainEditor
                     }
                     break;
             }
-            
+
             RenderingServer.InstanceGeometrySetDrawRange(instanceRid, tf.lodMinDistance, tf.lodMaxDistance, tf.lodMinHysteresis, tf.lodMaxHysteresis);
             RenderingServer.InstanceSetExtraVisibilityMargin(instanceRid, tf.extraCullMargin);
-            RenderingServer.InstanceSetVisible(instanceRid, tf.IsVisibleInTree());
         }
 
         /**
@@ -304,8 +305,13 @@ namespace TerrainEditor
 
             float vertexTexelSnapTexCoord = 1.0f / chunkSize;
 
+            GD.Print(vertexTexelSnapTexCoord);
+            GD.Print(chunkSize);
+
             var st = new SurfaceTool();
             st.Begin(Mesh.PrimitiveType.Triangles);
+
+            GD.Print("cound edges;" + vertexCount);
             for (int z = 0; z < vertexCount; z++)
             {
                 for (int x = 0; x < vertexCount; x++)
@@ -326,8 +332,8 @@ namespace TerrainEditor
 
 
                     st.SetColor(color);
-                    st.SetUv(new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord));
-
+                    var uv = new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord);
+                    st.SetUv(uv);
 
                     st.SetNormal(Vector3.Up);
                     st.AddVertex(buff); //x

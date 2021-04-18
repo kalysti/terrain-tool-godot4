@@ -33,8 +33,13 @@ func _get_output_port_type(port):
 func _get_global_code(mode):
 	return """
 
-		vec4 getSplatmap(vec2 uv, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
+		vec4 getSplatmap(vec2 uv, float _terrainChunkSize, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
 			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
+
+			float currentChunkSize = (_terrainChunkSize / 100f + 1f) * 4f;
+			float extraPolate = 0.5f / currentChunkSize;
+			heightmapUVs = heightmapUVs + vec2(extraPolate, extraPolate);
+
 			return textureLod(heightmap, heightmapUVs, currentLODLevel);
 		}
 		
@@ -45,8 +50,8 @@ func _get_code(input_vars, output_vars, mode, type):
 
 	var heightStr = ""
 	if type == 1:
-		heightStr = "vec4 splatmap1Values = getSplatmap(UV, terrainUvScale, terrainSplatmap1, terrainCurrentLodLevel);\n"
-		heightStr += "vec4 splatmap2Values = getSplatmap(UV, terrainUvScale, terrainSplatmap2, terrainCurrentLodLevel);\n"
+		heightStr = "vec4 splatmap1Values = getSplatmap(UV, terrainChunkSize, terrainUvScale, terrainSplatmap1, terrainCurrentLodLevel);\n"
+		heightStr += "vec4 splatmap2Values = getSplatmap(UV, terrainChunkSize,  terrainUvScale, terrainSplatmap2, terrainCurrentLodLevel);\n"
 
 		heightStr += output_vars[0] + " = splatmap1Values.r;\n"
 		heightStr += output_vars[1] + " = splatmap1Values.g;\n"

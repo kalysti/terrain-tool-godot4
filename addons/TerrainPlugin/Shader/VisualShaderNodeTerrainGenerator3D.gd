@@ -70,7 +70,7 @@ func _get_global_code(mode):
 
 		uniform vec4 terrainUvScale;
 		uniform vec2 terrainUvOffset;
-		uniform sampler2D terrainHeightMap;
+		uniform sampler2D terrainHeightMap : filter_linear, repeat_disable;
 
 		uniform float terrainChunkSize = 0;
 		uniform float terrainNextLodChunkSize = 0;
@@ -78,9 +78,8 @@ func _get_global_code(mode):
 		uniform float terrainCurrentLodLevel = 0;
 		uniform bool terrainSmoothing = false;
 		
-		uniform sampler2D terrainSplatmap1 : hint_albedo;
-		uniform sampler2D terrainSplatmap2 : hint_albedo;
-		uniform bool terrainSplatMapDebug = false;
+		uniform sampler2D terrainSplatmap1 : filter_linear, repeat_disable;
+		uniform sampler2D terrainSplatmap2 : filter_linear, repeat_disable;
 
 		float calculateLOD(bool _smoothing, float _currentLod, vec4 _neighborLod, vec2 xy, vec4 morph)
 		{
@@ -175,7 +174,7 @@ func _get_global_code(mode):
 	
 		}
 
-		vec4 getHeightmap(vec2 uv, bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
+		vec4 getHeightmap(vec2 uv, float _terrainChunkSize,  bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
 
 			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
 
@@ -220,7 +219,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr += "float lodValue = terrainCurrentLodLevel;";
 	heightStr += "float morphAlpha = lodCalculated - terrainCurrentLodLevel;";
 	
-	heightStr += "vec4 heightMapValues = getHeightmap(UV, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);\n"
+	heightStr += "vec4 heightMapValues = getHeightmap(UV, terrainChunkSize, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);\n"
 	heightStr += "float height = getHeight(heightMapValues);\n"
 	
 	heightStr += "vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);\n"
