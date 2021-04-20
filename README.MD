@@ -31,9 +31,22 @@ Each chunk have a chunk size of power of 2 - 1.
 	- Smooth, Linear, Spherical, Tip by given radius, strength and fallof
 - Importing and exporting heightmaps and splatmaps for 16bit raw images (industrial default)
 
-## Internal format
+## Import formats
+Currently the tool supports 4 kinds of importing heightmaps.
 
-Import and export of heightmaps are in 16bit raw
+- R16
+	- Importing heightmaps by a 16 Bit (L8) Format (Industrial deault)
+- RGBA8_Half
+	- Importing heightmaps by a RGBA 8Bit Image which splitted the height on the RED and GREEN Channel (16bit) 
+- RGBA8_NORMAL
+	- Is the format which the editor is using (RED = 8 bit height, GREEN = +8 extrabit, BLUE = normal.x, ALPHA = normal.z)
+- RGB_FULL
+	- Importing heightmaps by a RGB 8Bit Image which is using 24bit (Mapbox used that one)
+
+## Mapbox Support
+- Adding a custom node "TerrainMapBox3D" which can downloading datas directly from mapbox and draw it as a terrain
+
+## Internal format
 
 - Heightmap
 	- Format: RGBA8
