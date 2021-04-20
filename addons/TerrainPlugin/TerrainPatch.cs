@@ -28,8 +28,6 @@ namespace TerrainEditor
         [Export]
         public TerrainPatchInfo info = new TerrainPatchInfo();
 
-        //protected RID shapeRid;
-
         protected RID bodyRid;
 
         //cache for meshes
@@ -48,10 +46,10 @@ namespace TerrainEditor
                 chunk.ClearDraw();
             }
 
-          //  if (shapeRid != null)
+            //  if (shapeRid != null)
             {
-              //  PhysicsServer3D.FreeRid(shapeRid);
-               // shapeRid = null;
+                //  PhysicsServer3D.FreeRid(shapeRid);
+                // shapeRid = null;
             }
 
             if (bodyRid != null)
@@ -94,7 +92,7 @@ namespace TerrainEditor
                 chunks.Add(res);
             }
         }
-        
+
         /**
         * Creating a heightmap by given data
         */
@@ -202,7 +200,7 @@ namespace TerrainEditor
             PhysicsServer3D.BodySetSpace(bodyRid, terrainNode.GetWorld3d().Space);
             PhysicsServer3D.BodySetCollisionLayer(bodyRid, terrainNode.collisionLayer);
             PhysicsServer3D.BodySetCollisionMask(bodyRid, terrainNode.collisionMask);
-        //    PhysicsServer3D.BodySetRayPickable(bodyRid, true);
+            //    PhysicsServer3D.BodySetRayPickable(bodyRid, true);
 
             //create cache
             int chunkId = 0;
@@ -254,8 +252,16 @@ namespace TerrainEditor
             GD.Print("[Collider] Creation time " + (OS.GetTicksMsec() - start) + " ms");
         }
 
+        public void DisableCollider(bool disable = false)
+        {
+            if (bodyRid != null)
+                PhysicsServer3D.BodySetShapeDisabled(bodyRid, 0, disable);
+        }
+
         public void UpdateSettings(Terrain3D terrainNode)
         {
+            PhysicsServer3D.BodySetShapeDisabled(bodyRid, 0, terrainNode.IsInsideTree());
+
             foreach (var chunk in chunks)
             {
                 chunk.UpdateSettings(terrainNode);
@@ -488,12 +494,13 @@ namespace TerrainEditor
         {
             PhysicsServer3D.BodySetRayPickable(bodyRid, true);
             PhysicsServer3D.BodySetState(bodyRid, PhysicsServer3D.BodyState.Transform, GetColliderPosition(terrain));
+
         }
 
         /**
          * Get collider position by given terrain node
          */
-        public Transform GetColliderPosition(Terrain3D terrain)
+        public Transform GetColliderPosition(Terrain3D terrain, bool attachScale = true)
         {
             int collisionLOD = 1;
             int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
@@ -507,16 +514,18 @@ namespace TerrainEditor
             transform.origin = terrain.GlobalTransform.origin + new Vector3(chunks[0].TerrainChunkSizeLOD0 * 2, 0, chunks[0].TerrainChunkSizeLOD0 * 2) + offset;
             transform.basis = terrain.GlobalTransform.basis;
 
+            if (attachScale)
+                transform.origin *= terrain.Scale;
+
             var scale = transform.basis.Scale;
             scale.x *= Terrain3D.UNITS_PER_VERTEX;
             scale.z *= Terrain3D.UNITS_PER_VERTEX;
             transform.basis.Scale = scale;
 
+            GD.Print(transform.origin);
+
             return transform;
         }
-
-
-
     }
 
 

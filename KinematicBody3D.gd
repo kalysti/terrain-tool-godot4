@@ -9,7 +9,7 @@ extends KinematicBody3D
 @export var Maximum_Walk_Speed = 10
 @export var Jump_Speed = 2
 
-const GRAVITY = 0.098
+const GRAVITY = 2
 var velocity = Vector3(0,0,0)
 var forward_velocity = 0
 var Walk_Speed = 0

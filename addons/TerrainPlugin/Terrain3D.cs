@@ -14,6 +14,7 @@ namespace TerrainEditor
     [Tool]
     public partial class Terrain3D : Node3D
     {
+
         //count of chunks per patch
         public const int PATCH_CHUNKS_AMOUNT = 16;
 
@@ -22,6 +23,11 @@ namespace TerrainEditor
 
         //units per vertex (also scale factor)
         public const float UNITS_PER_VERTEX = 100.0f;
+
+        public Terrain3D() : base()
+        {
+            SetNotifyTransform(true);
+        }
 
         public void UpdatePosition()
         {
@@ -47,9 +53,6 @@ namespace TerrainEditor
             }
         }
 
-        public  Terrain3D() : base(){
-            SetNotifyTransform(true);
-        }
 
         public TerrainPatch GetPatch(int x, int z)
         {
@@ -278,7 +281,7 @@ namespace TerrainEditor
             }
             else if (what == NotificationTransformChanged)
             {
-              //  UpdatePosition();
+                UpdatePosition();
             }
             else if (what == NotificationVisibilityChanged)
             {

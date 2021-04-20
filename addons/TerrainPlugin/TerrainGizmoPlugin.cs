@@ -228,7 +228,7 @@ namespace TerrainEditor
                     var meshLines = GetDebugMeshLines(patch);
 
                     SurfaceTool st = new SurfaceTool();
-                    var tf = patch.GetColliderPosition(spatial);
+                    var tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
                     tf.origin = tf.origin - spatial.GlobalTransform.origin;
                     st.AppendFrom(GetDebugMesh(meshLines), 0, tf);
                     gizmo.AddMesh(st.Commit(), false, null, GetMaterial("shape_material", gizmo));
