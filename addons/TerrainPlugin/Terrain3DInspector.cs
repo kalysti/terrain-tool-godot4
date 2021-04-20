@@ -35,7 +35,7 @@ namespace TerrainEditor
       
             arr.Add(new Godot.Collections.Dictionary()
             {
-                {"name", "Terrain Group"},
+                {"name", "Terrain3D"},
                 {"type",  Variant.Type.Nil},
                 {"usage", PropertyUsageFlags.Category  | PropertyUsageFlags.Editor}
             });
@@ -109,7 +109,7 @@ namespace TerrainEditor
 
             arr.Add(new Godot.Collections.Dictionary()
             {
-                {"name", "Terrain Geometry"},
+                {"name", "Geometry"},
                { "type",  Variant.Type.Nil},
                 { "usage", PropertyUsageFlags.Group | PropertyUsageFlags.Editor}
             });
@@ -143,7 +143,7 @@ namespace TerrainEditor
 
             arr.Add(new Godot.Collections.Dictionary()
             {
-                {"name", "Terrain Global Illumination"},
+                {"name", "Global Illumination"},
                { "type",  Variant.Type.Nil},
                 { "usage", PropertyUsageFlags.Group | PropertyUsageFlags.Editor}
             });

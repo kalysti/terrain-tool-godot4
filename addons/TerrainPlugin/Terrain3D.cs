@@ -47,6 +47,10 @@ namespace TerrainEditor
             }
         }
 
+        public  Terrain3D() : base(){
+            SetNotifyTransform(true);
+        }
+
         public TerrainPatch GetPatch(int x, int z)
         {
             for (int i = 0; i < terrainPatches.Count(); i++)
@@ -176,7 +180,7 @@ namespace TerrainEditor
             }
 
             float[] heightmapData = new float[patch.info.heightMapSize * patch.info.heightMapSize];
-            
+
             for (int z = 0; z < patch.info.heightMapSize; z++)
             {
                 for (int x = 0; x < patch.info.heightMapSize; x++)
@@ -274,7 +278,7 @@ namespace TerrainEditor
             }
             else if (what == NotificationTransformChanged)
             {
-                UpdatePosition();
+              //  UpdatePosition();
             }
             else if (what == NotificationVisibilityChanged)
             {

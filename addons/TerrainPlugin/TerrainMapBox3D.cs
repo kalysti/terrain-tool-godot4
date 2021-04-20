@@ -16,12 +16,50 @@ namespace TerrainEditor
     [Tool]
     public partial class TerrainMapBox3D : Terrain3D
     {
-        public string accessToken = "pk.eyJ1IjoiaGlnaGNsaWNrZXJzIiwiYSI6ImNrZHdveTAxZjQxOXoyenJvcjlldmpoejEifQ.0LKYqSO1cCQoVCWObvVB5w";
-        public string cachePath = "user://mapCache";
+        public string mapBoxAccessToken = "pk.eyJ1IjoiaGlnaGNsaWNrZXJzIiwiYSI6ImNrZHdveTAxZjQxOXoyenJvcjlldmpoejEifQ.0LKYqSO1cCQoVCWObvVB5w";
+        public string mapBoxCachePath = "user://mapCache";
+
+        public override Godot.Collections.Array _GetPropertyList()
+        {
+            var list = base._GetPropertyList();
+
+            list.Add(new Godot.Collections.Dictionary()
+            {
+                {"name", "Terrain Mapbox"},
+                {"type",  Variant.Type.Nil},
+                {"usage", PropertyUsageFlags.Category  | PropertyUsageFlags.Editor}
+            });
+
+            list.Add(new Godot.Collections.Dictionary()
+            {
+                {"name", "Mapbox Data"},
+                {"type",  Variant.Type.Nil},
+                {"usage", PropertyUsageFlags.Group  | PropertyUsageFlags.Editor},
+                {"hint_string", "mapBox"}
+            });
+
+            list.Add(new Godot.Collections.Dictionary()
+            {
+                {"name", "mapBoxAccessToken"},
+                {"type",  Variant.Type.String},
+                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
+            });
+
+            list.Add(new Godot.Collections.Dictionary()
+            {
+                {"name", "mapBoxCachePath"},
+                {"type",  Variant.Type.String},
+                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
+            });
+
+
+            return list;
+        }
+
         protected void initCacheFolder()
         {
             var dir = new Godot.Directory();
-            if (!dir.DirExists(cachePath))
+            if (!dir.DirExists(mapBoxCachePath))
             {
                 dir.Open("user://");
                 dir.MakeDir("mapCache");
@@ -39,9 +77,10 @@ namespace TerrainEditor
         {
             initCacheFolder();
 
-            var url = "https://api.mapbox.com/v4/mapbox.terrain-rgb/" + zoomLevel + "/" + x + "/" + y + ".pngraw?access_token=" + accessToken;
+            var url = "https://api.mapbox.com/v4/mapbox.terrain-rgb/" + zoomLevel + "/" + x + "/" + y + ".pngraw?access_token=" + mapBoxAccessToken;
+
             var filename = zoomLevel + "_" + x + "_" + y + ".png";
-            var filePath = cachePath + "/" + filename;
+            var filePath = mapBoxCachePath + "/" + filename;
             var fileCheck = new Godot.File();
 
             if (fileCheck.FileExists(filePath))
@@ -83,24 +122,29 @@ namespace TerrainEditor
                 }
             }
         }
-        
-        public void addMapBoxTile(int x = 62360, int y = 48541, int zoomLevel = 17)
-        {
-            this.CreatePatchGrid(1, 1, 64);
 
+        public void testGrid()
+        {
+            this.CreatePatchGrid(1, 4, 64);
+
+            loadTile(new Vector2i(0, 0), 62360, 48541);
+            loadTile(new Vector2i(0, 1), 62360, 48542);
+            loadTile(new Vector2i(0, 2), 62360, 48543);
+            loadTile(new Vector2i(0, 3), 62360, 48544);
+
+            this.Draw();
+
+        }
+
+        public void loadTile(Vector2i patch, int x = 62360, int y = 48541, int zoomLevel = 17)
+        {
             var image = new Image();
             var error = loadHeightmapFromBox(ref image, x, y, zoomLevel);
 
-            if(error == Error.Ok)
+            if (error == Error.Ok)
             {
-                GD.Print(image.GetWidth());
-                GD.Print(image.GetFormat());
-
-                loadHeightmapFromImage(new Vector2i(0, 0), image, HeightmapAlgo.RGB8_Full);
-
+                loadHeightmapFromImage(patch, image, HeightmapAlgo.RGB8_Full);
             }
-
-            this.Draw();
         }
     }
 }

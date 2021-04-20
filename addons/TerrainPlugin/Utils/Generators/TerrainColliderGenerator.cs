@@ -38,6 +38,8 @@ namespace TerrainEditor.Generators
             int heightMapLength = patch.info.heightMapSize * patch.info.heightMapSize;
             var heightField = new float[heightMapLength];
 
+            GD.Print("size:" + patch.info.heightMapSize);
+
             for (int chunkZ = 0; chunkZ < Terrain3D.PATCH_CHUNK_EDGES; chunkZ++)
             {
                 int chunkTextureZ = chunkZ * vertexCountEdgeMip;

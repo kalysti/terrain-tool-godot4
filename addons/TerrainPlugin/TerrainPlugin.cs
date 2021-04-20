@@ -427,7 +427,7 @@ namespace TerrainEditor
             else if (id == 3)
             {
                 if (selectedTerrain is TerrainMapBox3D)
-                    (selectedTerrain as TerrainMapBox3D).addMapBoxTile();
+                    (selectedTerrain as TerrainMapBox3D).testGrid();
             }
         }
 

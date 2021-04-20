@@ -1,4 +1,3 @@
-# PerlinNoise3D.gd
 @tool
 
 extends VisualShaderNodeCustom
@@ -119,7 +118,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr +=  "packedOriginal[0].rgb = colorMap.rgb;\n"
 	heightStr +=  "packedOriginal[1].r = dispMap.r;\n"
 	heightStr +=  "packedOriginal[2].rg = normalMap.rg;\n"
-	heightStr +=  "packedOriginal[3].rg = roughMap.rg;\n"
+	heightStr +=  "packedOriginal[3].r = roughMap.r;\n"
 	heightStr +=  "packedOriginal[3].b = aoMap.r;\n"
 
 	heightStr +=  output_vars[1]+" = packedOriginal;\n"

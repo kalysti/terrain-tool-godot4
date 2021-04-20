@@ -112,6 +112,7 @@ namespace TerrainEditor
             return global;
         }
 
+
         /**
         *  Get the UV Scale for the chunk
         */
@@ -220,7 +221,7 @@ namespace TerrainEditor
             RenderingServer.InstanceAttachObjectInstanceId(instanceRid, tf.GetInstanceId()); // attach to node
             RenderingServer.MeshSetCustomAabb(meshId, new AABB(new Vector3(), new Vector3(size, height, size)));
             RenderingServer.InstanceSetCustomAabb(instanceRid, new AABB(new Vector3(), new Vector3(size, height, size)));
-        
+
             materialInUse = mat.Duplicate() as Material;
             materialId = materialInUse.GetRid();
 
