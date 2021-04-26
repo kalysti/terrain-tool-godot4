@@ -2,9 +2,7 @@
 
 Currently under development. Tool is written for prototyping in c# but will be converted to c++ for the godot core.
 
-## Needs to build godot 4 with a working heightmap collider
- - https://github.com/godotengine/godot/pull/47347 (for godot physics)
- - or https://github.com/godotengine/godot/pull/47508 (bullet physics)
+## Needs a master godot 4 build
 
 ## Read at first
 
