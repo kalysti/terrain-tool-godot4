@@ -1,6 +1,6 @@
 # GODOT 4 Terrain Plugin (GPU Based)
 
-Currently under development. Tool is written for prototyping in c# but will be converted to c++ for the godot core.
+Tool is written for prototyping in c# but will be converted to c++ for the godot core.
 
 ## Needs a master godot 4 build
 
