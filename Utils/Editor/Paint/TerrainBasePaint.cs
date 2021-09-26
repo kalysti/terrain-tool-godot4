@@ -2,7 +2,7 @@ using Godot;
 using System;
 using TerrainEditor;
 
-namespace TerrainEditor.Editor.Paint
+namespace TerrainEditor.Utils.Editor.Paint
 {
     public abstract class TerrainBasePaint
     {

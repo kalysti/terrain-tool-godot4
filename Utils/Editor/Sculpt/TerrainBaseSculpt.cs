@@ -2,7 +2,7 @@ using Godot;
 using System;
 using TerrainEditor;
 
-namespace TerrainEditor.Editor.Sculpt
+namespace TerrainEditor.Utils.Editor.Sculpt
 {
     public abstract class TerrainBaseSculpt
     {

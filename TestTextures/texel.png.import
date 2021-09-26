@@ -2,9 +2,9 @@
 
 importer="texture"
 type="StreamTexture2D"
-uid="uid://cv2xcvofugp3w"
-path.s3tc="res://.godot/imported/Ground037_2K_Displacement.jpg-78b6a739869dd13deabcab1c8d24186f.s3tc.stex"
-path.etc2="res://.godot/imported/Ground037_2K_Displacement.jpg-78b6a739869dd13deabcab1c8d24186f.etc2.stex"
+uid="uid://drxwgcpd1pfwu"
+path.s3tc="res://.godot/imported/texel.png-4213734fa44b2d2ce06649f93fa91538.s3tc.stex"
+path.etc2="res://.godot/imported/texel.png-4213734fa44b2d2ce06649f93fa91538.etc2.stex"
 metadata={
 "imported_formats": ["s3tc", "etc2"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Displacement.jpg"
-dest_files=["res://.godot/imported/Ground037_2K_Displacement.jpg-78b6a739869dd13deabcab1c8d24186f.s3tc.stex", "res://.godot/imported/Ground037_2K_Displacement.jpg-78b6a739869dd13deabcab1c8d24186f.etc2.stex"]
+source_file="res://addons/TerrainPlugin/TestTextures/texel.png"
+dest_files=["res://.godot/imported/texel.png-4213734fa44b2d2ce06649f93fa91538.s3tc.stex", "res://.godot/imported/texel.png-4213734fa44b2d2ce06649f93fa91538.etc2.stex"]
 
 [params]
 

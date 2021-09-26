@@ -1,8 +1,8 @@
 using Godot;
 using System;
-using TerrainEditor.Editor.Brush;
+using TerrainEditor.Utils.Editor.Brush;
 
-namespace TerrainEditor.Editor.Sculpt
+namespace TerrainEditor.Utils.Editor.Sculpt
 {
     public class TerrainSmoothSculpt : TerrainBaseSculpt
     {

@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace TerrainEditor.Editor.Brush
+namespace TerrainEditor.Utils.Editor.Brush
 {
     public static class TerrainEditorBrush
     {

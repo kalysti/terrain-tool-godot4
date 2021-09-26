@@ -2,17 +2,18 @@
 
 importer="texture"
 type="StreamTexture2D"
-path.s3tc="res://.godot/imported/Ground022_2K_Roughness.jpg-3eb266adee9ab3796a5099d77c24194e.s3tc.stex"
-path.etc2="res://.godot/imported/Ground022_2K_Roughness.jpg-3eb266adee9ab3796a5099d77c24194e.etc2.stex"
+uid="uid://f23bbnwha0lv"
+path.s3tc="res://.godot/imported/Ground022_2K_Roughness.jpg-a74ee305cb3e62b393fc5dc50b223361.s3tc.stex"
+path.etc2="res://.godot/imported/Ground022_2K_Roughness.jpg-a74ee305cb3e62b393fc5dc50b223361.etc2.stex"
 metadata={
-"imported_formats": [ "s3tc", "etc2" ],
+"imported_formats": ["s3tc", "etc2"],
 "vram_texture": true
 }
 
 [deps]
 
-source_file="res://TestTextures/Sandy/Ground022_2K_Roughness.jpg"
-dest_files=[ "res://.godot/imported/Ground022_2K_Roughness.jpg-3eb266adee9ab3796a5099d77c24194e.s3tc.stex", "res://.godot/imported/Ground022_2K_Roughness.jpg-3eb266adee9ab3796a5099d77c24194e.etc2.stex" ]
+source_file="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg"
+dest_files=["res://.godot/imported/Ground022_2K_Roughness.jpg-a74ee305cb3e62b393fc5dc50b223361.s3tc.stex", "res://.godot/imported/Ground022_2K_Roughness.jpg-a74ee305cb3e62b393fc5dc50b223361.etc2.stex"]
 
 [params]
 
@@ -29,7 +30,7 @@ roughness/mode=0
 roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
-process/invert_color=false
+process/normal_map_invert_y=false
 process/HDR_as_SRGB=false
 process/size_limit=0
 detect_3d/compress_to=0

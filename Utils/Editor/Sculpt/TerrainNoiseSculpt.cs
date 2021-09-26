@@ -1,9 +1,9 @@
 using Godot;
 using System;
-using TerrainEditor.Editor.Brush;
+using TerrainEditor.Utils.Editor.Brush;
 using TerrainEditor.Editor.Utilities;
 
-namespace TerrainEditor.Editor.Sculpt
+namespace TerrainEditor.Utils.Editor.Sculpt
 {
     public class TerrainNoiseSculpt : TerrainBaseSculpt
     {
