@@ -1,8 +1,8 @@
 using Godot;
 using System;
-using TerrainEditor.Editor.Brush;
+using TerrainEditor.Utils.Editor.Brush;
 
-namespace TerrainEditor.Editor.Paint
+namespace TerrainEditor.Utils.Editor.Paint
 {
     public class TerrainPaintPaint : TerrainBasePaint
     {

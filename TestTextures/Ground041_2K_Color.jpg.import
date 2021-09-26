@@ -2,17 +2,18 @@
 
 importer="texture"
 type="StreamTexture2D"
-path.s3tc="res://.godot/imported/Ground041_2K_Color.jpg-c4d4fa3d295f9fcf20b726148169bd47.s3tc.stex"
-path.etc2="res://.godot/imported/Ground041_2K_Color.jpg-c4d4fa3d295f9fcf20b726148169bd47.etc2.stex"
+uid="uid://dedg4miyoq4rg"
+path.s3tc="res://.godot/imported/Ground041_2K_Color.jpg-02e96c3c6176ad5a85af35cf18bdb6c0.s3tc.stex"
+path.etc2="res://.godot/imported/Ground041_2K_Color.jpg-02e96c3c6176ad5a85af35cf18bdb6c0.etc2.stex"
 metadata={
-"imported_formats": [ "s3tc", "etc2" ],
+"imported_formats": ["s3tc", "etc2"],
 "vram_texture": true
 }
 
 [deps]
 
-source_file="res://TestTextures/Ground041_2K_Color.jpg"
-dest_files=[ "res://.godot/imported/Ground041_2K_Color.jpg-c4d4fa3d295f9fcf20b726148169bd47.s3tc.stex", "res://.godot/imported/Ground041_2K_Color.jpg-c4d4fa3d295f9fcf20b726148169bd47.etc2.stex" ]
+source_file="res://addons/TerrainPlugin/TestTextures/Ground041_2K_Color.jpg"
+dest_files=["res://.godot/imported/Ground041_2K_Color.jpg-02e96c3c6176ad5a85af35cf18bdb6c0.s3tc.stex", "res://.godot/imported/Ground041_2K_Color.jpg-02e96c3c6176ad5a85af35cf18bdb6c0.etc2.stex"]
 
 [params]
 
@@ -29,7 +30,7 @@ roughness/mode=0
 roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
-process/invert_color=false
+process/normal_map_invert_y=false
 process/HDR_as_SRGB=false
 process/size_limit=0
 detect_3d/compress_to=0

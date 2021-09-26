@@ -10,6 +10,12 @@ The terrain is splited in a patch grid (int x, int y) to make the terrain on the
 Each patch has a constant number of 16 chunks. 
 Each chunk have a chunk size of power of 2 - 1.
 
+## Install
+
+1. Copy all files to addons/TerrainPlugin
+2. Enable it
+3. Have fun :-)
+
 ## Screenshots
 
 ![Construction of Terrain Editor](https://i.ibb.co/3T9sp5q/terraintool.png)

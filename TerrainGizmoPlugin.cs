@@ -18,9 +18,13 @@ namespace TerrainEditor
             Color gizmo_color = new Color(0.5f, 0.7f, 1);
             CreateMaterial("shape_material", gizmo_color);
         }
-        public override bool HasGizmo(Node3D spatial)
+        public override bool _HasGizmo(Node3D spatial)
         {
             return spatial is Terrain3D;
+        }
+        public override string _GetGizmoName()
+        {
+            return "TerrainGizmo";
         }
 
         void GetEdge(int p_edge, Vector3 position, Vector3 size, ref Vector3 r_from, ref Vector3 r_to)
@@ -115,7 +119,7 @@ namespace TerrainEditor
             StandardMaterial3D line_material = new StandardMaterial3D();
             line_material.ShadingMode = StandardMaterial3D.ShadingModeEnum.Unshaded;
             line_material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-            line_material.AlbedoColor =  new Color(0, 1, 1, 1);
+            line_material.AlbedoColor = new Color(0, 1, 1, 1);
 
             line_material.AlbedoTexForceSrgb = true;
             line_material.VertexColorIsSrgb = true;
@@ -192,7 +196,7 @@ namespace TerrainEditor
         }
 
 
-        public override void Redraw(EditorNode3DGizmo gizmo)
+        public override void _Redraw(EditorNode3DGizmo gizmo)
         {
             gizmo.Clear();
             var spatial = gizmo.GetSpatialNode() as Terrain3D;
@@ -231,7 +235,7 @@ namespace TerrainEditor
                     var tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
                     tf.origin = tf.origin - spatial.GlobalTransform.origin;
                     st.AppendFrom(GetDebugMesh(meshLines), 0, tf);
-                    gizmo.AddMesh(st.Commit(), false, null, GetMaterial("shape_material", gizmo));
+                    gizmo.AddMesh(st.Commit(), GetMaterial("shape_material", gizmo));
                 }
             }
         }

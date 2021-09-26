@@ -19,7 +19,7 @@ func _get_return_icon_type():
 	return VisualShaderNode.PORT_TYPE_TRANSFORM
 
 func _init():
-	set_input_port_default_value(0, Transform())
+	set_input_port_default_value(0, Transform3D())
 
 func _get_input_port_name(port):
 	match port:

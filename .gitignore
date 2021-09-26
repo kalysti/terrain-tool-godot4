@@ -15,6 +15,7 @@ export_presets.cfg
 .mono/
 data_*/
 mono_crash.*.json
+.import
 
 #test files
 testfiles/

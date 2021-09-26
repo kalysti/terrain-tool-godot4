@@ -2,15 +2,16 @@
 
 importer="texture"
 type="StreamTexture2D"
-path="res://.godot/imported/Ground_dirt_03_2K_Base_Color.png-b2568e5d2826fb9976ef331e34aa2297.stex"
+uid="uid://fl40vlypi4tr"
+path="res://.godot/imported/Ground_dirt_03_2K_Base_Color.png-d475305bd5a14954655a379fa1ee0fe1.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://TestTextures/Ground_dirt_03_2K_Base_Color.png"
-dest_files=[ "res://.godot/imported/Ground_dirt_03_2K_Base_Color.png-b2568e5d2826fb9976ef331e34aa2297.stex" ]
+source_file="res://addons/TerrainPlugin/TestTextures/Ground_dirt_03_2K_Base_Color.png"
+dest_files=["res://.godot/imported/Ground_dirt_03_2K_Base_Color.png-d475305bd5a14954655a379fa1ee0fe1.stex"]
 
 [params]
 
@@ -27,7 +28,7 @@ roughness/mode=0
 roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
-process/invert_color=false
+process/normal_map_invert_y=false
 process/HDR_as_SRGB=false
 process/size_limit=0
 detect_3d/compress_to=1

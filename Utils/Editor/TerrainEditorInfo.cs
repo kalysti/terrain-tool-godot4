@@ -1,4 +1,4 @@
-namespace TerrainEditor
+namespace TerrainEditor.Utils.Editor
 {
     public struct TerrainEditorInfo
     {

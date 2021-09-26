@@ -5,8 +5,8 @@ extends VisualShaderNodeCustom
 class_name VisualShaderNodeDepthBlending3D
 
 func _init():
-	set_input_port_default_value(0, Transform())
-	set_input_port_default_value(1, Transform())
+	set_input_port_default_value(0, Transform3D())
+	set_input_port_default_value(1, Transform3D())
 	set_input_port_default_value(2, 0.5)
 	set_input_port_default_value(3, 0.05)
 	set_input_port_default_value(4, false)
