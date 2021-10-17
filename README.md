@@ -82,4 +82,4 @@ Currently the tool supports 4 kinds of importing heightmaps.
 ## Todo
 - Setup automatic lod level by camera distance
 - Create blank terrain shader template by a button (create terrain shader)
-- Code cleanup and loop reduction
+- Move to native
