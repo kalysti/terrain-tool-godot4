@@ -1,4 +1,4 @@
-# GODOT 4 Terrain Plugin (GPU Based)
+# GODOT 4 3D Terrain Editor (C# Plugin) (GPU Based)
 
 Tool is written for prototyping in c# but will be converted to c++ for the godot core.
 
