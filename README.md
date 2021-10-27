@@ -2,7 +2,7 @@
 
 Tool is written for prototyping in c# but will be converted to c++ for the godot core.
 
-## Needs a master godot 4 build
+## Needs a master godot 4 build with mono!
 
 ## Read at first
 
