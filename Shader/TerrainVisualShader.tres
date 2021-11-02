@@ -916,6 +916,7 @@ nodes/light/2/position = Vector2(120, 160)
 nodes/light/connections = PackedInt32Array(2, 0, 0, 0)
 
 [resource]
+render_priority = 0
 shader = SubResource( "34" )
 shader_param/terrainUvScale = null
 shader_param/terrainUvOffset = null

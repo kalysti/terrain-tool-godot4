@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace TerrainEditor
 {
+#if TOOLS
     [Tool]
     public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
     {
@@ -251,4 +252,5 @@ namespace TerrainEditor
             return mt;
         }
     }
+#endif
 }
