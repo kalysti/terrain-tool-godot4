@@ -167,7 +167,11 @@ namespace TerrainEditor
 
                 var distance = editorCamera.Far * 1.2f;
                 var space_state = selectedTerrain.GetWorld3d().DirectSpaceState;
-                var result = space_state.IntersectRay(from, from + dir * distance);
+
+                var query = new PhysicsRayQueryParameters3D();
+                query.From = from;
+                query.To = from + dir * distance;
+                var result = space_state.IntersectRay(query);
 
                 if (result.Count > 0 && result["collider"] != null)
                 {
