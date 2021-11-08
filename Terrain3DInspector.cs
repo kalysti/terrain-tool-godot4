@@ -22,17 +22,17 @@ namespace TerrainEditor
         public float extraCullMargin = 0.0f;
         public float lodBias = 1.0f;
 
-        public int lodMinDistance = 0;
-        public int lodMinHysteresis = 0;
-        public int lodMaxDistance = 0;
-        public int lodMaxHysteresis = 0;
+        public float lodMinDistance = 0;
+        public float lodMinHysteresis = 0;
+        public float lodMaxDistance = 0;
+        public float lodMaxHysteresis = 0;
 
 
         public override Godot.Collections.Array _GetPropertyList()
         {
             var arr = new Godot.Collections.Array();
             var test = new VisualShaderNodeCustom();
-      
+
             arr.Add(new Godot.Collections.Dictionary()
             {
                 {"name", "Terrain3D"},
@@ -55,8 +55,8 @@ namespace TerrainEditor
                 {"hint", PropertyHint.ResourceType},
                 {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
                 {"hint_string", "ShaderMaterial"}
-            }); 
-            
+            });
+
             arr.Add(new Godot.Collections.Dictionary()
             {
                 {"name", "terrainDefaultTexture"},
@@ -97,7 +97,7 @@ namespace TerrainEditor
                 { "hint", PropertyHint.Layers3dPhysics}
 
             });
-            
+
             arr.Add(new Godot.Collections.Dictionary()
             {
              { "name", "collisionMask"},

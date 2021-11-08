@@ -2,18 +2,16 @@
 
 importer="texture"
 type="StreamTexture2D"
-uid="uid://cqim8gwagexie"
-path.s3tc="res://.godot/imported/Ground037_2K_Normal.jpg-185fcbd57bcff7d3b35e8f2660350618.s3tc.stex"
-path.etc2="res://.godot/imported/Ground037_2K_Normal.jpg-185fcbd57bcff7d3b35e8f2660350618.etc2.stex"
+uid="uid://c0o2ihy33nxoi"
+path="res://.godot/imported/Ground037_2K_Normal.jpg-185fcbd57bcff7d3b35e8f2660350618.stex"
 metadata={
-"imported_formats": ["s3tc", "etc2"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Normal.jpg"
-dest_files=["res://.godot/imported/Ground037_2K_Normal.jpg-185fcbd57bcff7d3b35e8f2660350618.s3tc.stex", "res://.godot/imported/Ground037_2K_Normal.jpg-185fcbd57bcff7d3b35e8f2660350618.etc2.stex"]
+dest_files=["res://.godot/imported/Ground037_2K_Normal.jpg-185fcbd57bcff7d3b35e8f2660350618.stex"]
 
 [params]
 

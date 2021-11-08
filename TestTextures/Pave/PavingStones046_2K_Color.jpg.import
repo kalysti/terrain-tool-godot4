@@ -2,18 +2,16 @@
 
 importer="texture"
 type="StreamTexture2D"
-uid="uid://ctu5yilyyc8ng"
-path.s3tc="res://.godot/imported/PavingStones046_2K_Color.jpg-2d9e7f6eaa445b2ea4510c4cae7a68f7.s3tc.stex"
-path.etc2="res://.godot/imported/PavingStones046_2K_Color.jpg-2d9e7f6eaa445b2ea4510c4cae7a68f7.etc2.stex"
+uid="uid://dyvdrwt45k7j6"
+path="res://.godot/imported/PavingStones046_2K_Color.jpg-2d9e7f6eaa445b2ea4510c4cae7a68f7.stex"
 metadata={
-"imported_formats": ["s3tc", "etc2"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Color.jpg"
-dest_files=["res://.godot/imported/PavingStones046_2K_Color.jpg-2d9e7f6eaa445b2ea4510c4cae7a68f7.s3tc.stex", "res://.godot/imported/PavingStones046_2K_Color.jpg-2d9e7f6eaa445b2ea4510c4cae7a68f7.etc2.stex"]
+dest_files=["res://.godot/imported/PavingStones046_2K_Color.jpg-2d9e7f6eaa445b2ea4510c4cae7a68f7.stex"]
 
 [params]
 
