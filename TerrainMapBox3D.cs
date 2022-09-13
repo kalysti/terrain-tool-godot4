@@ -10,51 +10,20 @@ using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Godot.Collections;
+using File = Godot.File;
 
 namespace TerrainEditor
 {
     [Tool]
     public partial class TerrainMapBox3D : Terrain3D
     {
+        [ExportCategory("Terrain Mapbox")]
+        [ExportGroup("Mapbox Data")]
+        [Export]
         public string mapBoxAccessToken = "pk.eyJ1IjoiaGlnaGNsaWNrZXJzIiwiYSI6ImNrZHdveTAxZjQxOXoyenJvcjlldmpoejEifQ.0LKYqSO1cCQoVCWObvVB5w";
+        [Export]
         public string mapBoxCachePath = "user://mapCache";
-
-        public override Godot.Collections.Array _GetPropertyList()
-        {
-            var list = base._GetPropertyList();
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Terrain Mapbox"},
-                {"type",  Variant.Type.Nil},
-                {"usage", PropertyUsageFlags.Category  | PropertyUsageFlags.Editor}
-            });
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Mapbox Data"},
-                {"type",  Variant.Type.Nil},
-                {"usage", PropertyUsageFlags.Group  | PropertyUsageFlags.Editor},
-                {"hint_string", "mapBox"}
-            });
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "mapBoxAccessToken"},
-                {"type",  Variant.Type.String},
-                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
-            });
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "mapBoxCachePath"},
-                {"type",  Variant.Type.String},
-                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
-            });
-
-
-            return list;
-        }
 
         protected void initCacheFolder()
         {
@@ -81,9 +50,8 @@ namespace TerrainEditor
 
             var filename = zoomLevel + "_" + x + "_" + y + ".png";
             var filePath = mapBoxCachePath + "/" + filename;
-            var fileCheck = new Godot.File();
 
-            if (fileCheck.FileExists(filePath))
+            if (File.FileExists(filePath))
             {
                 image = loadImageFromBox(filePath);
                 return Error.Ok;

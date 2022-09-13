@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsuf0rvxwqu32"
-path="res://.godot/imported/Paving_stone_07_2K_Base_Color.png-160fad38ee445971180f20545fc908db.ctex"
+uid="uid://d20acl1bubmmt"
+path="res://.godot/imported/2385218.png-c9462a2d71c61d06a12407f67dafa0de.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TerrainPlugin/TestTextures/Paving_stone_07_2K_Base_Color.png"
-dest_files=["res://.godot/imported/Paving_stone_07_2K_Base_Color.png-160fad38ee445971180f20545fc908db.ctex"]
+source_file="res://addons/TerrainPlugin/icons/2385218.png"
+dest_files=["res://.godot/imported/2385218.png-c9462a2d71c61d06a12407f67dafa0de.ctex"]
 
 [params]
 

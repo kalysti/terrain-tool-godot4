@@ -31,23 +31,23 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		return "Anti tiling for terrain textures";
 
 	}
-	public override int _GetReturnIconType()
+	public override long _GetReturnIconType()
 	{
 		return (int)VisualShaderNode.PortType.Scalar;
 	}
 
-	public override int _GetInputPortCount()
+	public override long _GetInputPortCount()
 	{
 		return 9;
 	}
 
 
-	public override int _GetOutputPortCount()
+	public override long _GetOutputPortCount()
 	{
 		return 2;
 	}
 
-	public override string _GetOutputPortName(int port)
+	public override string _GetOutputPortName(long port)
 	{
 		switch (port)
 		{
@@ -58,7 +58,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		return "";
 	}
 
-	public override int _GetOutputPortType(int port)
+	public override long _GetOutputPortType(long port)
 	{
 		switch (port)
 		{
@@ -70,7 +70,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 	}
 
 
-	public override string _GetInputPortName(int port)
+	public override string _GetInputPortName(long port)
 	{
 		switch (port)
 		{
@@ -88,7 +88,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		return "";
 	}
 
-	public override int _GetInputPortType(int port)
+	public override long _GetInputPortType(long port)
 	{
 		switch (port)
 		{
@@ -105,7 +105,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 
 		return 0;
 	}
-	public override string _GetGlobalCode(int mode)
+	public override string _GetGlobalCode(Shader.Mode mode)
 	{
 		return @"float rand(vec2 input)
 				{
@@ -126,7 +126,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 				}";
 	}
 
-	public override string _GetCode(string[] input_vars, Array output_vars, int mode, int type)
+	public override string _GetCode(Array<string> input_vars, Array<string> output_vars, Shader.Mode mode1, VisualShader.Type type1)
 	{
 		var heightStr = "";
 

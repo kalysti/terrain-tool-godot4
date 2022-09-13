@@ -46,7 +46,7 @@ namespace TerrainEditor
         protected string splatmapPath1 = null;
         protected string splatmapPath2 = null;
 
-        public override int _Forward3dGuiInput(Camera3D camera, InputEvent @event)
+        public override long _Forward3dGuiInput(Camera3D camera, InputEvent @event)
         {
             editorCamera = camera;
 
@@ -132,7 +132,7 @@ namespace TerrainEditor
             }
         }
 
-        public override void _PhysicsProcess(float delta)
+        public override void _PhysicsProcess(double delta)
         {
             //sculping or painting
             if (selectedTerrain != null && editorCamera != null && selectedTerrain.IsInsideTree())
@@ -160,7 +160,7 @@ namespace TerrainEditor
                 var viewport = editorCamera.GetViewport() as SubViewport;
                 var viewport_container = viewport.GetParent() as SubViewportContainer;
 
-                var screen_pos = pos * viewport.Size / viewport_container.RectSize;
+                var screen_pos = pos * viewport.Size / viewport_container.Size;
 
                 var from = editorCamera.ProjectRayOrigin(screen_pos);
                 var dir = editorCamera.ProjectRayNormal(screen_pos);
@@ -173,9 +173,9 @@ namespace TerrainEditor
                 query.To = from + dir * distance;
                 var result = space_state.IntersectRay(query);
 
-                if (result.Count > 0 && result["collider"] != null)
+                if (result.Count > 0 && result["collider"].Obj != null)
                 {
-                    if (result["collider"] == selectedTerrain)
+                    if (result["collider"].Obj == selectedTerrain)
                         return (Vector3)result["position"];
 
                 }
@@ -184,10 +184,10 @@ namespace TerrainEditor
             return Vector3.Inf;
         }
 
-        protected void DoEditTerrain(Vector3 pos, float delta)
+        protected void DoEditTerrain(Vector3 pos, double delta)
         {
             var applyInformation = getEditorApply();
-            float strength = applyInformation.strength * delta;
+            float strength = (float)(applyInformation.strength * delta);
 
             if (strength <= 0.0f)
                 return;
@@ -340,7 +340,7 @@ namespace TerrainEditor
             var scriptPatch = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatch.cs");
             var scriptPatchhInfo = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatchInfo.cs");
             var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
-            var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/terrain.png");
+            var texture = GD.Load<CompressedTexture2D>("res://addons/TerrainPlugin/icons/terrain.png");
 
             AddCustomType("TerrainPatchInfo", "Resource", scriptPatchhInfo, texture);
             AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);
@@ -505,7 +505,7 @@ namespace TerrainEditor
         private bool getPanelControlBoolean(string name)
         {
             var control = panelControls[name] as CheckBox;
-            return (bool)control.Pressed;
+            return control != null && control.ButtonPressed;
         }
 
         private TerrainEditorInfo getEditorApply()
@@ -657,7 +657,7 @@ namespace TerrainEditor
 
                 if (selectedTerrain.terrainDefaultTexture == null)
                 {
-                    var mat = GD.Load<StreamTexture2D>("res://addons/TerrainPlugin/TestTextures/texel.png");
+                    var mat = GD.Load<CompressedTexture2D>("res://addons/TerrainPlugin/TestTextures/texel.png");
                     selectedTerrain.terrainDefaultTexture = mat;
                 }
                 var typeImport = (HeightmapAlgo)heightmapAlgoControl.GetSelectedId();
@@ -763,7 +763,7 @@ namespace TerrainEditor
 
             // Find size of heightmap in patches
             Vector2i start = firstPatch.patchCoord;
-            Vector2i end = new Vector2i(start);
+            Vector2i end = new Vector2i(start.x, start.y);
 
             for (int i = 0; i < selectedTerrain.GetPatchesCount(); i++)
             {
@@ -892,22 +892,22 @@ namespace TerrainEditor
             panelControls.Clear();
         }
 
-        public override bool _Handles(object @object)
+        public override bool _Handles(Variant variant)
         {
-            return @object != null && (@object is Terrain3D);
+            return variant.Obj != null && (variant.Obj is Terrain3D);
         }
         public override void _MakeVisible(bool visible)
         {
             if (!visible)
-                _Edit(null);
+                _Edit(new Variant());
         }
 
-        public override void _Edit(object @object)
+        public override void _Edit(Variant variant)
         {
-            if (@object != null && @object is Terrain3D)
+            if (_Handles(variant))
             {
                 menuButton.Visible = true;
-                selectedTerrain = @object as Terrain3D;
+                selectedTerrain = variant.Obj as Terrain3D;
                 selectedTerrain.NotifyPropertyListChanged();
                 AddControlToDock(DockSlot.RightUl, editorPanel);
                 dockAttached = true;

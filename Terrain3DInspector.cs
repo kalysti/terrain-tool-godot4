@@ -3,212 +3,51 @@ using System.Collections.Generic;
 using Godot;
 using System;
 using System.Linq;
+using Godot.Collections;
 
 namespace TerrainEditor
 {
     public partial class Terrain3D : Node3D
     {
-        public Godot.Collections.Array<TerrainPatch> terrainPatches = new Godot.Collections.Array<TerrainPatch>();
+        [ExportCategory("Terrain3D")]
+        [ExportGroup("Terrain Data")]
+        [Export(PropertyHint.ResourceType, "ShaderMaterial")]
         public ShaderMaterial terrainDefaultMaterial { get; set; }
+        [Export(PropertyHint.ResourceType, "CompressedTexture2D")]
+        public CompressedTexture2D terrainDefaultTexture;
+        [Export(PropertyHint.ResourceType, "TerrainPatch")]
+        public Array<TerrainPatch> terrainPatches = new();
 
+        [ExportGroup("Collision")]
+        public bool collisionEnabled = true;
+        [Export(PropertyHint.Layers3dPhysics)]
         public uint collisionLayer = 1;
+        [Export(PropertyHint.Layers3dRender)]
         public uint collisionMask = 1;
-        public bool collsionEnabled = true;
-        public StreamTexture2D terrainDefaultTexture;
 
+        [ExportGroup("Geometry")]
+        [Export(PropertyHint.Enum, "Off,On,Double-Sided,Shadows Only")]
         public RenderingServer.ShadowCastingSetting castShadow = RenderingServer.ShadowCastingSetting.On;
-        public GIMode giMode = GIMode.Disabled;
-        public LightmapScale giLightmapScale = LightmapScale.LIGHTMAP_SCALE_1X;
+        [Export(PropertyHint.Range, "0,16384,0.01")]
         public float extraCullMargin = 0.0f;
+        [Export(PropertyHint.Range, "0.001,128,0.001")]
         public float lodBias = 1.0f;
+        
+        [ExportGroup("Global Illumination")]
+        [Export(PropertyHint.Enum, "1x,2x,4x,8x")]
+        public LightmapScale giLightmapScale = LightmapScale.LIGHTMAP_SCALE_1X;
+        [Export(PropertyHint.Enum, "Disabled,Baked,Dynamic")]
+        public GIMode giMode = GIMode.Disabled;
 
+        [ExportGroup("Terrain LOD")]
+        [Export(PropertyHint.Range, "0,32768,0.01")]
         public float lodMinDistance = 0;
+        [Export(PropertyHint.Range, "0,32768,0.01")]
         public float lodMinHysteresis = 0;
+        [Export(PropertyHint.Range, "0,32768,0.01")]
         public float lodMaxDistance = 0;
+        [Export(PropertyHint.Range, "0,32768,0.01")]
         public float lodMaxHysteresis = 0;
-
-
-        public override Godot.Collections.Array _GetPropertyList()
-        {
-            var arr = new Godot.Collections.Array();
-            var test = new VisualShaderNodeCustom();
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Terrain3D"},
-                {"type",  Variant.Type.Nil},
-                {"usage", PropertyUsageFlags.Category  | PropertyUsageFlags.Editor}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Terrain Data"},
-                {"type",  Variant.Type.Nil},
-                {"usage", PropertyUsageFlags.Group  | PropertyUsageFlags.Editor},
-                {"hint_string", "terrain"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "terrainDefaultMaterial"},
-                {"type", Variant.Type.Object },
-                {"hint", PropertyHint.ResourceType},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "ShaderMaterial"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "terrainDefaultTexture"},
-                {"type", Variant.Type.Object },
-                {"hint", PropertyHint.ResourceType},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "StreamTexture2D"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "terrainPatches"},
-                {"type", Variant.Type.Array },
-                {"hint", PropertyHint.ResourceType},
-                {"usage",   PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "TerrainPatch"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Collision"},
-                { "type",  Variant.Type.Nil},
-                { "usage", PropertyUsageFlags.Group | PropertyUsageFlags.Editor}
-             });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "collsionEnabled"},
-                {"type",  Variant.Type.Bool},
-                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-               { "name", "collisionLayer"},
-                {"type",  Variant.Type.Int},
-                { "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                { "hint", PropertyHint.Layers3dPhysics}
-
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-             { "name", "collisionMask"},
-                {"type",  Variant.Type.Int},
-                { "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                { "hint", PropertyHint.Layers3dRender}
-
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Geometry"},
-               { "type",  Variant.Type.Nil},
-                { "usage", PropertyUsageFlags.Group | PropertyUsageFlags.Editor}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "castShadow"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Enum},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "Off,On,Double-Sided,Shadows Only"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "extraCullMargin"},
-                {"type", Variant.Type.Float },
-                {"hint", PropertyHint.Range},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "0,16384,0.01"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "lodBias"},
-                {"type", Variant.Type.Float },
-                {"hint", PropertyHint.Range},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "0.001,128,0.001"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Global Illumination"},
-               { "type",  Variant.Type.Nil},
-                { "usage", PropertyUsageFlags.Group | PropertyUsageFlags.Editor}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "giLightmapScale"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Enum},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "1x,2x,4x,8x"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "giMode"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Enum},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "Disabled,Baked,Dynamic"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Terrain LOD"},
-                { "type",  Variant.Type.Nil},
-                { "usage", PropertyUsageFlags.Group | PropertyUsageFlags.Editor}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "lodMinDistance"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Range},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "0,32768,0.01"}
-            });
-
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "lodMinHysteresis"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Range},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "0,32768,0.01"}
-            });
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "lodMaxDistance"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Range},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "0,32768,0.01"}
-            });
-            arr.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "lodMaxHysteresis"},
-                {"type", Variant.Type.Int },
-                {"hint", PropertyHint.Range},
-                {"usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage},
-                {"hint_string", "0,32768,0.01"}
-            });
-
-            return arr;
-        }
 
         public string enumToString<T>()
         {
@@ -221,8 +60,5 @@ namespace TerrainEditor
 
             return String.Join(",", array.ToArray());
         }
-
-
-
     }
 }

@@ -28,7 +28,7 @@ namespace TerrainEditor
 		[Export]
 		public TerrainPatchInfo info = new TerrainPatchInfo();
 
-		protected RID bodyRid;
+		protected RID? bodyRid;
 
 		//cache for meshes
 		public Godot.Collections.Dictionary<int, ArrayMesh> meshCache = new Godot.Collections.Dictionary<int, ArrayMesh>();
@@ -52,9 +52,9 @@ namespace TerrainEditor
 				// shapeRid = null;
 			}
 
-			if (bodyRid != null)
+			if (bodyRid.HasValue)
 			{
-				PhysicsServer3D.BodyClearShapes(bodyRid);
+				PhysicsServer3D.BodyClearShapes(bodyRid.Value);
 				bodyRid = null;
 			}
 
@@ -80,7 +80,7 @@ namespace TerrainEditor
 			for (int i = 0; i < Terrain3D.PATCH_CHUNKS_AMOUNT; i++)
 			{
 				var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainChunk.cs").New();
-				var res = script as TerrainChunk;
+				var res = script.Obj as TerrainChunk;
 				res.ResourceLocalToScene = true;
 
 				int px = i % Terrain3D.PATCH_CHUNK_EDGES;
@@ -138,7 +138,7 @@ namespace TerrainEditor
 			if (heightmap == null)
 			{
 				heightmap = new ImageTexture();
-				heightmap.CreateFromImage(image);
+				ImageTexture.CreateFromImage(image);
 			}
 			else
 			{
@@ -176,7 +176,7 @@ namespace TerrainEditor
 				splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
 			}
 
-			splatmapTexture.CreateFromImage(splatmapImage);
+			ImageTexture.CreateFromImage(splatmapImage);
 			splatmaps[idx] = splatmapTexture;
 		}
 
@@ -195,11 +195,11 @@ namespace TerrainEditor
 
 			bodyRid = PhysicsServer3D.BodyCreate();
 
-			PhysicsServer3D.BodySetMode(bodyRid, PhysicsServer3D.BodyMode.Static);
-			PhysicsServer3D.BodyAttachObjectInstanceId(bodyRid, terrainNode.GetInstanceId());
-			PhysicsServer3D.BodySetSpace(bodyRid, terrainNode.GetWorld3d().Space);
-			PhysicsServer3D.BodySetCollisionLayer(bodyRid, terrainNode.collisionLayer);
-			PhysicsServer3D.BodySetCollisionMask(bodyRid, terrainNode.collisionMask);
+			PhysicsServer3D.BodySetMode(bodyRid.Value, PhysicsServer3D.BodyMode.Static);
+			PhysicsServer3D.BodyAttachObjectInstanceId(bodyRid.Value, terrainNode.GetInstanceId());
+			PhysicsServer3D.BodySetSpace(bodyRid.Value, terrainNode.GetWorld3d().Space);
+			PhysicsServer3D.BodySetCollisionLayer(bodyRid.Value, terrainNode.collisionLayer);
+			PhysicsServer3D.BodySetCollisionMask(bodyRid.Value, terrainNode.collisionMask);
 			//    PhysicsServer3D.BodySetRayPickable(bodyRid, true);
 
 			//create cache
@@ -246,7 +246,7 @@ namespace TerrainEditor
 
 
 			//create heightmap shape
-			PhysicsServer3D.BodyAddShape(bodyRid, shapeHeight.GetRid());
+			PhysicsServer3D.BodyAddShape(bodyRid.Value, shapeHeight.GetRid());
 
 			UpdateColliderData(terrain, heightField);
 			UpdateColliderPosition(terrain);
@@ -258,12 +258,12 @@ namespace TerrainEditor
 		public void DisableCollider(bool disable = false)
 		{
 			if (bodyRid != null)
-				PhysicsServer3D.BodySetShapeDisabled(bodyRid, 0, disable);
+				PhysicsServer3D.BodySetShapeDisabled(bodyRid.Value, 0, disable);
 		}
 
 		public void UpdateSettings(Terrain3D terrainNode)
 		{
-			PhysicsServer3D.BodySetShapeDisabled(bodyRid, 0, terrainNode.IsInsideTree());
+			PhysicsServer3D.BodySetShapeDisabled(bodyRid.Value, 0, terrainNode.IsInsideTree());
 
 			foreach (var chunk in chunks)
 			{
@@ -286,7 +286,7 @@ namespace TerrainEditor
 		private void createInfoResource(int _chunkSize)
 		{
 			var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatchInfo.cs").New();
-			var patch = script as TerrainPatchInfo;
+			var patch = script.Obj as TerrainPatchInfo;
 			patch.ResourceLocalToScene = true;
 			info = patch;
 
@@ -495,8 +495,8 @@ namespace TerrainEditor
 		 */
 		private void UpdateColliderPosition(Terrain3D terrain)
 		{
-			PhysicsServer3D.BodySetRayPickable(bodyRid, true);
-			PhysicsServer3D.BodySetState(bodyRid, PhysicsServer3D.BodyState.Transform, GetColliderPosition(terrain));
+			PhysicsServer3D.BodySetRayPickable(bodyRid.Value, true);
+			PhysicsServer3D.BodySetState(bodyRid.Value, PhysicsServer3D.BodyState.Transform, GetColliderPosition(terrain));
 
 		}
 

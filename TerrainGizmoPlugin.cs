@@ -122,7 +122,7 @@ namespace TerrainEditor
             line_material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
             line_material.AlbedoColor = new Color(0, 1, 1, 1);
 
-            line_material.AlbedoTexForceSrgb = true;
+            line_material.AlbedoTextureForceSrgb = true;
             line_material.VertexColorIsSrgb = true;
             line_material.VertexColorUseAsAlbedo = true;
 
@@ -135,7 +135,7 @@ namespace TerrainEditor
 
             Godot.Collections.Array arr = new Godot.Collections.Array();
             arr.Resize((int)Mesh.ArrayType.Max);
-            arr[(int)Mesh.ArrayType.Vertex] = lines;
+            arr[(int)Mesh.ArrayType.Vertex] = Variant.CreateFrom(lines);
 
             debug_mesh_cache.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arr);
             debug_mesh_cache.SurfaceSetMaterial(0, getDebugMaterial());
@@ -150,7 +150,7 @@ namespace TerrainEditor
             var map_width = patch.info.heightMapSize;
             var map_depth = patch.info.heightMapSize;
 
-            var points = new Vector3[0];
+            var points = Array.Empty<Vector3>();
             if ((map_width != 0) && (map_depth != 0))
             {
                 // This will be slow for large maps...
@@ -246,7 +246,7 @@ namespace TerrainEditor
             var mt = new ArrayMesh();
             var arr = new Godot.Collections.Array();
             arr.Resize((int)ArrayMesh.ArrayType.Max);
-            arr[(int)ArrayMesh.ArrayType.Vertex] = lines.ToArray();
+            arr[(int)ArrayMesh.ArrayType.Vertex] = lines;
             mt.AddSurfaceFromArrays(ArrayMesh.PrimitiveType.Lines, arr);
 
             return mt;

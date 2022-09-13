@@ -131,8 +131,9 @@ namespace TerrainEditor
 		{
 			float size = (chunkSize - 1) * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
 
-			var script = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatch.cs").New();
-			var patch = script as TerrainPatch;
+			CSharpScript cSharpScript = GD.Load<CSharpScript>("res://addons/TerrainPlugin/TerrainPatch.cs");
+			Variant script = cSharpScript.New();
+			var patch = script.Obj as TerrainPatch;
 
 			patch.offset = new Vector3(x * size, 0.0f, y * size);
 			patch.ResourceLocalToScene = true;
@@ -271,7 +272,7 @@ namespace TerrainEditor
 			return Error.Ok;
 		}
 
-		public override void _Notification(int what)
+		public override void _Notification(long what)
 		{
 			if (what == NotificationExitWorld)
 			{
