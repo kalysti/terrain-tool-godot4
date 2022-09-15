@@ -135,7 +135,7 @@ namespace TerrainEditor
         /**
 		*  Send default material to shader
 		*/
-        public void SetDefaultMaterial(CompressedTexture2D image)
+        public void SetDefaultMaterial(Texture2D image)
         {
             RenderingServer.MaterialSetParam(materialId.Value, "terrainDefaultMaterial", image.GetRid());
         }

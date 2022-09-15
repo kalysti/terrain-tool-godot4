@@ -170,7 +170,7 @@ func _get_global_code(mode):
 				positionXZ = uv * _terrainChunkSize;
 			}
 			
-			return vec3(positionXZ.x, 0f, positionXZ.y);
+			return vec3(positionXZ.x, 0.0f, positionXZ.y);
 	
 		}
 

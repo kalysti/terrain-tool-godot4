@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=56 format=3 uid="uid://rhmyhuveb7yv"]
+[gd_resource type="ShaderMaterial" load_steps=41 format=3 uid="uid://rhmyhuveb7yv"]
 
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" id="1"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" id="2"]
@@ -7,224 +7,154 @@
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd" id="5"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeUVMultiply3D.gd" id="6"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeSplatmapHeight3D.gd" id="7"]
-[ext_resource type="Texture2D" uid="uid://63e32iphi2js" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Color.jpg" id="8"]
-[ext_resource type="Texture2D" uid="uid://cdrbyssh4g2nw" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_AmbientOcclusion.jpg" id="9"]
-[ext_resource type="Texture2D" uid="uid://cv2xcvofugp3w" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Displacement.jpg" id="10"]
-[ext_resource type="Texture2D" uid="uid://cqim8gwagexie" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Normal.jpg" id="11"]
-[ext_resource type="Texture2D" uid="uid://dv8kyo1tvosho" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Roughness.jpg" id="12"]
-[ext_resource type="Texture2D" uid="uid://dvywje0f16gnb" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Displacement.jpg" id="13"]
-[ext_resource type="Texture2D" uid="uid://bttutb4ikmdmp" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_AmbientOcclusion.jpg" id="14"]
-[ext_resource type="Texture2D" uid="uid://c7oshl33rb05h" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Normal.jpg" id="15"]
-[ext_resource type="Texture2D" uid="uid://f23bbnwha0lv" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg" id="16"]
-[ext_resource type="Texture2D" uid="uid://d1as6ccdmd65o" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Color.jpg" id="17"]
-[ext_resource type="Texture2D" uid="uid://ce01x0tgv2wc3" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Normal.jpg" id="18"]
-[ext_resource type="Texture2D" uid="uid://ct6swwoan26s6" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Displacement.jpg" id="19"]
-[ext_resource type="Texture2D" uid="uid://ctu5yilyyc8ng" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Color.jpg" id="20"]
-[ext_resource type="Texture2D" uid="uid://cs2sw16r2e4y8" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Roughness.jpg" id="21"]
-[ext_resource type="Texture2D" uid="uid://ujhqeonma8kj" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_AmbientOcclusion.jpg" id="22"]
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="1"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_2_Rough"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_hod58"]
+parameter_name = "Layer_2_Rough"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="2"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_2_Normal"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_681d4"]
+parameter_name = "Layer_2_Normal"
 texture_type = 2
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="3"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_2_Dis"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_wkjnk"]
+parameter_name = "Layer_2_Dis"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="4"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_2"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_4do8g"]
+parameter_name = "Layer_2"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="5"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_3_Dis"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_mdyvu"]
+parameter_name = "Layer_3_Dis"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="6"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_3_Normal"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_patep"]
+parameter_name = "Layer_3_Normal"
 texture_type = 2
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="7"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_3_Rough"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_ul4yd"]
+parameter_name = "Layer_3_Rough"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="8"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_3_AO"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_t222b"]
+parameter_name = "Layer_3_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="9"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_3"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_gs7lb"]
+parameter_name = "Layer_3"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeCustom" id="10"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_6vg54"]
 default_input_values = [5, Vector3(0, 0, 0), 6, 0.5, 7, 1.0, 8, 0.0]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "2" )
+script = ExtResource("2")
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="11"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_1_Dis"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_t0rdx"]
+parameter_name = "Layer_1_Dis"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeCustom" id="12"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_wa7bm"]
 default_input_values = [5, Vector3(0, 0, 0), 6, 0.5, 7, 1.0, 8, 0.0]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "2" )
+script = ExtResource("2")
 
-[sub_resource type="VisualShaderNodeCustom" id="13"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_0yefk"]
 default_input_values = [5, Vector3(0, 0, 0), 6, 0.5, 7, 1.0, 8, 0.0]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "2" )
+script = ExtResource("2")
 
-[sub_resource type="VisualShaderNodeCustom" id="14"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_nj3w2"]
 default_input_values = [0, Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0), 1, Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0), 2, 0.5, 3, 0.05, 4, false]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "3" )
+script = ExtResource("3")
 
-[sub_resource type="VisualShaderNodeCustom" id="15"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_s6evc"]
 default_input_values = [0, Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0), 1, Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0), 2, 0.5, 3, 0.05, 4, false]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "3" )
+script = ExtResource("3")
 
-[sub_resource type="VisualShaderNodeCustom" id="16"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_0l7r6"]
 default_input_values = [0, Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "4" )
+script = ExtResource("4")
 
-[sub_resource type="VisualShaderNodeCustom" id="17"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_7oaa4"]
 default_input_values = [0, Vector3(1, 1, 0)]
-expanded_output_ports = []
 initialized = true
-script = ExtResource( "6" )
+script = ExtResource("6")
 
-[sub_resource type="VisualShaderNodeCustom" id="18"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_dv7n0"]
 initialized = true
-script = ExtResource( "5" )
+script = ExtResource("5")
 
-[sub_resource type="VisualShaderNodeFloatConstant" id="19"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_cxi7b"]
 constant = 1.0
 
-[sub_resource type="VisualShaderNodeFloatConstant" id="20"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_i608f"]
 constant = 1.0
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="21"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_1_Normal"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_s3wmr"]
+parameter_name = "Layer_1_Normal"
 texture_type = 2
 
-[sub_resource type="VisualShaderNodeFloatConstant" id="22"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_t4p08"]
 
-[sub_resource type="VisualShaderNodeFloatConstant" id="23"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_yilqv"]
 constant = 0.02
 
-[sub_resource type="VisualShaderNodeVec3Constant" id="24"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeVec3Constant" id="VisualShaderNodeVec3Constant_t2ieq"]
 constant = Vector3(75, 75, 75)
 
-[sub_resource type="VisualShaderNodeCustom" id="25"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_45qss"]
 initialized = true
-script = ExtResource( "7" )
+script = ExtResource("7")
 
-[sub_resource type="VisualShaderNodeFloatConstant" id="26"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_541m4"]
 constant = 1.0
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="28"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_1"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_7ootu"]
+parameter_name = "Layer_1"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="29"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_1_Rough"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_5fg4w"]
+parameter_name = "Layer_1_Rough"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="30"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_1_AO"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_mor1n"]
+parameter_name = "Layer_1_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeTextureUniform" id="31"]
-default_input_values = []
-expanded_output_ports = []
-uniform_name = "Layer_2_AO"
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_be7w6"]
+parameter_name = "Layer_2_AO"
 texture_type = 1
 
-[sub_resource type="VisualShaderNodeVec3Constant" id="32"]
-default_input_values = []
-expanded_output_ports = []
+[sub_resource type="VisualShaderNodeVec3Constant" id="VisualShaderNodeVec3Constant_nww6o"]
 constant = Vector3(0.5, 0.5, 0.5)
 
-[sub_resource type="VisualShaderNodeCustom" id="33"]
+[sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_jh5gm"]
 default_input_values = [0, Vector3(0, 0, 0)]
-expanded_output_ports = []
-script = ExtResource( "1" )
+initialized = true
+script = ExtResource("1")
 
-[sub_resource type="VisualShader" id="34"]
+[sub_resource type="VisualShader" id="VisualShader_ofbnr"]
 code = "shader_type spatial;
 render_mode depth_draw_always;
 
-uniform sampler2D Layer_1 : hint_albedo;
-uniform sampler2D Layer_1_Dis : hint_albedo;
+uniform sampler2D Layer_1 : source_color;
+uniform sampler2D Layer_1_Dis : source_color;
 uniform sampler2D Layer_1_Normal : hint_normal;
-uniform sampler2D Layer_1_Rough : hint_albedo;
-uniform sampler2D Layer_1_AO : hint_albedo;
-uniform sampler2D Layer_2 : hint_albedo;
-uniform sampler2D Layer_2_Dis : hint_albedo;
+uniform sampler2D Layer_1_Rough : source_color;
+uniform sampler2D Layer_1_AO : source_color;
+uniform sampler2D Layer_2 : source_color;
+uniform sampler2D Layer_2_Dis : source_color;
 uniform sampler2D Layer_2_Normal : hint_normal;
-uniform sampler2D Layer_2_Rough : hint_albedo;
-uniform sampler2D Layer_2_AO : hint_albedo;
-uniform sampler2D Layer_3 : hint_albedo;
-uniform sampler2D Layer_3_Dis : hint_albedo;
+uniform sampler2D Layer_2_Rough : source_color;
+uniform sampler2D Layer_2_AO : source_color;
+uniform sampler2D Layer_3 : source_color;
+uniform sampler2D Layer_3_Dis : source_color;
 uniform sampler2D Layer_3_Normal : hint_normal;
-uniform sampler2D Layer_3_Rough : hint_albedo;
-uniform sampler2D Layer_3_AO : hint_albedo;
+uniform sampler2D Layer_3_Rough : source_color;
+uniform sampler2D Layer_3_AO : source_color;
 
 
 // TerrainGenerator3D
@@ -332,7 +262,7 @@ uniform sampler2D Layer_3_AO : hint_albedo;
 				positionXZ = uv * _terrainChunkSize;
 			}
 			
-			return vec3(positionXZ.x, 0f, positionXZ.y);
+			return vec3(positionXZ.x, 0.0f, positionXZ.y);
 	
 		}
 
@@ -528,14 +458,14 @@ uniform sampler2D Layer_3_AO : hint_albedo;
 	
 
 void vertex() {
-	vec3 n_out2p0;
+	float n_out2p0;
 	float n_out2p1;
-	vec3 n_out2p2;
-	vec3 n_out2p3;
-	vec3 n_out2p4;
+	float n_out2p2;
+	float n_out2p3;
+	float n_out2p4;
 	float n_out2p5;
 	float n_out2p6;
-	vec3 n_out2p7;
+	float n_out2p7;
 // TerrainGenerator3D:2
 	{
 		float lodCalculated = calculateLOD(terrainSmoothing, terrainCurrentLodLevel, terrainNeighborLod, UV, COLOR);float lodValue = terrainCurrentLodLevel;float morphAlpha = lodCalculated - terrainCurrentLodLevel;vec4 heightMapValues = getHeightmap(UV, terrainChunkSize, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);
@@ -559,23 +489,28 @@ void vertex() {
 
 
 // Output:0
-	VERTEX = n_out2p0;
-	NORMAL = n_out2p2;
-	TANGENT = n_out2p3;
-	BINORMAL = n_out2p4;
+	VERTEX = vec3(n_out2p0);
+	NORMAL = vec3(n_out2p2);
+	TANGENT = vec3(n_out2p3);
+	BINORMAL = vec3(n_out2p4);
 
 
 }
 
 void fragment() {
-// VectorConstant:33
+
+
+
+
+
+// Vector3Constant:33
 	vec3 n_out33p0 = vec3(75.000000, 75.000000, 75.000000);
 
 
-	vec3 n_out25p0;
+	float n_out25p0;
 // UVMultiply3D:25
 	{
-		vec2 scaled = UV * vec2(n_out33p0.x, n_out33p0.y);
+		vec2 scaled = UV * vec2(n_out33p0.x.x, n_out33p0.x.y);
 		n_out25p0 = vec3(scaled.x, scaled.y, 0f);
 	}
 
@@ -620,6 +555,11 @@ void fragment() {
 		n_out19p1 = packedOriginal;
 		n_out19p0 = packedMixed;
 	}
+
+
+
+
+
 
 
 // FloatConstant:29
@@ -718,6 +658,11 @@ void fragment() {
 	}
 
 
+
+
+
+
+
 // FloatConstant:30
 	float n_out30p0 = 0.000000;
 
@@ -787,9 +732,9 @@ void fragment() {
 	}
 
 
-	vec3 n_out24p0;
+	float n_out24p0;
 	float n_out24p1;
-	vec3 n_out24p2;
+	float n_out24p2;
 	float n_out24p3;
 	float n_out24p4;
 // TextureUnpack3D:24
@@ -802,8 +747,8 @@ void fragment() {
 	}
 
 
-	vec3 n_out26p0;
-	vec3 n_out26p1;
+	float n_out26p0;
+	float n_out26p1;
 // TerrainMaterial3D:26
 	{
 		vec4 material = texture(terrainDefaultMaterial, UV);
@@ -817,18 +762,18 @@ void fragment() {
 
 
 // Output:0
-	ALBEDO = n_out24p0;
+	ALBEDO = vec3(n_out24p0);
 	ROUGHNESS = n_out24p3;
-	EMISSION = n_out26p0;
+	EMISSION = vec3(n_out26p0);
 	AO = n_out24p4;
-	NORMAL_MAP = n_out24p2;
-	NORMAL_MAP_DEPTH = n_out35p0;
+	NORMAL = vec3(n_out24p2);
+	NORMAL_MAP = vec3(n_out35p0);
 
 
 }
 
 void light() {
-// VectorConstant:2
+// Vector3Constant:2
 	vec3 n_out2p0 = vec3(0.500000, 0.500000, 0.500000);
 
 
@@ -838,108 +783,79 @@ void light() {
 
 }
 "
-graph_offset = Vector2(1088.63, -214.445)
-engine_version = {
-"major": 4,
-"minor": 0
-}
+graph_offset = Vector2(343.469, -528.295)
 modes/depth_draw = 1
 nodes/vertex/0/position = Vector2(1120, -320)
-nodes/vertex/2/node = SubResource( "33" )
+nodes/vertex/2/node = SubResource("VisualShaderNodeCustom_jh5gm")
 nodes/vertex/2/position = Vector2(560, -280)
 nodes/vertex/connections = PackedInt32Array(2, 0, 0, 0, 2, 4, 0, 3, 2, 3, 0, 2, 2, 2, 0, 1)
-nodes/fragment/0/position = Vector2(2420, -120)
-nodes/fragment/2/node = SubResource( "11" )
-nodes/fragment/2/position = Vector2(-280, -120)
-nodes/fragment/3/node = SubResource( "21" )
-nodes/fragment/3/position = Vector2(-100, -120)
-nodes/fragment/6/node = SubResource( "28" )
-nodes/fragment/6/position = Vector2(-460, -120)
-nodes/fragment/7/node = SubResource( "29" )
-nodes/fragment/7/position = Vector2(80, -120)
-nodes/fragment/8/node = SubResource( "30" )
-nodes/fragment/8/position = Vector2(280, -120)
-nodes/fragment/9/node = SubResource( "31" )
-nodes/fragment/9/position = Vector2(280, 140)
-nodes/fragment/10/node = SubResource( "1" )
-nodes/fragment/10/position = Vector2(80, 140)
-nodes/fragment/11/node = SubResource( "2" )
-nodes/fragment/11/position = Vector2(-100, 140)
-nodes/fragment/12/node = SubResource( "3" )
-nodes/fragment/12/position = Vector2(-280, 140)
-nodes/fragment/13/node = SubResource( "4" )
-nodes/fragment/13/position = Vector2(-460, 140)
-nodes/fragment/14/node = SubResource( "5" )
-nodes/fragment/14/position = Vector2(-280, 360)
-nodes/fragment/15/node = SubResource( "6" )
-nodes/fragment/15/position = Vector2(-100, 360)
-nodes/fragment/16/node = SubResource( "7" )
-nodes/fragment/16/position = Vector2(80, 360)
-nodes/fragment/17/node = SubResource( "8" )
-nodes/fragment/17/position = Vector2(280, 360)
-nodes/fragment/18/node = SubResource( "9" )
-nodes/fragment/18/position = Vector2(-460, 360)
-nodes/fragment/19/node = SubResource( "10" )
-nodes/fragment/19/position = Vector2(660, -180)
-nodes/fragment/20/node = SubResource( "12" )
-nodes/fragment/20/position = Vector2(820, 160)
-nodes/fragment/21/node = SubResource( "13" )
-nodes/fragment/21/position = Vector2(820, 420)
-nodes/fragment/22/node = SubResource( "14" )
-nodes/fragment/22/position = Vector2(1280, -180)
-nodes/fragment/23/node = SubResource( "15" )
-nodes/fragment/23/position = Vector2(1480, -80)
-nodes/fragment/24/node = SubResource( "16" )
-nodes/fragment/24/position = Vector2(1760, -100)
-nodes/fragment/25/node = SubResource( "17" )
-nodes/fragment/25/position = Vector2(260, 80)
-nodes/fragment/26/node = SubResource( "18" )
-nodes/fragment/26/position = Vector2(1820, -240)
-nodes/fragment/28/node = SubResource( "19" )
-nodes/fragment/28/position = Vector2(540, 60)
-nodes/fragment/29/node = SubResource( "20" )
-nodes/fragment/29/position = Vector2(520, 300)
-nodes/fragment/30/node = SubResource( "22" )
-nodes/fragment/30/position = Vector2(320, 580)
-nodes/fragment/31/node = SubResource( "23" )
-nodes/fragment/31/position = Vector2(1220, 80)
-nodes/fragment/33/node = SubResource( "24" )
-nodes/fragment/33/position = Vector2(-100, 80)
-nodes/fragment/34/node = SubResource( "25" )
-nodes/fragment/34/position = Vector2(960, -60)
-nodes/fragment/35/node = SubResource( "26" )
-nodes/fragment/35/position = Vector2(1720, 40)
-nodes/fragment/connections = PackedInt32Array(8, 2, 19, 4, 7, 2, 19, 3, 3, 2, 19, 2, 2, 2, 19, 1, 6, 2, 19, 0, 9, 2, 20, 4, 10, 2, 20, 3, 11, 2, 20, 2, 12, 2, 20, 1, 13, 2, 20, 0, 17, 2, 21, 4, 16, 2, 21, 3, 15, 2, 21, 2, 14, 2, 21, 1, 18, 2, 21, 0, 22, 0, 23, 0, 21, 0, 23, 1, 25, 0, 19, 5, 25, 0, 20, 5, 25, 0, 21, 5, 28, 0, 19, 8, 29, 0, 20, 8, 30, 0, 21, 8, 31, 0, 22, 3, 31, 0, 23, 3, 33, 0, 25, 0, 23, 0, 24, 0, 24, 2, 0, 8, 35, 0, 0, 9, 24, 3, 0, 3, 24, 4, 0, 6, 19, 0, 22, 0, 20, 0, 22, 1, 34, 1, 23, 2, 34, 3, 22, 2, 24, 0, 0, 0, 26, 0, 0, 5)
+nodes/fragment/0/position = Vector2(2840, 20)
+nodes/fragment/2/node = SubResource("VisualShaderNodeTexture2DParameter_t0rdx")
+nodes/fragment/2/position = Vector2(-2400, -800)
+nodes/fragment/3/node = SubResource("VisualShaderNodeTexture2DParameter_s3wmr")
+nodes/fragment/3/position = Vector2(-2000, -800)
+nodes/fragment/6/node = SubResource("VisualShaderNodeTexture2DParameter_7ootu")
+nodes/fragment/6/position = Vector2(-2800, -800)
+nodes/fragment/7/node = SubResource("VisualShaderNodeTexture2DParameter_5fg4w")
+nodes/fragment/7/position = Vector2(-1200, -800)
+nodes/fragment/8/node = SubResource("VisualShaderNodeTexture2DParameter_mor1n")
+nodes/fragment/8/position = Vector2(-1600, -800)
+nodes/fragment/9/node = SubResource("VisualShaderNodeTexture2DParameter_be7w6")
+nodes/fragment/9/position = Vector2(-1600, -400)
+nodes/fragment/10/node = SubResource("VisualShaderNodeTexture2DParameter_hod58")
+nodes/fragment/10/position = Vector2(-1200, -400)
+nodes/fragment/11/node = SubResource("VisualShaderNodeTexture2DParameter_681d4")
+nodes/fragment/11/position = Vector2(-2000, -400)
+nodes/fragment/12/node = SubResource("VisualShaderNodeTexture2DParameter_wkjnk")
+nodes/fragment/12/position = Vector2(-2400, -400)
+nodes/fragment/13/node = SubResource("VisualShaderNodeTexture2DParameter_4do8g")
+nodes/fragment/13/position = Vector2(-2800, -400)
+nodes/fragment/14/node = SubResource("VisualShaderNodeTexture2DParameter_mdyvu")
+nodes/fragment/14/position = Vector2(-2400, 0)
+nodes/fragment/15/node = SubResource("VisualShaderNodeTexture2DParameter_patep")
+nodes/fragment/15/position = Vector2(-2000, 0)
+nodes/fragment/16/node = SubResource("VisualShaderNodeTexture2DParameter_ul4yd")
+nodes/fragment/16/position = Vector2(-1200, 0)
+nodes/fragment/17/node = SubResource("VisualShaderNodeTexture2DParameter_t222b")
+nodes/fragment/17/position = Vector2(-1600, 0)
+nodes/fragment/18/node = SubResource("VisualShaderNodeTexture2DParameter_gs7lb")
+nodes/fragment/18/position = Vector2(-2800, 0)
+nodes/fragment/19/node = SubResource("VisualShaderNodeCustom_6vg54")
+nodes/fragment/19/position = Vector2(600, -600)
+nodes/fragment/20/node = SubResource("VisualShaderNodeCustom_wa7bm")
+nodes/fragment/20/position = Vector2(600, -180)
+nodes/fragment/21/node = SubResource("VisualShaderNodeCustom_0yefk")
+nodes/fragment/21/position = Vector2(1240, 560)
+nodes/fragment/22/node = SubResource("VisualShaderNodeCustom_nj3w2")
+nodes/fragment/22/position = Vector2(1480, -280)
+nodes/fragment/23/node = SubResource("VisualShaderNodeCustom_s6evc")
+nodes/fragment/23/position = Vector2(1900, 60)
+nodes/fragment/24/node = SubResource("VisualShaderNodeCustom_0l7r6")
+nodes/fragment/24/position = Vector2(2280, 100)
+nodes/fragment/25/node = SubResource("VisualShaderNodeCustom_7oaa4")
+nodes/fragment/25/position = Vector2(40, -200)
+nodes/fragment/26/node = SubResource("VisualShaderNodeCustom_dv7n0")
+nodes/fragment/26/position = Vector2(2240, -100)
+nodes/fragment/28/node = SubResource("VisualShaderNodeFloatConstant_cxi7b")
+nodes/fragment/28/position = Vector2(340, -300)
+nodes/fragment/29/node = SubResource("VisualShaderNodeFloatConstant_i608f")
+nodes/fragment/29/position = Vector2(320, 120)
+nodes/fragment/30/node = SubResource("VisualShaderNodeFloatConstant_t4p08")
+nodes/fragment/30/position = Vector2(960, 860)
+nodes/fragment/31/node = SubResource("VisualShaderNodeFloatConstant_yilqv")
+nodes/fragment/31/position = Vector2(1020, 300)
+nodes/fragment/33/node = SubResource("VisualShaderNodeVec3Constant_t2ieq")
+nodes/fragment/33/position = Vector2(-500, -220)
+nodes/fragment/34/node = SubResource("VisualShaderNodeCustom_45qss")
+nodes/fragment/34/position = Vector2(1000, -80)
+nodes/fragment/35/node = SubResource("VisualShaderNodeFloatConstant_541m4")
+nodes/fragment/35/position = Vector2(2420, 540)
+nodes/fragment/connections = PackedInt32Array(22, 0, 23, 0, 21, 0, 23, 1, 25, 0, 19, 5, 25, 0, 20, 5, 25, 0, 21, 5, 28, 0, 19, 8, 29, 0, 20, 8, 30, 0, 21, 8, 31, 0, 22, 3, 31, 0, 23, 3, 33, 0, 25, 0, 23, 0, 24, 0, 24, 2, 0, 8, 35, 0, 0, 9, 24, 3, 0, 3, 24, 4, 0, 6, 19, 0, 22, 0, 20, 0, 22, 1, 34, 1, 23, 2, 34, 3, 22, 2, 24, 0, 0, 0, 26, 0, 0, 5, 7, 0, 19, 3, 8, 0, 19, 4, 3, 0, 19, 2, 2, 0, 19, 1, 6, 0, 19, 0, 10, 0, 20, 3, 9, 0, 20, 4, 11, 0, 20, 2, 12, 0, 20, 1, 13, 0, 20, 0, 16, 0, 21, 3, 17, 0, 21, 4, 15, 0, 21, 2, 14, 0, 21, 1, 18, 0, 21, 0)
 nodes/light/0/position = Vector2(440, 160)
-nodes/light/2/node = SubResource( "32" )
-nodes/light/2/position = Vector2(120, 160)
+nodes/light/2/node = SubResource("VisualShaderNodeVec3Constant_nww6o")
+nodes/light/2/position = Vector2(-140, 140)
 nodes/light/connections = PackedInt32Array(2, 0, 0, 0)
 
 [resource]
 render_priority = 0
-shader = SubResource( "34" )
-shader_param/terrainUvScale = null
-shader_param/terrainUvOffset = null
-shader_param/terrainChunkSize = null
-shader_param/terrainNextLodChunkSize = null
-shader_param/terrainNeighborLod = null
-shader_param/terrainCurrentLodLevel = null
-shader_param/terrainSmoothing = null
-shader_param/BrushData0 = null
-shader_param/BrushData1 = null
-shader_param/BrushColor = null
-shader_param/Layer_1 = ExtResource( "8" )
-shader_param/Layer_1_Dis = ExtResource( "10" )
-shader_param/Layer_1_Normal = ExtResource( "11" )
-shader_param/Layer_1_Rough = ExtResource( "12" )
-shader_param/Layer_1_AO = ExtResource( "9" )
-shader_param/Layer_2 = ExtResource( "17" )
-shader_param/Layer_2_Dis = ExtResource( "13" )
-shader_param/Layer_2_Normal = ExtResource( "15" )
-shader_param/Layer_2_Rough = ExtResource( "16" )
-shader_param/Layer_2_AO = ExtResource( "14" )
-shader_param/Layer_3 = ExtResource( "20" )
-shader_param/Layer_3_Dis = ExtResource( "19" )
-shader_param/Layer_3_Normal = ExtResource( "18" )
-shader_param/Layer_3_Rough = ExtResource( "21" )
-shader_param/Layer_3_AO = ExtResource( "22" )
+shader = SubResource("VisualShader_ofbnr")

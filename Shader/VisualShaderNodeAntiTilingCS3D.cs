@@ -126,7 +126,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 				}";
 	}
 
-	public override string _GetCode(Array<string> input_vars, Array<string> output_vars, Shader.Mode mode1, VisualShader.Type type1)
+	public override string _GetCode(Array<string> input_vars, Array<string> output_vars, Shader.Mode mode, VisualShader.Type type)
 	{
 		var heightStr = "";
 

@@ -31,7 +31,7 @@ namespace TerrainEditor.Utils.Editor.Sculpt
                     var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.UNITS_PER_VERTEX);
                     var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
 
-                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFallofType, applyInfo.brushFallof, applyInfo.brushSize, pos, samplePositionWorld);
+                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld);
 
                     // Blend between the height and the target value
                     var id = z * modifiedSize.x + x;

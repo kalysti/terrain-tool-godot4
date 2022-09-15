@@ -137,8 +137,7 @@ namespace TerrainEditor
 
 			if (heightmap == null)
 			{
-				heightmap = new ImageTexture();
-				ImageTexture.CreateFromImage(image);
+				heightmap = ImageTexture.CreateFromImage(image);
 			}
 			else
 			{
@@ -176,7 +175,7 @@ namespace TerrainEditor
 				splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
 			}
 
-			ImageTexture.CreateFromImage(splatmapImage);
+			splatmapTexture = ImageTexture.CreateFromImage(splatmapImage);
 			splatmaps[idx] = splatmapTexture;
 		}
 
@@ -235,7 +234,7 @@ namespace TerrainEditor
 		{
 			shapeHeight = new HeightMapShape3D();
 
-				var start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;;
+			var start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
 
 			int heightFieldChunkSize = ((info.chunkSize + 1) >> collisionLOD) - 1;
 			int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;

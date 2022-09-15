@@ -93,10 +93,10 @@ namespace TerrainEditor
             // Data 0: XYZ: position, W: radius
             // Data 1: X: falloff, Y: type
             float halfSize = info.brushSize * 0.5f; // 2000
-            float falloff = halfSize * info.brushFallof; // 1000
+            float falloff = halfSize * info.brushFalloff; // 1000
             float radius = halfSize - falloff; // 1000
 
-            chunk.UpdateInspectorMaterial(color, new Plane(position, radius), new Plane(falloff, (float)info.brushFallofType, 0, 0));
+            chunk.UpdateInspectorMaterial(color, new Plane(position, radius), new Plane(falloff, (float)info.brushFalloffType, 0, 0));
         }
 
         protected void ResetMaterialParams(TerrainChunk chunk)
@@ -340,7 +340,7 @@ namespace TerrainEditor
             var scriptPatch = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatch.cs");
             var scriptPatchhInfo = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatchInfo.cs");
             var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
-            var texture = GD.Load<CompressedTexture2D>("res://addons/TerrainPlugin/icons/terrain.png");
+            var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/terrain.png");
 
             AddCustomType("TerrainPatchInfo", "Resource", scriptPatchhInfo, texture);
             AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);
@@ -358,7 +358,7 @@ namespace TerrainEditor
             menuButton.GetPopup().AddItem("Mapbox import", 3);
 
             menuButton.Visible = false;
-            menuButton.GetPopup().Connect("id_pressed", new Callable(this, "openCreateMenu"));
+            menuButton.GetPopup().Connect("id_pressed", new Callable(this, nameof(openCreateMenu)));
 
             AddControlToContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
             AddSpatialGizmoPlugin(gizmoPlugin);
@@ -510,17 +510,18 @@ namespace TerrainEditor
 
         private TerrainEditorInfo getEditorApply()
         {
-            var st = new TerrainEditorInfo();
-
-            st.brushFallof = getPanelControlFloatValue("brush_fallof");
-            st.brushSize = getPanelControlFloatValue("brush_size");
-            st.strength = getPanelControlFloatValue("strength");
-            st.radius = getPanelControlFloatValue("radius");
-            st.height = getPanelControlFloatValue("height");
-            st.layer = (int)getPanelControlFloatValue("layer");
-            st.noiseAmount = getPanelControlFloatValue("noise_amount");
-            st.noiseScale = getPanelControlFloatValue("noise_scale");
-            st.brushFallofType = getPanelControlValue<BrushFallOfType>("brush_fallof_type");
+            var st = new TerrainEditorInfo
+            {
+                brushFalloff = getPanelControlFloatValue("brush_fallof"),
+                brushSize = getPanelControlFloatValue("brush_size"),
+                strength = getPanelControlFloatValue("strength"),
+                radius = getPanelControlFloatValue("radius"),
+                height = getPanelControlFloatValue("height"),
+                layer = (int)getPanelControlFloatValue("layer"),
+                noiseAmount = getPanelControlFloatValue("noise_amount"),
+                noiseScale = getPanelControlFloatValue("noise_scale"),
+                brushFalloffType = getPanelControlValue<BrushFallOfType>("brush_fallof_type")
+            };
 
             return st;
         }
@@ -894,7 +895,7 @@ namespace TerrainEditor
 
         public override bool _Handles(Variant variant)
         {
-            return variant.Obj != null && (variant.Obj is Terrain3D);
+            return variant.Obj is Terrain3D;
         }
         public override void _MakeVisible(bool visible)
         {

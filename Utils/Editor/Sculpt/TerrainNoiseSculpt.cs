@@ -36,7 +36,7 @@ namespace TerrainEditor.Utils.Editor.Sculpt
                     var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
 
                     var noiseSample = noise.Sample(xx + patchOffset.x, zz + patchOffset.y);
-                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFallofType, applyInfo.brushFallof, applyInfo.brushSize, pos, samplePositionWorld);
+                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld);
 
                     var id = z * modifiedSize.x + x;
                     buffer[id] = sourceHeight + noiseSample * paintAmount;

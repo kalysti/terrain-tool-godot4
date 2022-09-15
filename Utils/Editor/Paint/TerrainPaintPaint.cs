@@ -33,7 +33,7 @@ namespace TerrainEditor.Utils.Editor.Paint
                     var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, 0, zz * Terrain3D.UNITS_PER_VERTEX);
                     var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
 
-                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFallofType, applyInfo.brushFallof, applyInfo.brushSize, pos, samplePositionWorld) * applyInfo.strength;
+                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld) * applyInfo.strength;
 
                     var id = z * modifiedSize.x + x;
 
