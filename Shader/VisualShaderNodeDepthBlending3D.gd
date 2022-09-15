@@ -69,14 +69,14 @@ func _get_global_code(mode):
 		vec3 HeightBlend(float blending, vec3 input1, float height1, vec3 input2, float height2)
 		{
 			float height_start = max(height1, height2) - blending;
-			float b1 = max(height1 - height_start, 0f);
-			float b2 = max(height2 - height_start, 0f);
+			float b1 = max(height1 - height_start, 0.0f);
+			float b2 = max(height2 - height_start, 0.0f);
 			return ((input1 * b1) + (input2 * b2)) / (b1 + b2);
 		}
 
 		vec3 HeightLerp(float blending, vec3 input1, float height1, vec3 input2, float height2, float lerp)
 		{
-			return HeightBlend(blending, input1, height1 * (1f - lerp), input2, height2 * lerp);
+			return HeightBlend(blending, input1, height1 * (1.0f - lerp), input2, height2 * lerp);
 		}
 
 	"""
@@ -105,7 +105,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	heightStr += "	avg2 = "+input_vars[1]+"[1].r;\n"
 	heightStr += "}\n"
 
-	heightStr += "mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));\n"
+	heightStr += "mat4 result = mat4(vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f));\n"
 	heightStr += "result[0].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[0].rgb, avg1, "+input_vars[1]+"[0].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr += "result[1].rgb = HeightLerp("+input_vars[3]+", "+input_vars[0]+"[1].rgb, avg1, "+input_vars[1]+"[1].rgb, avg2, "+input_vars[2]+");\n"
 	heightStr += "result[2].rgb = mix( "+input_vars[0]+"[2].rgb,  "+input_vars[1]+"[2].rgb, "+input_vars[2]+");\n"

@@ -277,7 +277,7 @@ uniform sampler2D Layer_3_AO : source_color;
 				vec4 heightmapValueThisLOD = texture( heightmap, heightmapUVs);
 				vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
 				vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
-				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1f);
+				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1.0f);
 				vec4 heightmapValue = mix(heightmapValueThisLOD, heightmapValueNextLOD, morphAlpha);
 
 				return heightmapValue;
@@ -333,7 +333,7 @@ uniform sampler2D Layer_3_AO : source_color;
 		vec4 getSplatmap(vec2 uv, float _terrainChunkSize, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
 			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
 
-			float currentChunkSize = (_terrainChunkSize / 100f + 1f) * 4f;
+			float currentChunkSize = (_terrainChunkSize / 100.0f + 1.0f) * 4.0f;
 			float extraPolate = 0.5f / currentChunkSize;
 			heightmapUVs = heightmapUVs + vec2(extraPolate, extraPolate);
 
@@ -347,14 +347,14 @@ uniform sampler2D Layer_3_AO : source_color;
 		vec3 HeightBlend(float blending, vec3 input1, float height1, vec3 input2, float height2)
 		{
 			float height_start = max(height1, height2) - blending;
-			float b1 = max(height1 - height_start, 0f);
-			float b2 = max(height2 - height_start, 0f);
+			float b1 = max(height1 - height_start, 0.0f);
+			float b2 = max(height2 - height_start, 0.0f);
 			return ((input1 * b1) + (input2 * b2)) / (b1 + b2);
 		}
 
 		vec3 HeightLerp(float blending, vec3 input1, float height1, vec3 input2, float height2, float lerp)
 		{
-			return HeightBlend(blending, input1, height1 * (1f - lerp), input2, height2 * lerp);
+			return HeightBlend(blending, input1, height1 * (1.0f - lerp), input2, height2 * lerp);
 		}
 
 	
@@ -367,9 +367,9 @@ uniform sampler2D Layer_3_AO : source_color;
 
 		uniform vec4 BrushData0;
 		uniform vec4 BrushData1;
-		uniform vec4 BrushColor	 : hint_color;
+		uniform vec4 BrushColor	 : source_color;
 
-		uniform sampler2D terrainDefaultMaterial : hint_albedo;
+		uniform sampler2D terrainDefaultMaterial : source_color;
 
 
 		vec3 genInspectorHighliteTerrain(vec4 brushColor, vec4 brushData0, vec4 brushData1, mat4 CAMMATRIX, vec3 vertexLocal)
@@ -400,22 +400,22 @@ uniform sampler2D Layer_3_AO : source_color;
 				float falloffType = n_out10p1;
 				
 				// Output0 = brush intensity
-				n_out9p0 = 0f;
+				n_out9p0 = 0.0f;
 				
 				if (dist < radius)
 				{
-					n_out9p0 = 1f;
+					n_out9p0 = 1.0f;
 				}
 				else if (dist < radius + falloff)
 				{
 					float valueLinear = mix(1, 0, (dist - radius) / falloff);
-					if (falloffType == 0f) // Smooth
-						n_out9p0 = valueLinear * valueLinear * (3f - 2f * valueLinear);
-					else if (falloffType == 1f) // Linear
+					if (falloffType == 0.0f) // Smooth
+						n_out9p0 = valueLinear * valueLinear * (3.0f - 2.0f * valueLinear);
+					else if (falloffType == 1.0f) // Linear
 						n_out9p0 = valueLinear;
-					else if (falloffType == 2f) // Spherical
+					else if (falloffType == 2.0f) // Spherical
 						n_out9p0 = sqrt(1.0f - ((dist - radius) / falloff) * (dist - radius) / falloff);
-					else if (falloffType == 3f) // Tip
+					else if (falloffType == 3.0f) // Tip
 						n_out9p0 = 1.0f - sqrt(1.0f - ((falloff + radius - dist) / falloff) * (falloff + radius - dist) / falloff);
 				}
 				
@@ -428,15 +428,15 @@ uniform sampler2D Layer_3_AO : source_color;
 			float n_out16p1 = 1.000000;
 
 			float n_out15p0;
-			n_out15p0 = 0f;
+			n_out15p0 = 0.0f;
 			{
 				float Width = 7.0f;
 				if (abs(n_out4p0) < Width || abs(n_out4p0 - n_out2p1) < Width)
-					n_out15p0 = 1f;
+					n_out15p0 = 1.0f;
 				else if (abs(n_out4p0 - n_out2p1 - n_out10p0) < Width)
-					n_out15p0 = 1f;
+					n_out15p0 = 1.0f;
 				else
-					n_out15p0 = 0f;
+					n_out15p0 = 0.0f;
 				
 			}
 
@@ -452,27 +452,27 @@ uniform sampler2D Layer_3_AO : source_color;
 			vec3 n_out22p0 = vec3(n_out13p1, n_out13p1, n_out13p1);
 
 			vec3 n_out21p0 = n_out17p0 * n_out22p0;
-			return mix(vec3(0f,0f,0f), n_out21p0, n_out20p0);
+			return mix(vec3(0.0f,0.0f,0.0f), n_out21p0, n_out20p0);
 		}
 
 	
 
 void vertex() {
-	float n_out2p0;
+	vec3 n_out2p0;
 	float n_out2p1;
-	float n_out2p2;
-	float n_out2p3;
-	float n_out2p4;
+	vec3 n_out2p2;
+	vec3 n_out2p3;
+	vec3 n_out2p4;
 	float n_out2p5;
 	float n_out2p6;
-	float n_out2p7;
+	vec3 n_out2p7;
 // TerrainGenerator3D:2
 	{
 		float lodCalculated = calculateLOD(terrainSmoothing, terrainCurrentLodLevel, terrainNeighborLod, UV, COLOR);float lodValue = terrainCurrentLodLevel;float morphAlpha = lodCalculated - terrainCurrentLodLevel;vec4 heightMapValues = getHeightmap(UV, terrainChunkSize, terrainSmoothing, terrainUvScale, terrainHeightMap, morphAlpha,  terrainNextLodChunkSize,  terrainCurrentLodLevel);
 		float height = getHeight(heightMapValues);
 		vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);
 		mat3 tangentToLocal = CalcTangentBasisFromWorldNormal(getNormal(heightMapValues));
-		mat3 tangentToWorld = CalcTangentToWorld(WORLD_MATRIX, tangentToLocal);
+		mat3 tangentToWorld = CalcTangentToWorld(MODEL_MATRIX, tangentToLocal);
 		vec3 worldNormal = tangentToWorld[2];
 		mat3 calculatedTBNWorld = CalcTangentBasisFromWorldNormal(worldNormal);
 		position.y = height;
@@ -489,10 +489,10 @@ void vertex() {
 
 
 // Output:0
-	VERTEX = vec3(n_out2p0);
-	NORMAL = vec3(n_out2p2);
-	TANGENT = vec3(n_out2p3);
-	BINORMAL = vec3(n_out2p4);
+	VERTEX = n_out2p0;
+	NORMAL = n_out2p2;
+	TANGENT = n_out2p3;
+	BINORMAL = n_out2p4;
 
 
 }
@@ -507,11 +507,11 @@ void fragment() {
 	vec3 n_out33p0 = vec3(75.000000, 75.000000, 75.000000);
 
 
-	float n_out25p0;
+	vec3 n_out25p0;
 // UVMultiply3D:25
 	{
-		vec2 scaled = UV * vec2(n_out33p0.x.x, n_out33p0.x.y);
-		n_out25p0 = vec3(scaled.x, scaled.y, 0f);
+		vec2 scaled = UV * vec2(n_out33p0.x, n_out33p0.y);
+		n_out25p0 = vec3(scaled.x, scaled.y, 0.0f);
 	}
 
 
@@ -649,7 +649,7 @@ void fragment() {
 			avg1 = n_out19p0[1].r;
 			avg2 = n_out20p0[1].r;
 		}
-		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
+		mat4 result = mat4(vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f));
 		result[0].rgb = HeightLerp(n_out31p0, n_out19p0[0].rgb, avg1, n_out20p0[0].rgb, avg2, n_out34p3);
 		result[1].rgb = HeightLerp(n_out31p0, n_out19p0[1].rgb, avg1, n_out20p0[1].rgb, avg2, n_out34p3);
 		result[2].rgb = mix( n_out19p0[2].rgb,  n_out20p0[2].rgb, n_out34p3);
@@ -723,7 +723,7 @@ void fragment() {
 			avg1 = n_out22p0[1].r;
 			avg2 = n_out21p0[1].r;
 		}
-		mat4 result = mat4(vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f),vec4(0f,0f,0f,0f));
+		mat4 result = mat4(vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f),vec4(0.0f,0.0f,0.0f,0.0f));
 		result[0].rgb = HeightLerp(n_out31p0, n_out22p0[0].rgb, avg1, n_out21p0[0].rgb, avg2, n_out34p1);
 		result[1].rgb = HeightLerp(n_out31p0, n_out22p0[1].rgb, avg1, n_out21p0[1].rgb, avg2, n_out34p1);
 		result[2].rgb = mix( n_out22p0[2].rgb,  n_out21p0[2].rgb, n_out34p1);
@@ -732,9 +732,9 @@ void fragment() {
 	}
 
 
-	float n_out24p0;
+	vec3 n_out24p0;
 	float n_out24p1;
-	float n_out24p2;
+	vec3 n_out24p2;
 	float n_out24p3;
 	float n_out24p4;
 // TextureUnpack3D:24
@@ -747,12 +747,12 @@ void fragment() {
 	}
 
 
-	float n_out26p0;
-	float n_out26p1;
+	vec3 n_out26p0;
+	vec3 n_out26p1;
 // TerrainMaterial3D:26
 	{
 		vec4 material = texture(terrainDefaultMaterial, UV);
-		n_out26p0 = genInspectorHighliteTerrain(BrushColor, BrushData0, BrushData1, CAMERA_MATRIX, VERTEX);
+		n_out26p0 = genInspectorHighliteTerrain(BrushColor, BrushData0, BrushData1, INV_VIEW_MATRIX, VERTEX);
 		n_out26p1 = material.rgb;
 	}
 
@@ -762,11 +762,11 @@ void fragment() {
 
 
 // Output:0
-	ALBEDO = vec3(n_out24p0);
+	ALBEDO = n_out24p0;
 	ROUGHNESS = n_out24p3;
-	EMISSION = vec3(n_out26p0);
+	EMISSION = n_out26p0;
 	AO = n_out24p4;
-	NORMAL = vec3(n_out24p2);
+	NORMAL = n_out24p2;
 	NORMAL_MAP = vec3(n_out35p0);
 
 
@@ -783,7 +783,6 @@ void light() {
 
 }
 "
-graph_offset = Vector2(343.469, -528.295)
 modes/depth_draw = 1
 nodes/vertex/0/position = Vector2(1120, -320)
 nodes/vertex/2/node = SubResource("VisualShaderNodeCustom_jh5gm")
@@ -859,3 +858,13 @@ nodes/light/connections = PackedInt32Array(2, 0, 0, 0)
 [resource]
 render_priority = 0
 shader = SubResource("VisualShader_ofbnr")
+shader_parameter/terrainUvScale = null
+shader_parameter/terrainUvOffset = null
+shader_parameter/terrainSmoothing = null
+shader_parameter/terrainNextLodChunkSize = null
+shader_parameter/terrainNeighborLod = null
+shader_parameter/terrainCurrentLodLevel = null
+shader_parameter/terrainChunkSize = null
+shader_parameter/BrushData1 = null
+shader_parameter/BrushData0 = null
+shader_parameter/BrushColor = null

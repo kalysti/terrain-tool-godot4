@@ -65,7 +65,6 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 			case 0: return (int)VisualShaderNode.PortType.Transform;
 			case 1: return (int)VisualShaderNode.PortType.Transform;
 		}
-
 		return 0;
 	}
 

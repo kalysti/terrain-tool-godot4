@@ -53,11 +53,11 @@ func _get_output_port_name(port):
 func _get_output_port_type(port):
 	match port:
 		0:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 		1:
 			return VisualShaderNode.PORT_TYPE_SCALAR
 		2:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 		3:
 			return VisualShaderNode.PORT_TYPE_SCALAR
 		4:
