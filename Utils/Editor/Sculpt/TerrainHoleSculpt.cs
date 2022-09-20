@@ -12,30 +12,30 @@ namespace TerrainEditor.Utils.Editor.Sculpt
 
         public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
         {
-            var sourceHolesData = patch.CacheHeightData();
+            float[]? sourceHolesData = patch.CacheHeightData();
 
-            var targetHeight = applyInfo.height;
-            var strength = Saturate(editorStrength);
+            float targetHeight = applyInfo.height;
+            float strength = Saturate(editorStrength);
 
-            var bufferSize = modifiedSize.y * modifiedSize.x;
+            int bufferSize = modifiedSize.y * modifiedSize.x;
             var buffer = new byte[bufferSize];
 
             for (int z = 0; z < modifiedSize.y; z++)
             {
-                var zz = z + modifiedOffset.y;
+                int zz = z + modifiedOffset.y;
                 for (int x = 0; x < modifiedSize.x; x++)
                 {
-                    var xx = x + modifiedOffset.x;
-                    var sourceMask = sourceHolesData[zz * patch.info.heightMapSize + xx];
+                    int xx = x + modifiedOffset.x;
+                    float sourceMask = sourceHolesData[zz * patch.info.heightMapSize + xx];
 
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceMask , zz * Terrain3D.UNITS_PER_VERTEX);
-                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
+                    Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceMask , zz * Terrain3D.UNITS_PER_VERTEX);
+                    Vector3 samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
                     samplePositionWorld.y = pos.y;
 
-                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld);
+                    float paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld);
 
                     // Blend between the height and the target value
-                    var id = z * modifiedSize.x + x;
+                    int id = z * modifiedSize.x + x;
                     buffer[id] = (byte)((sourceMask + paintAmount * strength) < 0.8f ? 0 : 255);
                 }
             }

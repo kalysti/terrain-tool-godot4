@@ -45,7 +45,7 @@ namespace TerrainEditor
         public AABB getBounds(TerrainPatchInfo info, Vector3 patchOffset)
         {
             float size = (float)info.chunkSize * Terrain3D.UNITS_PER_VERTEX;
-            var origin = patchOffset + new Vector3(position.x * size, offset, position.y * size);
+            Vector3 origin = patchOffset + new Vector3(position.x * size, offset, position.y * size);
             var bounds = new AABB(origin, new Vector3(size, height, size));
 
             return bounds;
@@ -95,13 +95,13 @@ namespace TerrainEditor
         public Transform3D UpdatePosition(TerrainPatchInfo info, Transform3D terrainTransform, Vector3 patchoffset)
         {
             float size = (info.chunkSize) * Terrain3D.UNITS_PER_VERTEX;
-            var localPosition = patchoffset + new Vector3(position.x * size, info.patchOffset, position.y * size);
+            Vector3 localPosition = patchoffset + new Vector3(position.x * size, info.patchOffset, position.y * size);
             Transform3D localTransform = new Transform3D();
             localTransform.origin = localPosition;
             localTransform.basis = new Basis(Quaternion.Identity);
             localTransform.basis = localTransform.basis.Scaled(new Vector3(1.0f, info.patchHeight, 1.0f));
 
-            var global = terrainTransform * localTransform;
+            Transform3D global = terrainTransform * localTransform;
 
             if (instanceRid.HasValue)
                 RenderingServer.InstanceSetTransform(instanceRid.Value, global);
@@ -118,7 +118,7 @@ namespace TerrainEditor
 		*/
         private Plane getUVScale()
         {
-            var q = new Quaternion(1.0f, 1.0f, position.x, position.y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
+            Quaternion q = new Quaternion(1.0f, 1.0f, position.x, position.y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
             return new Plane(q.x, q.y, q.z, q.w);
         }
 
@@ -158,7 +158,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x, position.y - 1);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x, position.y - 1);
                 if (patch != null)
                     _neighbors[0] = patch.chunks[(Terrain3D.PATCH_CHUNK_EDGES - 1) * Terrain3D.PATCH_CHUNK_EDGES + position.x];
             }
@@ -170,7 +170,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x - 1, position.y);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x - 1, position.y);
                 if (patch != null)
                     _neighbors[1] = patch.chunks[position.y * Terrain3D.PATCH_CHUNK_EDGES + (Terrain3D.PATCH_CHUNK_EDGES - 1)];
             }
@@ -182,7 +182,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x + 1, position.y);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x + 1, position.y);
                 if (patch != null)
                     _neighbors[2] = patch.chunks[position.y * Terrain3D.PATCH_CHUNK_EDGES];
             }
@@ -194,7 +194,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x, position.y + 1);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x, position.y + 1);
                 if (patch != null)
                     _neighbors[3] = patch.chunks[position.x];
             }
@@ -360,7 +360,7 @@ namespace TerrainEditor
 
             st.GenerateTangents();
 
-            var mesh = st.Commit();
+            ArrayMesh? mesh = st.Commit();
             patch.meshCache.Add(lodIndex, mesh);
 
             return mesh.Duplicate() as ArrayMesh;

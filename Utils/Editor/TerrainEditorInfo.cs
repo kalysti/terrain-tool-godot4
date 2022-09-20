@@ -12,6 +12,6 @@ namespace TerrainEditor.Utils.Editor
         public float noiseAmount { get; set; }
         public float noiseScale { get; set; }
 
-        public BrushFallOfType brushFalloffType { get; set; }
+        public BrushFallOffType brushFalloffType { get; set; }
     }
 }

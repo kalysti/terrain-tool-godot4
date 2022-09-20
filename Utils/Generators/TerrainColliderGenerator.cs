@@ -32,7 +32,7 @@ namespace TerrainEditor.Generators
             int vertexCountEdgeMip = patch.info.vertexCountEdge >> collisionLOD;
             int textureSizeMip = patch.info.textureSize >> collisionLOD;
 
-            var img = patch.heightmap.GetImage();
+            Image? img = patch.heightmap.GetImage();
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(img.GetData());
 
             int heightMapLength = patch.info.heightMapSize * patch.info.heightMapSize;

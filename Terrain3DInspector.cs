@@ -49,16 +49,5 @@ namespace TerrainEditor
         [Export(PropertyHint.Range, "0,32768,0.01")]
         public float lodMaxHysteresis = 0;
 
-        public string enumToString<T>()
-        {
-            var array = new Godot.Collections.Array<string>();
-            foreach (int i in Enum.GetValues(typeof(T)))
-            {
-                String name = Enum.GetName(typeof(T), i);
-                array.Add(name);
-            }
-
-            return String.Join(",", array.ToArray());
-        }
     }
 }

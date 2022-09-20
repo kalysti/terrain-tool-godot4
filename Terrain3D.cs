@@ -31,13 +31,13 @@ namespace TerrainEditor
 
 		public void UpdatePosition()
 		{
-			foreach (var patch in terrainPatches)
+			foreach (TerrainPatch? patch in terrainPatches)
 				patch.UpdatePosition(this);
 		}
 
 		public void UpdateSettings()
 		{
-			foreach (var patch in terrainPatches)
+			foreach (TerrainPatch? patch in terrainPatches)
 				patch.UpdateSettings(this);
 		}
 
@@ -45,7 +45,7 @@ namespace TerrainEditor
 		{
 			for (int pathIndex = 0; pathIndex < terrainPatches.Count(); pathIndex++)
 			{
-				var patch = terrainPatches[pathIndex];
+				TerrainPatch? patch = terrainPatches[pathIndex];
 				for (int chunkIndex = 0; chunkIndex < PATCH_CHUNKS_AMOUNT; chunkIndex++)
 				{
 					patch.chunks[chunkIndex].CacheNeighbors(this, patch);
@@ -58,7 +58,7 @@ namespace TerrainEditor
 		{
 			for (int i = 0; i < terrainPatches.Count(); i++)
 			{
-				var patch = terrainPatches[i];
+				TerrainPatch? patch = terrainPatches[i];
 				if (patch.patchCoord.x == x && patch.patchCoord.y == z)
 				{
 					return patch;
@@ -152,7 +152,7 @@ namespace TerrainEditor
 		*/
 		public Error loadHeightmapFromImage(Vector2i patchCoord, Image heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
 		{
-			var patch = GetPatch(patchCoord.x, patchCoord.y);
+			TerrainPatch? patch = GetPatch(patchCoord.x, patchCoord.y);
 			if (patch == null || heightMapImage == null)
 			{
 				return Error.FileNotFound;
@@ -218,7 +218,7 @@ namespace TerrainEditor
 		*/
 		public Error loadSplatmapFromImage(Vector2i patchCoord, int idx, Image splatmapImage)
 		{
-			var patch = GetPatch(patchCoord.x, patchCoord.y);
+			TerrainPatch? patch = GetPatch(patchCoord.x, patchCoord.y);
 			if (patch == null || splatmapImage == null)
 			{
 				return Error.FileNotFound;
@@ -251,12 +251,12 @@ namespace TerrainEditor
 
 			int patchId = 0;
 
-			foreach (var patch in terrainPatches)
+			foreach (TerrainPatch? patch in terrainPatches)
 			{
 
-				var start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;;
+				long start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;;
 				patch.Draw(this, terrainDefaultMaterial);
-				var end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;;
+				long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;;
 
 				GD.Print("[Patch][" + patchId + "] Draw time " + (end - start) + " ms");
 				patchId++;
@@ -264,8 +264,8 @@ namespace TerrainEditor
 			UpdateGizmos();
 
 
-			var kmX = getBounds().Size.x * 0.00001f;
-			var kmY = getBounds().Size.z * 0.00001f;
+			float kmX = getBounds().Size.x * 0.00001f;
+			float kmY = getBounds().Size.z * 0.00001f;
 
 			GD.Print("[Draw Size] " + kmX + "x" + kmY + "km");
 
@@ -294,7 +294,7 @@ namespace TerrainEditor
 
 		protected void ClearDraw()
 		{
-			foreach (var patch in terrainPatches)
+			foreach (TerrainPatch? patch in terrainPatches)
 			{
 				patch.ClearDraw();
 			}
@@ -303,7 +303,7 @@ namespace TerrainEditor
 		public AABB getBounds()
 		{
 			var bounds = new AABB();
-			foreach (var patch in terrainPatches)
+			foreach (TerrainPatch? patch in terrainPatches)
 			{
 				bounds = bounds.Merge(patch.getBounds());
 			}

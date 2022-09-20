@@ -22,8 +22,8 @@ namespace TerrainEditor.Generators
             }
 
             // Cache all the splatmaps
-            var splatmap = patch.splatmaps[id];
-            var splatmapImg = splatmap.GetImage();
+            ImageTexture? splatmap = patch.splatmaps[id];
+            Image? splatmapImg = splatmap.GetImage();
             int heightMapLength = patch.info.heightMapSize * patch.info.heightMapSize;
 
             // Allocate data
