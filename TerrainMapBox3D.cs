@@ -10,58 +10,28 @@ using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Godot.Collections;
+using FileAccess = Godot.FileAccess;
+
 
 namespace TerrainEditor
 {
     [Tool]
     public partial class TerrainMapBox3D : Terrain3D
     {
+        [ExportCategory("Terrain Mapbox")]
+        [ExportGroup("Mapbox Data")]
+        [Export]
         public string mapBoxAccessToken = "pk.eyJ1IjoiaGlnaGNsaWNrZXJzIiwiYSI6ImNrZHdveTAxZjQxOXoyenJvcjlldmpoejEifQ.0LKYqSO1cCQoVCWObvVB5w";
+        [Export]
         public string mapBoxCachePath = "user://mapCache";
-
-        public override Godot.Collections.Array _GetPropertyList()
-        {
-            var list = base._GetPropertyList();
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Terrain Mapbox"},
-                {"type",  Variant.Type.Nil},
-                {"usage", PropertyUsageFlags.Category  | PropertyUsageFlags.Editor}
-            });
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "Mapbox Data"},
-                {"type",  Variant.Type.Nil},
-                {"usage", PropertyUsageFlags.Group  | PropertyUsageFlags.Editor},
-                {"hint_string", "mapBox"}
-            });
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "mapBoxAccessToken"},
-                {"type",  Variant.Type.String},
-                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
-            });
-
-            list.Add(new Godot.Collections.Dictionary()
-            {
-                {"name", "mapBoxCachePath"},
-                {"type",  Variant.Type.String},
-                {  "usage",  PropertyUsageFlags.Editor | PropertyUsageFlags.Storage}
-            });
-
-
-            return list;
-        }
 
         protected void initCacheFolder()
         {
-            var dir = new Godot.Directory();
+            DirAccess? dir = DirAccess.Open(mapBoxCachePath);
             if (!dir.DirExists(mapBoxCachePath))
             {
-                dir.Open("user://");
+                DirAccess.Open("user://");
                 dir.MakeDir("mapCache");
             }
         }
@@ -77,13 +47,12 @@ namespace TerrainEditor
         {
             initCacheFolder();
 
-            var url = "https://api.mapbox.com/v4/mapbox.terrain-rgb/" + zoomLevel + "/" + x + "/" + y + ".pngraw?access_token=" + mapBoxAccessToken;
+            string? url = "https://api.mapbox.com/v4/mapbox.terrain-rgb/" + zoomLevel + "/" + x + "/" + y + ".pngraw?access_token=" + mapBoxAccessToken;
 
-            var filename = zoomLevel + "_" + x + "_" + y + ".png";
-            var filePath = mapBoxCachePath + "/" + filename;
-            var fileCheck = new Godot.File();
+            string? filename = zoomLevel + "_" + x + "_" + y + ".png";
+            string? filePath = mapBoxCachePath + "/" + filename;
 
-            if (fileCheck.FileExists(filePath))
+            if (FileAccess.FileExists(filePath))
             {
                 image = loadImageFromBox(filePath);
                 return Error.Ok;
@@ -101,11 +70,10 @@ namespace TerrainEditor
                     byte[] data = client.DownloadData(url);
                     GD.Print("Store in: " + filePath);
 
-                    var file = new Godot.File();
-                    var result = file.Open(filePath, Godot.File.ModeFlags.Write);
-                    if (result == Error.Ok)
+                    FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
+                    if (result.IsOpen())
                     {
-                        file.StoreBuffer(data);
+                        result.StoreBuffer(data);
                     }
                     else
                     {
@@ -115,7 +83,7 @@ namespace TerrainEditor
 
                     image = loadImageFromBox(filePath);
 
-                    file.Close();
+                    result.Flush();
                     GD.PrintErr("Ready storing image succesfull");
 
                     return Error.Ok;
@@ -139,7 +107,7 @@ namespace TerrainEditor
         public void loadTile(Vector2i patch, int x = 62360, int y = 48541, int zoomLevel = 17)
         {
             var image = new Image();
-            var error = loadHeightmapFromBox(ref image, x, y, zoomLevel);
+            Error error = loadHeightmapFromBox(ref image, x, y, zoomLevel);
 
             if (error == Error.Ok)
             {

@@ -66,23 +66,22 @@ namespace TerrainEditor.Utils.Editor.Brush
 
             result = (float)Math.Sqrt(x * x + z * z);
         }
-        public static float Sample(BrushFallOfType type, float brushFallof, float brushSize, Vector3 brushPosition, Vector3 samplePosition)
+        public static float Sample(BrushFallOffType type, float brushFalloff, float brushSize, Vector3 brushPosition, Vector3 samplePosition)
         {
-            float distanceXZ = 0f;
-            DistanceXZ(brushPosition, samplePosition, out distanceXZ);
+            DistanceXZ(brushPosition, samplePosition, out float distanceXZ);
 
             float halfSize = brushSize * 0.5f;
-            float falloff = halfSize * brushFallof;
+            float falloff = halfSize * brushFalloff;
             float radius = halfSize - falloff;
 
-            switch (type)
+            return type switch
             {
-                case BrushFallOfType.Smooth: return CalculateFalloff_Smooth(distanceXZ, radius, falloff);
-                case BrushFallOfType.Linear: return CalculateFalloff_Linear(distanceXZ, radius, falloff);
-                case BrushFallOfType.Spherical: return CalculateFalloff_Spherical(distanceXZ, radius, falloff);
-                case BrushFallOfType.Tip: return CalculateFalloff_Tip(distanceXZ, radius, falloff);
-                default: throw new ArgumentOutOfRangeException();
-            }
+                BrushFallOffType.Smooth => CalculateFalloff_Smooth(distanceXZ, radius, falloff),
+                BrushFallOffType.Linear => CalculateFalloff_Linear(distanceXZ, radius, falloff),
+                BrushFallOffType.Spherical => CalculateFalloff_Spherical(distanceXZ, radius, falloff),
+                BrushFallOffType.Tip => CalculateFalloff_Tip(distanceXZ, radius, falloff),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 }

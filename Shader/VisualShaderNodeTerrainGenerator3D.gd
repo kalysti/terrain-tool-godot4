@@ -49,21 +49,21 @@ func _get_output_port_name(port):
 func _get_output_port_type(port):
 	match port:
 		0:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 		1:
 			return VisualShaderNode.PORT_TYPE_SCALAR
 		2:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 		3:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 		4:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 		5:
 			return VisualShaderNode.PORT_TYPE_SCALAR
 		6:
 			return VisualShaderNode.PORT_TYPE_SCALAR
 		7:
-			return VisualShaderNode.PORT_TYPE_VECTOR
+			return VisualShaderNode.PORT_TYPE_VECTOR_3D
 
 func _get_global_code(mode):
 	return """
@@ -170,7 +170,7 @@ func _get_global_code(mode):
 				positionXZ = uv * _terrainChunkSize;
 			}
 			
-			return vec3(positionXZ.x, 0f, positionXZ.y);
+			return vec3(positionXZ.x, 0.0f, positionXZ.y);
 	
 		}
 
@@ -185,7 +185,7 @@ func _get_global_code(mode):
 				vec4 heightmapValueThisLOD = texture( heightmap, heightmapUVs);
 				vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
 				vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
-				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1f);
+				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1.0f);
 				vec4 heightmapValue = mix(heightmapValueThisLOD, heightmapValueNextLOD, morphAlpha);
 
 				return heightmapValue;
@@ -224,7 +224,7 @@ func _get_code(input_vars, output_vars, mode, type):
 	
 	heightStr += "vec3 position = getPosition(UV, terrainChunkSize, terrainCurrentLodLevel, terrainSmoothing, terrainNextLodChunkSize, lodCalculated);\n"
 	heightStr += "mat3 tangentToLocal = CalcTangentBasisFromWorldNormal(getNormal(heightMapValues));\n"
-	heightStr += "mat3 tangentToWorld = CalcTangentToWorld(WORLD_MATRIX, tangentToLocal);\n"
+	heightStr += "mat3 tangentToWorld = CalcTangentToWorld(MODEL_MATRIX, tangentToLocal);\n"
 	heightStr += "vec3 worldNormal = tangentToWorld[2];\n"
 	heightStr += "mat3 calculatedTBNWorld = CalcTangentBasisFromWorldNormal(worldNormal);\n"
 

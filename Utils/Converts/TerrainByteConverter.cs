@@ -12,7 +12,7 @@ namespace TerrainEditor.Converters
 
         public static float ReadNormalizedHeight16Bit(Color raw)
         {
-            var test = raw.r8 | (raw.g8 << 8);
+            int test = raw.r8 | (raw.g8 << 8);
             UInt16 quantizedHeight = Convert.ToUInt16(test);
 
             float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;
@@ -21,7 +21,7 @@ namespace TerrainEditor.Converters
 
         public static float ReadNormalizedHeightByte(RGBA raw)
         {
-            var test = raw.r | (raw.g << 8);
+            int test = raw.r | (raw.g << 8);
             UInt16 quantizedHeight = Convert.ToUInt16(test);
 
             float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;

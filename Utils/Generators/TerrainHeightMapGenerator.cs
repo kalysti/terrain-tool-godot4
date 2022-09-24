@@ -168,10 +168,10 @@ namespace TerrainEditor.Generators
                 for (int x = normalsStart.x; x < normalsEnd.x - 1; x++)
                 {
                     // Get four vertices from the quad
-                    var v00 = getVertex(0, 0, x, z);
-                    var v10 = getVertex(1, 0, x, z);
-                    var v01 = getVertex(0, 1, x, z);
-                    var v11 = getVertex(1, 1, x, z);
+                    VertexResult v00 = getVertex(0, 0, x, z);
+                    VertexResult v10 = getVertex(1, 0, x, z);
+                    VertexResult v01 = getVertex(0, 1, x, z);
+                    VertexResult v11 = getVertex(1, 1, x, z);
 
                     // Calculate normals for quad two vertices
                     Vector3 n0 = ((v00.v - v01.v).Cross(v01.v - v10.v)).Normalized();
@@ -192,17 +192,17 @@ namespace TerrainEditor.Generators
             {
                 for (int x = 1; x < normalsSize.x - 1; x++)
                 {
-                    var n00 = getNormal(0, 0, x, z);
-                    var n10 = getNormal(1, 0, x, z);
-                    var n01 = getNormal(0, 1, x, z);
-                    var n11 = getNormal(1, 1, x, z);
+                    VertexResult n00 = getNormal(0, 0, x, z);
+                    VertexResult n10 = getNormal(1, 0, x, z);
+                    VertexResult n01 = getNormal(0, 1, x, z);
+                    VertexResult n11 = getNormal(1, 1, x, z);
 
-                    var n20 = getNormal(2, 0, x, z);
+                    VertexResult n20 = getNormal(2, 0, x, z);
 
-                    var n21 = getNormal(2, 1, x, z);
-                    var n02 = getNormal(0, 2, x, z);
-                    var n12 = getNormal(1, 2, x, z);
-                    var n22 = getNormal(2, 2, x, z);
+                    VertexResult n21 = getNormal(2, 1, x, z);
+                    VertexResult n02 = getNormal(0, 2, x, z);
+                    VertexResult n12 = getNormal(1, 2, x, z);
+                    VertexResult n22 = getNormal(2, 2, x, z);
 
                     /*
                      * The current vertex is (11). Calculate average for the nearby vertices.

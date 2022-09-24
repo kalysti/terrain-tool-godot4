@@ -24,13 +24,13 @@ namespace TerrainEditor
         [Export]
         public float height = 1;
 
-        protected RID instanceRid;
+        protected RID? instanceRid;
 
-        protected RID materialId;
+        protected RID? materialId;
 
         protected Material materialInUse;
 
-        protected RID meshId;
+        protected RID? meshId;
 
         protected Mesh mesh { get; set; }
 
@@ -45,7 +45,7 @@ namespace TerrainEditor
         public AABB getBounds(TerrainPatchInfo info, Vector3 patchOffset)
         {
             float size = (float)info.chunkSize * Terrain3D.UNITS_PER_VERTEX;
-            var origin = patchOffset + new Vector3(position.x * size, offset, position.y * size);
+            Vector3 origin = patchOffset + new Vector3(position.x * size, offset, position.y * size);
             var bounds = new AABB(origin, new Vector3(size, height, size));
 
             return bounds;
@@ -73,14 +73,14 @@ namespace TerrainEditor
 		*/
         public void ClearDraw()
         {
-            if (meshId != null)
+            if (meshId.HasValue)
             {
-                RenderingServer.FreeRid(meshId);
+                RenderingServer.FreeRid(meshId.Value);
             }
 
-            if (instanceRid != null)
+            if (instanceRid.HasValue)
             {
-                RenderingServer.FreeRid(instanceRid);
+                RenderingServer.FreeRid(instanceRid.Value);
             }
             mesh = null;
             materialInUse = null;
@@ -95,19 +95,19 @@ namespace TerrainEditor
         public Transform3D UpdatePosition(TerrainPatchInfo info, Transform3D terrainTransform, Vector3 patchoffset)
         {
             float size = (info.chunkSize) * Terrain3D.UNITS_PER_VERTEX;
-            var localPosition = patchoffset + new Vector3(position.x * size, info.patchOffset, position.y * size);
+            Vector3 localPosition = patchoffset + new Vector3(position.x * size, info.patchOffset, position.y * size);
             Transform3D localTransform = new Transform3D();
             localTransform.origin = localPosition;
             localTransform.basis = new Basis(Quaternion.Identity);
             localTransform.basis = localTransform.basis.Scaled(new Vector3(1.0f, info.patchHeight, 1.0f));
 
-            var global = terrainTransform * localTransform;
+            Transform3D global = terrainTransform * localTransform;
 
-            if (instanceRid != null)
-                RenderingServer.InstanceSetTransform(instanceRid, global);
+            if (instanceRid.HasValue)
+                RenderingServer.InstanceSetTransform(instanceRid.Value, global);
 
-            if (materialId != null)
-                RenderingServer.MaterialSetParam(materialId, "uv_scale", getUVScale());
+            if (materialId.HasValue)
+                RenderingServer.MaterialSetParam(materialId.Value, "uv_scale", getUVScale());
 
             return global;
         }
@@ -118,7 +118,7 @@ namespace TerrainEditor
 		*/
         private Plane getUVScale()
         {
-            var q = new Quaternion(1.0f, 1.0f, position.x, position.y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
+            Quaternion q = new Quaternion(1.0f, 1.0f, position.x, position.y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
             return new Plane(q.x, q.y, q.z, q.w);
         }
 
@@ -127,9 +127,9 @@ namespace TerrainEditor
 		*/
         public void UpdateInspectorMaterial(Color color, Plane BrushData0, Plane BrushData1)
         {
-            RenderingServer.MaterialSetParam(materialId, "Color", color);
-            RenderingServer.MaterialSetParam(materialId, "BrushData0", BrushData0);
-            RenderingServer.MaterialSetParam(materialId, "BrushData1", BrushData1);
+            RenderingServer.MaterialSetParam(materialId.Value, "Color", color);
+            RenderingServer.MaterialSetParam(materialId.Value, "BrushData0", BrushData0);
+            RenderingServer.MaterialSetParam(materialId.Value, "BrushData1", BrushData1);
         }
 
         /**
@@ -137,7 +137,7 @@ namespace TerrainEditor
 		*/
         public void SetDefaultMaterial(Texture2D image)
         {
-            RenderingServer.MaterialSetParam(materialId, "terrainDefaultMaterial", image.GetRid());
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainDefaultMaterial", image.GetRid());
         }
 
         /**
@@ -158,7 +158,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x, position.y - 1);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x, position.y - 1);
                 if (patch != null)
                     _neighbors[0] = patch.chunks[(Terrain3D.PATCH_CHUNK_EDGES - 1) * Terrain3D.PATCH_CHUNK_EDGES + position.x];
             }
@@ -170,7 +170,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x - 1, position.y);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x - 1, position.y);
                 if (patch != null)
                     _neighbors[1] = patch.chunks[position.y * Terrain3D.PATCH_CHUNK_EDGES + (Terrain3D.PATCH_CHUNK_EDGES - 1)];
             }
@@ -182,7 +182,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x + 1, position.y);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x + 1, position.y);
                 if (patch != null)
                     _neighbors[2] = patch.chunks[position.y * Terrain3D.PATCH_CHUNK_EDGES];
             }
@@ -194,7 +194,7 @@ namespace TerrainEditor
             }
             else
             {
-                var patch = terrainNode.GetPatch(position.x, position.y + 1);
+                TerrainPatch? patch = terrainNode.GetPatch(position.x, position.y + 1);
                 if (patch != null)
                     _neighbors[3] = patch.chunks[position.x];
             }
@@ -216,36 +216,36 @@ namespace TerrainEditor
             float size = (float)info.chunkSize * Terrain3D.UNITS_PER_VERTEX;
 
             instanceRid = RenderingServer.InstanceCreate();
-            RenderingServer.InstanceSetScenario(instanceRid, scenario); //adding to the scene
-            RenderingServer.InstanceSetBase(instanceRid, meshId);
-            RenderingServer.InstanceAttachObjectInstanceId(instanceRid, tf.GetInstanceId()); // attach to node
-            RenderingServer.MeshSetCustomAabb(meshId, new AABB(new Vector3(), new Vector3(size, height, size)));
-            RenderingServer.InstanceSetCustomAabb(instanceRid, new AABB(new Vector3(), new Vector3(size, height, size)));
+            RenderingServer.InstanceSetScenario(instanceRid.Value, scenario); //adding to the scene
+            RenderingServer.InstanceSetBase(instanceRid.Value, meshId.Value);
+            RenderingServer.InstanceAttachObjectInstanceId(instanceRid.Value, tf.GetInstanceId()); // attach to node
+            RenderingServer.MeshSetCustomAabb(meshId.Value, new AABB(new Vector3(), new Vector3(size, height, size)));
+            RenderingServer.InstanceSetCustomAabb(instanceRid.Value, new AABB(new Vector3(), new Vector3(size, height, size)));
 
             materialInUse = mat.Duplicate() as Material;
             materialId = materialInUse.GetRid();
 
-            RenderingServer.InstanceGeometrySetMaterialOverride(instanceRid, materialId);
+            RenderingServer.InstanceGeometrySetMaterialOverride(instanceRid.Value, materialId.Value);
             var nextChunkSizeLod = (float)(((info.chunkSize + 1) >> (lod + 1)) - 1);
 
-            RenderingServer.MaterialSetParam(materialId, "terrainHeightMap", heightMap.GetRid());
-            RenderingServer.MaterialSetParam(materialId, "terrainChunkSize", TerrainChunkSizeLOD0);
-            RenderingServer.MaterialSetParam(materialId, "terrainNextLodChunkSize", nextChunkSizeLod);
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainHeightMap", heightMap.GetRid());
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainChunkSize", TerrainChunkSizeLOD0);
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainNextLodChunkSize", nextChunkSizeLod);
 
-            RenderingServer.MaterialSetParam(materialId, "terrainCurrentLodLevel", lod);
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainCurrentLodLevel", lod);
 
-            RenderingServer.MaterialSetParam(materialId, "terrainSplatmap1", splatMaps[0].GetRid());
-            RenderingServer.MaterialSetParam(materialId, "terrainSplatmap2", splatMaps[1].GetRid());
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainSplatmap1", splatMaps[0].GetRid());
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainSplatmap2", splatMaps[1].GetRid());
 
-            RenderingServer.MaterialSetParam(materialId, "terrainUvScale", getUVScale());
-            RenderingServer.MaterialSetParam(materialId, "terrainNeighborLod", getNeighbors());
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainUvScale", getUVScale());
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainNeighborLod", getNeighbors());
 
 
-            RenderingServer.MaterialSetParam(materialId, "terrainSmoothing", true);
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainSmoothing", true);
 
             offsetUv = new Vector2((float)(patch.patchCoord.x * Terrain3D.PATCH_CHUNK_EDGES + position.x), (float)(patch.patchCoord.y * Terrain3D.PATCH_CHUNK_EDGES + position.y));
-            RenderingServer.MaterialSetParam(materialId, "terrainUvOffset", offsetUv);
-            RenderingServer.InstanceSetVisible(instanceRid, false);
+            RenderingServer.MaterialSetParam(materialId.Value, "terrainUvOffset", offsetUv);
+            RenderingServer.InstanceSetVisible(instanceRid.Value, false);
 
             UpdateSettings(tf);
             tf.ForceUpdateTransform();
@@ -259,34 +259,34 @@ namespace TerrainEditor
             if (!tf.IsInsideTree())
                 return;
 
-            RenderingServer.InstanceSetVisible(instanceRid, tf.IsVisibleInTree());
-            RenderingServer.InstanceGeometrySetCastShadowsSetting(instanceRid, tf.castShadow);
+            RenderingServer.InstanceSetVisible(instanceRid.Value, tf.IsVisibleInTree());
+            RenderingServer.InstanceGeometrySetCastShadowsSetting(instanceRid.Value, tf.castShadow);
 
             switch (tf.giMode)
             {
                 case GIMode.Disabled:
                     {
-                        RenderingServer.InstanceGeometrySetFlag(instanceRid, RenderingServer.InstanceFlags.UseBakedLight, false);
-                        RenderingServer.InstanceGeometrySetFlag(instanceRid, RenderingServer.InstanceFlags.UseDynamicGi, false);
+                        RenderingServer.InstanceGeometrySetFlag(instanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, false);
+                        RenderingServer.InstanceGeometrySetFlag(instanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, false);
                     }
                     break;
                 case GIMode.Baked:
                     {
 
-                        RenderingServer.InstanceGeometrySetFlag(instanceRid, RenderingServer.InstanceFlags.UseBakedLight, true);
-                        RenderingServer.InstanceGeometrySetFlag(instanceRid, RenderingServer.InstanceFlags.UseDynamicGi, false);
+                        RenderingServer.InstanceGeometrySetFlag(instanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, true);
+                        RenderingServer.InstanceGeometrySetFlag(instanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, false);
                     }
                     break;
                 case GIMode.Dynamic:
                     {
-                        RenderingServer.InstanceGeometrySetFlag(instanceRid, RenderingServer.InstanceFlags.UseBakedLight, false);
-                        RenderingServer.InstanceGeometrySetFlag(instanceRid, RenderingServer.InstanceFlags.UseDynamicGi, true);
+                        RenderingServer.InstanceGeometrySetFlag(instanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, false);
+                        RenderingServer.InstanceGeometrySetFlag(instanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, true);
                     }
                     break;
             }
 
-            RenderingServer.InstanceGeometrySetVisibilityRange(instanceRid, tf.lodMinDistance, tf.lodMaxDistance, tf.lodMinHysteresis, tf.lodMaxHysteresis, RenderingServer.VisibilityRangeFadeMode.Dependencies);
-            RenderingServer.InstanceSetExtraVisibilityMargin(instanceRid, tf.extraCullMargin);
+            RenderingServer.InstanceGeometrySetVisibilityRange(instanceRid.Value, tf.lodMinDistance, tf.lodMaxDistance, tf.lodMinHysteresis, tf.lodMaxHysteresis, RenderingServer.VisibilityRangeFadeMode.Dependencies);
+            RenderingServer.InstanceSetExtraVisibilityMargin(instanceRid.Value, tf.extraCullMargin);
         }
 
         /**
@@ -360,7 +360,7 @@ namespace TerrainEditor
 
             st.GenerateTangents();
 
-            var mesh = st.Commit();
+            ArrayMesh? mesh = st.Commit();
             patch.meshCache.Add(lodIndex, mesh);
 
             return mesh.Duplicate() as ArrayMesh;

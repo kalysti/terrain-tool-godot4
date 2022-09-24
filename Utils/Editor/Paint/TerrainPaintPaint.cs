@@ -14,28 +14,28 @@ namespace TerrainEditor.Utils.Editor.Paint
         {
             int splatmapIndex = applyInfo.layer < 4 ? 0 : 1;
 
-            var sourceSplatmap = patch.CacheSplatMap(splatmapIndex);
+            Color[]? sourceSplatmap = patch.CacheSplatMap(splatmapIndex);
             float strength = editorStrength * 1000.0f;
 
-            var bufferSize = modifiedSize.y * modifiedSize.x;
+            int bufferSize = modifiedSize.y * modifiedSize.x;
             var buffer = new Color[bufferSize];
 
-            var colorComponent = applyInfo.layer % 4;
+            int colorComponent = applyInfo.layer % 4;
 
             for (int z = 0; z < modifiedSize.y; z++)
             {
-                var zz = z + modifiedOffset.y;
+                int zz = z + modifiedOffset.y;
                 for (int x = 0; x < modifiedSize.x; x++)
                 {
-                    var xx = x + modifiedOffset.x;
-                    var source = sourceSplatmap[zz * patch.info.heightMapSize + xx];
+                    int xx = x + modifiedOffset.x;
+                    Color source = sourceSplatmap[zz * patch.info.heightMapSize + xx];
 
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, 0, zz * Terrain3D.UNITS_PER_VERTEX);
-                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
+                    Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, 0, zz * Terrain3D.UNITS_PER_VERTEX);
+                    Vector3 samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
 
-                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFallofType, applyInfo.brushFallof, applyInfo.brushSize, pos, samplePositionWorld) * applyInfo.strength;
+                    float paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld) * applyInfo.strength;
 
-                    var id = z * modifiedSize.x + x;
+                    int id = z * modifiedSize.x + x;
 
                     // buffer[id] = new Color(0, 0, 0, 1);
                     buffer[id] = source;

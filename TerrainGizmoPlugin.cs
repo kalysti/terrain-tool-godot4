@@ -122,7 +122,7 @@ namespace TerrainEditor
             line_material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
             line_material.AlbedoColor = new Color(0, 1, 1, 1);
 
-            line_material.AlbedoTexForceSrgb = true;
+            line_material.AlbedoTextureForceSrgb = true;
             line_material.VertexColorIsSrgb = true;
             line_material.VertexColorUseAsAlbedo = true;
 
@@ -135,7 +135,7 @@ namespace TerrainEditor
 
             Godot.Collections.Array arr = new Godot.Collections.Array();
             arr.Resize((int)Mesh.ArrayType.Max);
-            arr[(int)Mesh.ArrayType.Vertex] = lines;
+            arr[(int)Mesh.ArrayType.Vertex] = Variant.CreateFrom(lines);
 
             debug_mesh_cache.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, arr);
             debug_mesh_cache.SurfaceSetMaterial(0, getDebugMaterial());
@@ -146,11 +146,11 @@ namespace TerrainEditor
 
         public Vector3[] GetDebugMeshLines(TerrainPatch patch)
         {
-            var heightField = patch.CacheHeightData();
-            var map_width = patch.info.heightMapSize;
-            var map_depth = patch.info.heightMapSize;
+            float[]? heightField = patch.CacheHeightData();
+            int map_width = patch.info.heightMapSize;
+            int map_depth = patch.info.heightMapSize;
 
-            var points = new Vector3[0];
+            Vector3[]? points = Array.Empty<Vector3>();
             if ((map_width != 0) && (map_depth != 0))
             {
                 // This will be slow for large maps...
@@ -205,13 +205,13 @@ namespace TerrainEditor
             if (spatial == null || spatial.Visible == false || !spatial.IsInsideTree())
                 return;
 
-            foreach (var patch in spatial.terrainPatches)
+            foreach (TerrainPatch? patch in spatial.terrainPatches)
             {
 
                 if (showAABB)
                 {
                     var lines = new Godot.Collections.Array<Vector3>();
-                    var aabb = patch.getBounds();
+                    AABB aabb = patch.getBounds();
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -230,10 +230,10 @@ namespace TerrainEditor
 
                 if (showCollider)
                 {
-                    var meshLines = GetDebugMeshLines(patch);
+                    Vector3[]? meshLines = GetDebugMeshLines(patch);
 
                     SurfaceTool st = new SurfaceTool();
-                    var tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
+                    Transform3D tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
                     tf.origin = tf.origin - spatial.GlobalTransform.origin;
                     st.AppendFrom(GetDebugMesh(meshLines), 0, tf);
                     gizmo.AddMesh(st.Commit(), GetMaterial("shape_material", gizmo));
@@ -246,7 +246,7 @@ namespace TerrainEditor
             var mt = new ArrayMesh();
             var arr = new Godot.Collections.Array();
             arr.Resize((int)ArrayMesh.ArrayType.Max);
-            arr[(int)ArrayMesh.ArrayType.Vertex] = lines.ToArray();
+            arr[(int)ArrayMesh.ArrayType.Vertex] = lines;
             mt.AddSurfaceFromArrays(ArrayMesh.PrimitiveType.Lines, arr);
 
             return mt;

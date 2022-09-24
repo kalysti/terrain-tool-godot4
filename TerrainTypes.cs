@@ -23,7 +23,7 @@ namespace TerrainEditor
         Smooth
     }
 
-    public enum BrushFallOfType
+    public enum BrushFallOffType
     {
         Smooth,
         Linear,

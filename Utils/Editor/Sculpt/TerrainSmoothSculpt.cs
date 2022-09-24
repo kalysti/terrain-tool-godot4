@@ -12,26 +12,26 @@ namespace TerrainEditor.Utils.Editor.Sculpt
 
         public override void Apply( TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
         {
-            var radius = Mathf.Max(Mathf.CeilToInt(applyInfo.radius * 0.01f * applyInfo.brushSize), 2);
-            var sourceHeightMap = patch.CacheHeightData();
-            var strength = Saturate(editorStrength);
-            var bufferSize = modifiedSize.y * modifiedSize.x;
+            int radius = Mathf.Max(Mathf.CeilToInt(applyInfo.radius * 0.01f * applyInfo.brushSize), 2);
+            float[]? sourceHeightMap = patch.CacheHeightData();
+            float strength = Saturate(editorStrength);
+            int bufferSize = modifiedSize.y * modifiedSize.x;
             var buffer = new float[bufferSize];
 
             for (int z = 0; z < modifiedSize.y; z++)
             {
-                var zz = z + modifiedOffset.y;
+                int zz = z + modifiedOffset.y;
                 for (int x = 0; x < modifiedSize.x; x++)
                 {
-                    var id = z * modifiedSize.x + x;
-                    var xx = x + modifiedOffset.x;
+                    int id = z * modifiedSize.x + x;
+                    int xx = x + modifiedOffset.x;
 
-                    var sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
+                    float sourceHeight = sourceHeightMap[zz * patch.info.heightMapSize + xx];
 
-                    var samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.UNITS_PER_VERTEX);
-                    var samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
-                    var paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFallofType, applyInfo.brushFallof, applyInfo.brushSize, pos, samplePositionWorld) * strength;
-                    var max = patch.info.heightMapSize - 1;
+                    Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceHeight, zz * Terrain3D.UNITS_PER_VERTEX);
+                    Vector3 samplePositionWorld = selectedTerrain.ToGlobal(samplePositionLocal);
+                    float paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld) * strength;
+                    int max = patch.info.heightMapSize - 1;
                     if (paintAmount > 0)
                     {
                         // Blend between the height and the target value
@@ -46,7 +46,7 @@ namespace TerrainEditor.Utils.Editor.Sculpt
                         {
                             for (int dx = minX; dx <= maxX; dx++)
                             {
-                                var height = sourceHeightMap[dz * patch.info.heightMapSize + dx];
+                                float height = sourceHeightMap[dz * patch.info.heightMapSize + dx];
                                 smoothValue += height;
                                 smoothValueSamples++;
                             }
