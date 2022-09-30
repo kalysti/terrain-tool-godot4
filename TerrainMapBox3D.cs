@@ -1,18 +1,6 @@
-using System.Xml.Schema;
-using System.IO.Compression;
-using System.IO;
-using System.ComponentModel;
-using System.Collections.Generic;
-using Godot;
-using System;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Net;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
-using Godot.Collections;
-using FileAccess = Godot.FileAccess;
-
+using System.Net.Cache;
+using Godot;
 
 namespace TerrainEditor
 {
@@ -28,12 +16,9 @@ namespace TerrainEditor
 
         protected void initCacheFolder()
         {
-            DirAccess? dir = DirAccess.Open(mapBoxCachePath);
-            if (!dir.DirExists(mapBoxCachePath))
-            {
-                DirAccess.Open("user://");
+            DirAccess? dir = DirAccess.Open("user://");
+            if (!dir.DirExists("mapCache")) 
                 dir.MakeDir("mapCache");
-            }
         }
         private Image loadImageFromBox(string filePath)
         {
@@ -63,7 +48,7 @@ namespace TerrainEditor
                 {
                     ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
                     ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
-                    client.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
+                    client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
                     client.Headers.Add("Cache-Control", "no-cache");
 
                     GD.Print("Download: " + url);
