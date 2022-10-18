@@ -367,7 +367,7 @@ namespace TerrainEditor
             menuButton.GetPopup().Connect("id_pressed", new Callable(this, nameof(openCreateMenu)));
 
             AddControlToContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
-            AddSpatialGizmoPlugin(gizmoPlugin);
+            AddNode3dGizmoPlugin(gizmoPlugin);
             createImportMenu();
 
             editorPanel.Name = "Terrain";
@@ -886,8 +886,8 @@ namespace TerrainEditor
             RemoveCustomType("TerrainPatch");
             RemoveCustomType("TerrainPatchInfo");
             RemoveCustomType("TerrainChunk");
-
-            RemoveSpatialGizmoPlugin(gizmoPlugin);
+            
+            AddNode3dGizmoPlugin(gizmoPlugin);
             RemoveControlFromContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
 
             editorPanel.Free();
