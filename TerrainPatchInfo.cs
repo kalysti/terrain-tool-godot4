@@ -1,27 +1,25 @@
-using System.ComponentModel;
-using System.ComponentModel.Design.Serialization;
-using System.Runtime.InteropServices;
 using Godot;
-using System;
-using System.Linq;
 
-namespace TerrainEditor
+namespace TerrainEditor;
+
+[Tool]
+public partial class TerrainPatchInfo : Resource
 {
-    [Tool]
-    public partial class TerrainPatchInfo : Resource
-    {
-        [Export]
-        public float patchOffset = 0;
-        [Export]
-        public float patchHeight = 0;
-        [Export]
-        public int chunkSize = 0;
-        [Export]
-        public int vertexCountEdge = 0;
-        [Export]
-        public int heightMapSize = 0;
-        [Export]
-        public int textureSize = 0;
+    [Export]
+    public float PatchOffset { get; set; }
 
-    }
+    [Export]
+    public float PatchHeight { get; set; }
+
+    [Export]
+    public int ChunkSize { get; set; }
+
+    [Export]
+    public int VertexCountEdge { get; set; }
+
+    [Export]
+    public int HeightMapSize { get; set; }
+
+    [Export]
+    public int TextureSize { get; set; }
 }

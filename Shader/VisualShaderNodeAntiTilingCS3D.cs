@@ -2,10 +2,10 @@ using Godot;
 using Godot.Collections;
 
 [Tool]
-public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
+public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
 {
 
-	public VisualShaderNodeAntiTilingCS3D() : base()
+	public VisualShaderNodeAntiTilingCs3D() : base()
 	{
 
 		SetInputPortDefaultValue(5, new Vector3(0, 0, 0));
@@ -33,7 +33,7 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 	}
 	public override long _GetReturnIconType()
 	{
-		return (int)VisualShaderNode.PortType.Scalar;
+		return (int)PortType.Scalar;
 	}
 
 	public override long _GetInputPortCount()
@@ -62,8 +62,8 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 	{
 		switch (port)
 		{
-			case 0: return (int)VisualShaderNode.PortType.Transform;
-			case 1: return (int)VisualShaderNode.PortType.Transform;
+			case 0: return (int)PortType.Transform;
+			case 1: return (int)PortType.Transform;
 		}
 		return 0;
 	}
@@ -91,15 +91,15 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 	{
 		switch (port)
 		{
-			case 0: return (int)VisualShaderNode.PortType.Sampler;
-			case 1: return (int)VisualShaderNode.PortType.Sampler;
-			case 2: return (int)VisualShaderNode.PortType.Sampler;
-			case 3: return (int)VisualShaderNode.PortType.Sampler;
-			case 4: return (int)VisualShaderNode.PortType.Sampler;
-			case 5: return (int)VisualShaderNode.PortType.Sampler;
-			case 6: return (int)VisualShaderNode.PortType.Sampler;
-			case 7: return (int)VisualShaderNode.PortType.Sampler;
-			case 8: return (int)VisualShaderNode.PortType.Sampler;
+			case 0: return (int)PortType.Sampler;
+			case 1: return (int)PortType.Sampler;
+			case 2: return (int)PortType.Sampler;
+			case 3: return (int)PortType.Sampler;
+			case 4: return (int)PortType.Sampler;
+			case 5: return (int)PortType.Sampler;
+			case 6: return (int)PortType.Sampler;
+			case 7: return (int)PortType.Sampler;
+			case 8: return (int)PortType.Sampler;
 		}
 
 		return 0;
@@ -125,15 +125,15 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 				}";
 	}
 
-	public override string _GetCode(Array<string> input_vars, Array<string> output_vars, Shader.Mode mode, VisualShader.Type type)
+	public override string _GetCode(Array<string> inputVars, Array<string> outputVars, Shader.Mode mode, VisualShader.Type type)
 	{
 		var heightStr = "";
 
-		heightStr += "vec4 colorMap = texture(" + input_vars[0] + ", " + input_vars[5] + ".xy);\n";
-		heightStr += "vec4 dispMap = texture(" + input_vars[1] + ",  " + input_vars[5] + ".xy);\n";
-		heightStr += "vec4 normalMap = texture(" + input_vars[2] + ",  " + input_vars[5] + ".xy);\n";
-		heightStr += "vec4 roughMap = texture(" + input_vars[3] + ",  " + input_vars[5] + ".xy);\n";
-		heightStr += "vec4 aoMap = texture(" + input_vars[4] + ",  " + input_vars[5] + ".xy);\n";
+		heightStr += "vec4 colorMap = texture(" + inputVars[0] + ", " + inputVars[5] + ".xy);\n";
+		heightStr += "vec4 dispMap = texture(" + inputVars[1] + ",  " + inputVars[5] + ".xy);\n";
+		heightStr += "vec4 normalMap = texture(" + inputVars[2] + ",  " + inputVars[5] + ".xy);\n";
+		heightStr += "vec4 roughMap = texture(" + inputVars[3] + ",  " + inputVars[5] + ".xy);\n";
+		heightStr += "vec4 aoMap = texture(" + inputVars[4] + ",  " + inputVars[5] + ".xy);\n";
 
 		heightStr += "mat4 packedOriginal = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));\n";
 		heightStr += "packedOriginal[0].rgb = colorMap.rgb;\n";
@@ -143,15 +143,15 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		heightStr += "packedOriginal[3].b = aoMap.r;\n";
 
 
-		heightStr += output_vars[1] + " = packedOriginal;\n";
+		heightStr += outputVars[1] + " = packedOriginal;\n";
 
 
-		heightStr += "vec2 newUv = rotatedUV(" + input_vars[5] + ".xy, " + input_vars[7] + ", " + input_vars[6] + ");";
-		heightStr += "vec4 colorMapRot = texture(" + input_vars[0] + ", newUv);\n";
-		heightStr += "vec4 dispMapRot = texture(" + input_vars[1] + ",  newUv);\n";
-		heightStr += "vec4 normalMapRot = texture(" + input_vars[2] + ",  newUv);\n";
-		heightStr += "vec4 roughMapRot = texture(" + input_vars[3] + ",  newUv);\n";
-		heightStr += "vec4 aoMapRot = texture(" + input_vars[4] + ",  newUv);\n";
+		heightStr += "vec2 newUv = rotatedUV(" + inputVars[5] + ".xy, " + inputVars[7] + ", " + inputVars[6] + ");";
+		heightStr += "vec4 colorMapRot = texture(" + inputVars[0] + ", newUv);\n";
+		heightStr += "vec4 dispMapRot = texture(" + inputVars[1] + ",  newUv);\n";
+		heightStr += "vec4 normalMapRot = texture(" + inputVars[2] + ",  newUv);\n";
+		heightStr += "vec4 roughMapRot = texture(" + inputVars[3] + ",  newUv);\n";
+		heightStr += "vec4 aoMapRot = texture(" + inputVars[4] + ",  newUv);\n";
 
 
 		heightStr += "mat4 packedMixed = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));\n";
@@ -161,13 +161,13 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		heightStr += "packedMixed[3].r = roughMapRot.r;\n";
 		heightStr += "packedMixed[3].b = aoMapRot.r;\n";
 
-		heightStr += "packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  " + input_vars[8] + ");\n";
-		heightStr += "packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  " + input_vars[8] + ");\n";
-		heightStr += "packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  " + input_vars[8] + ");\n";
-		heightStr += "packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  " + input_vars[8] + ");\n";
+		heightStr += "packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  " + inputVars[8] + ");\n";
+		heightStr += "packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  " + inputVars[8] + ");\n";
+		heightStr += "packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  " + inputVars[8] + ");\n";
+		heightStr += "packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  " + inputVars[8] + ");\n";
 
-		heightStr += output_vars[1] + " = packedOriginal;\n";
-		heightStr += output_vars[0] + " = packedMixed;\n";
+		heightStr += outputVars[1] + " = packedOriginal;\n";
+		heightStr += outputVars[0] + " = packedMixed;\n";
 
 
 		return heightStr;

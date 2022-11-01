@@ -1,17 +1,16 @@
-namespace TerrainEditor.Utils.Editor
-{
-    public struct TerrainEditorInfo
-    {
-        public float brushSize { get; set; }
-        public float brushFalloff { get; set; }
-        public float strength { get; set; }
-        public float radius { get; set; }
-        public float height { get; set; }
-        public int layer { get; set; }
-        public bool inverse { get; set; }
-        public float noiseAmount { get; set; }
-        public float noiseScale { get; set; }
+namespace TerrainEditor.Utils.Editor;
 
-        public BrushFallOffType brushFalloffType { get; set; }
-    }
+public struct TerrainEditorInfo
+{
+    public float BrushSize { get; set; }
+    public float BrushFalloff { get; set; }
+    public float Strength { get; set; }
+    public float Radius { get; set; }
+    public float Height { get; set; }
+    public int Layer { get; set; }
+    public bool Inverse { get; set; }
+    public float NoiseAmount { get; set; }
+    public float NoiseScale { get; set; }
+
+    public BrushFallOffType BrushFalloffType { get; set; }
 }
