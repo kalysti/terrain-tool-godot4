@@ -1,32 +1,35 @@
-using System.Xml.Schema;
-using System.ComponentModel;
-using System.ComponentModel.Design.Serialization;
+using System;
 using System.Runtime.InteropServices;
 using Godot;
-using System;
-using System.Linq;
-using System.IO;
 
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 namespace TerrainEditor.Generators
 {
     public abstract class TerrainBaseGenerator
     {
-        protected TerrainPatch patch;
-        public TerrainBaseGenerator(TerrainPatch _patch)
-        {
-            patch = _patch;
+        protected TerrainPatch? Patch;
 
-            if (patch == null)
-                GD.PrintErr("Patch not initlizied");
+        public TerrainBaseGenerator(TerrainPatch patch)
+        {
+            Patch = patch;
+
+            if (Patch == null)
+                GD.PrintErr("Patch not initialized");
         }
 
-        public Image createImage()
+        public Image? CreateImage()
         {
-            var initData = Image.Create(patch.Info.TextureSize, patch.Info.TextureSize, false, Image.Format.Rgba8);
+            if (Patch != null)
+            {
+                var initData = Image.Create(Patch.Info.TextureSize, Patch.Info.TextureSize, false, Image.Format.Rgba8);
 
-            return initData;
+                return initData;
+            }
+            else
+            {
+                GD.PrintErr("Patch not initialized");
+            }
+
+            return null;
         }
 
         /**

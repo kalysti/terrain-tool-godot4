@@ -371,7 +371,7 @@ public partial class TerrainPlugin : EditorPlugin
         menuButton.GetPopup().Connect("id_pressed", new Callable(this, nameof(OpenCreateMenu)));
 
         AddControlToContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
-        AddSpatialGizmoPlugin(GizmoPlugin);
+        AddNode3dGizmoPlugin(GizmoPlugin);
         CreateImportMenu();
 
         editorPanel.Name = "Terrain";
@@ -879,7 +879,7 @@ public partial class TerrainPlugin : EditorPlugin
         RemoveCustomType(nameof(TerrainPatchInfo));
         RemoveCustomType(nameof(TerrainChunk));
 
-        RemoveSpatialGizmoPlugin(GizmoPlugin);
+        RemoveNode3dGizmoPlugin(GizmoPlugin);
         RemoveControlFromContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
 
         editorPanel.Free();
