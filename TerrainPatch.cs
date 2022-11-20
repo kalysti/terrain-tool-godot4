@@ -144,7 +144,7 @@ public partial class TerrainPatch : Resource
         heightmapGen.WriteNormals(ref imageBuffer, heightMapData, null, Vector2i.Zero, new Vector2i(Info.HeightMapSize, Info.HeightMapSize));
 
         //store heightmap in rgba8
-        image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imageBuffer);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imageBuffer);
 
         if (Heightmap == null)
         {
@@ -183,7 +183,7 @@ public partial class TerrainPatch : Resource
         else
         {
             splatmapGen.WriteColors(ref splatmapData, ref splatmapDataImport);
-            splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
+				splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
         }
 
         splatmapTexture = ImageTexture.CreateFromImage(splatmapImage);
@@ -346,8 +346,8 @@ public partial class TerrainPatch : Resource
         var heightmapGen = new TerrainHeightMapGenerator(this);
         heightmapGen.WriteNormals(ref imgData, heightMap, holesMask, modifiedOffset, modifiedSize);
 
-        image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
-        Heightmap.Update(image);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
+			heightmap.Update(image);
 
         UpdateColliderData(terrain, heightMap);
         UpdatePosition(terrain);
@@ -405,8 +405,8 @@ public partial class TerrainPatch : Resource
             chunkIndex++;
         }
 
-        image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
-        Heightmap.Update(image);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
+			heightmap.Update(image);
 
         var genCollider = new TerrainColliderGenerator(this);
         UpdateColliderData(terrain, data);
@@ -449,7 +449,7 @@ public partial class TerrainPatch : Resource
         var splatMapGen = new TerrainSplatMapGenerator(this);
         splatMapGen.WriteColors(ref imgData, ref data);
 
-        image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
 
         Splatmaps[splatmapIndex].Update(image);
         CachedSplatMap[splatmapIndex] = data;

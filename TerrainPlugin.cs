@@ -846,8 +846,8 @@ public partial class TerrainPlugin : EditorPlugin
         }
 
 
-        var image = new Image();
-        image.CreateFromData(heightmapWidth, heightmapWidth, false, Image.Format.Rh, byteHeightmap.ToArray());
+
+        var image = Image.CreateFromData(heightmapWidth, heightmapWidth, false, Image.Format.Rh, byteHeightmap.ToArray());
         image.SavePng(path);
     }
 

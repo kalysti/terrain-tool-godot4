@@ -199,9 +199,8 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
     public override void _Redraw(EditorNode3DGizmo gizmo)
     {
         gizmo.Clear();
-        var spatial = gizmo.GetSpatialNode() as Terrain3D;
 
-        if (spatial == null || spatial.Visible == false || !spatial.IsInsideTree())
+        if (gizmo.GetNode3d() is not Terrain3D spatial || spatial.Visible == false || !spatial.IsInsideTree())
             return;
 
         foreach (TerrainPatch? patch in spatial.TerrainPatches)

@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=41 format=3 uid="uid://rhmyhuveb7yv"]
+[gd_resource type="ShaderMaterial" load_steps=58 format=3 uid="uid://rhmyhuveb7yv"]
 
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" id="1"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" id="2"]
@@ -7,6 +7,23 @@
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd" id="5"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeUVMultiply3D.gd" id="6"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeSplatmapHeight3D.gd" id="7"]
+[ext_resource type="Texture2D" uid="uid://dc2xi4hsf3t0f" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Color.jpg" id="8_0au65"]
+[ext_resource type="Texture2D" uid="uid://cotxdvt4tewp0" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_AmbientOcclusion.jpg" id="9_i4a20"]
+[ext_resource type="Texture2D" uid="uid://dpdgc1ku7e6fr" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Displacement.jpg" id="10_n1vaw"]
+[ext_resource type="Texture2D" uid="uid://c0o2ihy33nxoi" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Normal.jpg" id="11_oncw3"]
+[ext_resource type="Texture2D" uid="uid://djoj3jl1n2rtt" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Roughness.jpg" id="12_4egyj"]
+[ext_resource type="Texture2D" uid="uid://dyvdrwt45k7j6" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Color.jpg" id="13_w4xsk"]
+[ext_resource type="Texture2D" uid="uid://dn8quy5008k78" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_AmbientOcclusion.jpg" id="14_e5u5p"]
+[ext_resource type="Texture2D" uid="uid://d1yt3ecldar2a" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Displacement.jpg" id="15_h3y7g"]
+[ext_resource type="Texture2D" uid="uid://clc4kcx4335tx" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Normal.jpg" id="16_m333e"]
+[ext_resource type="Texture2D" uid="uid://mk7mytfdmrhp" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Roughness.jpg" id="17_mm8pq"]
+[ext_resource type="Texture2D" uid="uid://b785uofraj4si" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Color.jpg" id="18_p6mbg"]
+[ext_resource type="Texture2D" uid="uid://cmxwi81tkqvo" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_AmbientOcclusion.jpg" id="19_fxm6v"]
+[ext_resource type="Texture2D" uid="uid://dl6sqatoftgcw" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Displacement.jpg" id="20_vymy8"]
+[ext_resource type="Texture2D" uid="uid://bc6gwklfsx8rh" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Normal.jpg" id="21_epq78"]
+[ext_resource type="Texture2D" uid="uid://c0fksnmlfatn8" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg" id="22_x63ai"]
+[ext_resource type="Texture2D" uid="uid://dly1js17gm0s5" path="res://Terrain/Heightmaps/canyon01.png" id="23_2hlgo"]
+[ext_resource type="Texture2D" uid="uid://bxcs8nbrw74qc" path="res://addons/TerrainPlugin/TestTextures/texel.png" id="24_v1c3n"]
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_hod58"]
 parameter_name = "Layer_2_Rough"
@@ -74,6 +91,7 @@ initialized = true
 script = ExtResource("3")
 
 [sub_resource type="VisualShaderNodeCustom" id="VisualShaderNodeCustom_0l7r6"]
+output_port_for_preview = 0
 default_input_values = [0, Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
 initialized = true
 script = ExtResource("4")
@@ -138,8 +156,6 @@ script = ExtResource("1")
 
 [sub_resource type="VisualShader" id="VisualShader_ofbnr"]
 code = "shader_type spatial;
-render_mode depth_draw_always;
-
 uniform sampler2D Layer_1 : source_color;
 uniform sampler2D Layer_1_Dis : source_color;
 uniform sampler2D Layer_1_Normal : hint_normal;
@@ -783,7 +799,6 @@ void light() {
 
 }
 "
-modes/depth_draw = 1
 nodes/vertex/0/position = Vector2(1120, -320)
 nodes/vertex/2/node = SubResource("VisualShaderNodeCustom_jh5gm")
 nodes/vertex/2/position = Vector2(560, -280)
@@ -832,9 +847,9 @@ nodes/fragment/23/position = Vector2(1900, 60)
 nodes/fragment/24/node = SubResource("VisualShaderNodeCustom_0l7r6")
 nodes/fragment/24/position = Vector2(2280, 100)
 nodes/fragment/25/node = SubResource("VisualShaderNodeCustom_7oaa4")
-nodes/fragment/25/position = Vector2(40, -200)
+nodes/fragment/25/position = Vector2(40, -300)
 nodes/fragment/26/node = SubResource("VisualShaderNodeCustom_dv7n0")
-nodes/fragment/26/position = Vector2(2240, -100)
+nodes/fragment/26/position = Vector2(2200, -220)
 nodes/fragment/28/node = SubResource("VisualShaderNodeFloatConstant_cxi7b")
 nodes/fragment/28/position = Vector2(340, -300)
 nodes/fragment/29/node = SubResource("VisualShaderNodeFloatConstant_i608f")
@@ -844,12 +859,12 @@ nodes/fragment/30/position = Vector2(960, 860)
 nodes/fragment/31/node = SubResource("VisualShaderNodeFloatConstant_yilqv")
 nodes/fragment/31/position = Vector2(1020, 300)
 nodes/fragment/33/node = SubResource("VisualShaderNodeVec3Constant_t2ieq")
-nodes/fragment/33/position = Vector2(-500, -220)
+nodes/fragment/33/position = Vector2(-500, -340)
 nodes/fragment/34/node = SubResource("VisualShaderNodeCustom_45qss")
 nodes/fragment/34/position = Vector2(1000, -80)
 nodes/fragment/35/node = SubResource("VisualShaderNodeFloatConstant_541m4")
 nodes/fragment/35/position = Vector2(2420, 540)
-nodes/fragment/connections = PackedInt32Array(22, 0, 23, 0, 21, 0, 23, 1, 25, 0, 19, 5, 25, 0, 20, 5, 25, 0, 21, 5, 28, 0, 19, 8, 29, 0, 20, 8, 30, 0, 21, 8, 31, 0, 22, 3, 31, 0, 23, 3, 33, 0, 25, 0, 23, 0, 24, 0, 24, 2, 0, 8, 35, 0, 0, 9, 24, 3, 0, 3, 24, 4, 0, 6, 19, 0, 22, 0, 20, 0, 22, 1, 34, 1, 23, 2, 34, 3, 22, 2, 24, 0, 0, 0, 26, 0, 0, 5, 7, 0, 19, 3, 8, 0, 19, 4, 3, 0, 19, 2, 2, 0, 19, 1, 6, 0, 19, 0, 10, 0, 20, 3, 9, 0, 20, 4, 11, 0, 20, 2, 12, 0, 20, 1, 13, 0, 20, 0, 16, 0, 21, 3, 17, 0, 21, 4, 15, 0, 21, 2, 14, 0, 21, 1, 18, 0, 21, 0)
+nodes/fragment/connections = PackedInt32Array(22, 0, 23, 0, 21, 0, 23, 1, 25, 0, 19, 5, 25, 0, 20, 5, 25, 0, 21, 5, 28, 0, 19, 8, 29, 0, 20, 8, 30, 0, 21, 8, 31, 0, 22, 3, 31, 0, 23, 3, 33, 0, 25, 0, 23, 0, 24, 0, 24, 2, 0, 8, 35, 0, 0, 9, 24, 3, 0, 3, 24, 4, 0, 6, 19, 0, 22, 0, 20, 0, 22, 1, 34, 1, 23, 2, 34, 3, 22, 2, 24, 0, 0, 0, 26, 0, 0, 5, 7, 0, 19, 3, 8, 0, 19, 4, 3, 0, 19, 2, 2, 0, 19, 1, 10, 0, 20, 3, 9, 0, 20, 4, 11, 0, 20, 2, 12, 0, 20, 1, 13, 0, 20, 0, 16, 0, 21, 3, 17, 0, 21, 4, 15, 0, 21, 2, 14, 0, 21, 1, 18, 0, 21, 0, 6, 0, 19, 0)
 nodes/light/0/position = Vector2(440, 160)
 nodes/light/2/node = SubResource("VisualShaderNodeVec3Constant_nww6o")
 nodes/light/2/position = Vector2(-140, 140)
@@ -861,10 +876,27 @@ shader = SubResource("VisualShader_ofbnr")
 shader_parameter/BrushColor = null
 shader_parameter/BrushData0 = null
 shader_parameter/BrushData1 = null
-shader_parameter/terrainChunkSize = null
-shader_parameter/terrainCurrentLodLevel = null
+shader_parameter/Layer_1 = ExtResource("8_0au65")
+shader_parameter/Layer_1_AO = ExtResource("9_i4a20")
+shader_parameter/Layer_1_Dis = ExtResource("10_n1vaw")
+shader_parameter/Layer_1_Normal = ExtResource("11_oncw3")
+shader_parameter/Layer_1_Rough = ExtResource("12_4egyj")
+shader_parameter/Layer_2 = ExtResource("13_w4xsk")
+shader_parameter/Layer_2_AO = ExtResource("14_e5u5p")
+shader_parameter/Layer_2_Dis = ExtResource("15_h3y7g")
+shader_parameter/Layer_2_Normal = ExtResource("16_m333e")
+shader_parameter/Layer_2_Rough = ExtResource("17_mm8pq")
+shader_parameter/Layer_3 = ExtResource("18_p6mbg")
+shader_parameter/Layer_3_AO = ExtResource("19_fxm6v")
+shader_parameter/Layer_3_Dis = ExtResource("20_vymy8")
+shader_parameter/Layer_3_Normal = ExtResource("21_epq78")
+shader_parameter/Layer_3_Rough = ExtResource("22_x63ai")
+shader_parameter/terrainChunkSize = 0.0
+shader_parameter/terrainCurrentLodLevel = 0.0
+shader_parameter/terrainHeightMap = ExtResource("23_2hlgo")
 shader_parameter/terrainNeighborLod = null
-shader_parameter/terrainNextLodChunkSize = null
-shader_parameter/terrainSmoothing = null
+shader_parameter/terrainNextLodChunkSize = 0.0
+shader_parameter/terrainSmoothing = false
+shader_parameter/terrainSplatmap1 = ExtResource("24_v1c3n")
 shader_parameter/terrainUvOffset = null
 shader_parameter/terrainUvScale = null
