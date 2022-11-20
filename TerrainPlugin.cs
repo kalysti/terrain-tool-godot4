@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Linq;
+using System.Reflection;
 using Godot.Collections;
 using TerrainEditor.Utils.Editor;
 using TerrainEditor.Utils.Editor.Sculpt;
@@ -341,22 +342,22 @@ public partial class TerrainPlugin : EditorPlugin
     public override void _EnterTree()
     {
         EditorInterface? editorInterface = GetEditorInterface();
-        //  var inspector = editor_interface.GetInspector();
-        // inspector.Connect("property_edited", new Callable(this, "refreshEditor"), null, (uint)ConnectFlags.Deferred);
+        // var inspector = editorInterface?.GetInspector();
+        // inspector.PropertyEdited += RefreshEditor; // Connect("property_edited", new Callable(this, "refreshEditor"), null, (uint)ConnectFlags.Deferred);
         Control? baseControl = editorInterface.GetBaseControl();
 
-        var script = GD.Load<Script>("res://addons/TerrainPlugin/Terrain3D.cs");
-        var scriptMapBox = GD.Load<Script>("res://addons/TerrainPlugin/TerrainMapBox3D.cs");
-        var scriptPatch = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatch.cs");
-        var scriptPatchInfo = GD.Load<Script>("res://addons/TerrainPlugin/TerrainPatchInfo.cs");
-        var scriptChunk = GD.Load<Script>("res://addons/TerrainPlugin/TerrainChunk.cs");
-        var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/terrain.png");
+        var script = GD.Load<Script>(typeof(Terrain3D).GetCustomAttribute<ScriptPathAttribute>()?.Path);
+        var scriptMapBox = GD.Load<Script>(typeof(TerrainMapBox3D).GetCustomAttribute<ScriptPathAttribute>()?.Path);
+        var scriptPatch = GD.Load<Script>(typeof(TerrainPatch).GetCustomAttribute<ScriptPathAttribute>()?.Path);
+        var scriptPatchInfo = GD.Load<Script>(typeof(TerrainPatchInfo).GetCustomAttribute<ScriptPathAttribute>()?.Path);
+        var scriptChunk = GD.Load<Script>(typeof(TerrainChunk).GetCustomAttribute<ScriptPathAttribute>()?.Path);
+        var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/terrain.png"); //TODO: find a solution for this
 
-        AddCustomType("TerrainPatchInfo", "Resource", scriptPatchInfo, texture);
-        AddCustomType("TerrainPatch", "Resource", scriptPatch, texture);
-        AddCustomType("TerrainChunk", "Resource", scriptChunk, texture);
-        AddCustomType("Terrain3D", "Node3D", script, texture);
-        AddCustomType("TerrainMapBox3D", "Node3D", scriptMapBox, texture);
+        AddCustomType(nameof(TerrainPatchInfo), nameof(Resource), scriptPatchInfo, texture);
+        AddCustomType(nameof(TerrainPatch), nameof(Resource), scriptPatch, texture);
+        AddCustomType(nameof(TerrainChunk), nameof(Resource), scriptChunk, texture);
+        AddCustomType(nameof(Terrain3D), nameof(Node3D), script, texture);
+        AddCustomType(nameof(TerrainMapBox3D), nameof(Node3D), scriptMapBox, texture);
 
         menuButton.SwitchOnHover = true;
         menuButton.Text = "Terrain";
@@ -368,7 +369,7 @@ public partial class TerrainPlugin : EditorPlugin
         menuButton.GetPopup().AddItem("Mapbox import", 3);
 
         menuButton.Visible = false;
-        menuButton.GetPopup().Connect("id_pressed", new Callable(this, nameof(OpenCreateMenu)));
+        menuButton.GetPopup().IdPressed += OpenCreateMenu;
 
         AddControlToContainer(CustomControlContainer.SpatialEditorMenu, menuButton);
         AddNode3dGizmoPlugin(GizmoPlugin);
@@ -413,7 +414,7 @@ public partial class TerrainPlugin : EditorPlugin
         HeightMapPath = path;
     }
 
-    public void OpenCreateMenu(int id)
+    public void OpenCreateMenu(long id)
     {
         HeightMapPath = null;
         SplatmapPath1 = null;
@@ -461,7 +462,7 @@ public partial class TerrainPlugin : EditorPlugin
 
         CreateMarginInput(editorPanel, text, checkbox);
         PanelControls.Add(name, checkbox);
-        checkbox.Connect("pressed", new Callable(this, "refreshGizmo"));
+        checkbox.Pressed += RefreshGizmo;
     }
 
 
@@ -483,7 +484,7 @@ public partial class TerrainPlugin : EditorPlugin
         }
 
         option.Selected = selectedId;
-        option.Connect("item_selected", new Callable(this, "onPanelControlSelected"));
+        option.ItemSelected += OnPanelControlSelected;
 
         CreateMarginInput(editorPanel, text, option);
         PanelControls.Add(name, option);
@@ -527,7 +528,7 @@ public partial class TerrainPlugin : EditorPlugin
         return st;
     }
 
-    public void OnPanelControlSelected(int itemSelected)
+    public void OnPanelControlSelected(long index)
     {
         RefreshPanel();
     }
@@ -574,26 +575,27 @@ public partial class TerrainPlugin : EditorPlugin
         AddChild(fileDialogSplatmap2);
 
         AddChild(fileDialogExport);
-        CreateDialog.Connect("confirmed", new Callable(this, nameof(GenerateTerrain)));
-        fileDialogExport.Connect("file_selected", new Callable(this, nameof(ExportHeightmap)));
+        CreateDialog.Confirmed += GenerateTerrain;
+        fileDialogExport.FileSelected += ExportHeightmap;
 
         chooseTextureButton.Text = "Open ...";
-        chooseTextureButton.Connect("pressed", new Callable(this, nameof(OpenFileDialog)));
+        chooseTextureButton.Pressed += OpenFileDialog;
         chooseTextureSplatmap1Button.Text = "Open ...";
-        chooseTextureSplatmap1Button.Connect("pressed", new Callable(this, nameof(OpenFileDialogSplatmap1)));
+        chooseTextureSplatmap1Button.Pressed += OpenFileDialogSplatmap1;
         chooseTextureSplatmap2Button.Text = "Open ...";
-        chooseTextureSplatmap2Button.Connect("pressed", new Callable(this, nameof(OpenFileDialogSplatmap2)));
+        chooseTextureSplatmap2Button.Pressed += OpenFileDialogSplatmap2;
 
         fileDialog.FileMode = FileDialog.FileModeEnum.OpenFile;
         fileDialogSplatmap1.FileMode = FileDialog.FileModeEnum.OpenFile;
         fileDialogSplatmap2.FileMode = FileDialog.FileModeEnum.OpenFile;
 
-        fileDialog.Connect("file_selected", new Callable(this, nameof(SelectFilePath)));
-        fileDialogSplatmap1.Connect("file_selected", new Callable(this, nameof(SelectFilePathSplatmap1)));
-        fileDialogSplatmap2.Connect("file_selected", new Callable(this, nameof(SelectFilePathSplatmap2)));
-        fileDialog.AddFilter("*.png ; PNG Images");
-        fileDialogSplatmap1.AddFilter("*.png ; PNG Images");
-        fileDialogSplatmap2.AddFilter("*.png ; PNG Images");
+        fileDialog.FileSelected += SelectFilePath;
+        fileDialogSplatmap1.FileSelected += SelectFilePathSplatmap1;
+        fileDialogSplatmap2.FileSelected += SelectFilePathSplatmap2;
+        const string pngFilter = "*.png ; PNG Images";
+        fileDialog.AddFilter(pngFilter);
+        fileDialogSplatmap1.AddFilter(pngFilter);
+        fileDialogSplatmap2.AddFilter(pngFilter);
 
         CreateDialog.Title = "Create a terrain";
         fileDialogExport.Title = "Export heightmap in 16bit raw";
@@ -695,6 +697,7 @@ public partial class TerrainPlugin : EditorPlugin
                 splatmap2Image.Load(SplatmapPath2);
                 SelectedTerrain.LoadSplatmapFromImage(new Vector2i(0, 0), 1, splatmap2Image);
             }
+
             SelectedTerrain.Draw();
         }
     }
@@ -846,23 +849,22 @@ public partial class TerrainPlugin : EditorPlugin
         }
 
 
-
         var image = Image.CreateFromData(heightmapWidth, heightmapWidth, false, Image.Format.Rh, byteHeightmap.ToArray());
         image.SavePng(path);
     }
 
     public override void _ExitTree()
     {
-        CreateDialog.Disconnect("confirmed", new Callable(this, nameof(GenerateTerrain)));
+        CreateDialog.Confirmed -= GenerateTerrain;
 
-        chooseTextureSplatmap1Button.Disconnect("pressed", new Callable(this, nameof(OpenFileDialogSplatmap1)));
-        chooseTextureSplatmap2Button.Disconnect("pressed", new Callable(this, nameof(OpenFileDialogSplatmap2)));
-        chooseTextureButton.Disconnect("pressed", new Callable(this, nameof(OpenFileDialog)));
-        fileDialogExport.Disconnect("file_selected", new Callable(this, nameof(ExportHeightmap)));
+        chooseTextureSplatmap1Button.Pressed -= OpenFileDialogSplatmap1;
+        chooseTextureSplatmap2Button.Pressed -= OpenFileDialogSplatmap2;
+        chooseTextureButton.Pressed -= OpenFileDialog;
+        fileDialogExport.FileSelected -= ExportHeightmap;
 
-        fileDialog.Disconnect("file_selected", new Callable(this, nameof(SelectFilePath)));
-        fileDialogSplatmap1.Disconnect("file_selected", new Callable(this, nameof(SelectFilePathSplatmap1)));
-        fileDialogSplatmap2.Disconnect("file_selected", new Callable(this, nameof(SelectFilePathSplatmap2)));
+        fileDialog.FileSelected -= SelectFilePath;
+        fileDialogSplatmap1.FileSelected -= SelectFilePathSplatmap1;
+        fileDialogSplatmap2.FileSelected -= SelectFilePathSplatmap2;
 
         RemoveChild(CreateDialog);
         RemoveChild(fileDialog);
