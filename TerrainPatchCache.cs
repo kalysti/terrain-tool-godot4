@@ -1,60 +1,61 @@
 using Godot;
+using Godot.Collections;
 using TerrainEditor.Generators;
+using Array = System.Array;
 
 namespace TerrainEditor;
 
 public partial class TerrainPatch : Resource
 {
-	protected float[] CachedHeightMapData;
+    protected float[] CachedHeightMapData = Array.Empty<float>();
 
-	protected byte[] CachedHolesMask;
+    protected byte[] CachedHolesMask = Array.Empty<byte>();
 
-	protected Godot.Collections.Array<Color[]> CachedSplatMap;
+    protected Array<Color[]> CachedSplatMap = new();
 
-	public float[] CacheHeightData()
-	{
-		if (CachedHeightMapData == null || CachedHeightMapData.Length <= 0)
-		{
-			var heightmapGen = new TerrainHeightMapGenerator(this);
+    public float[] CacheHeightData()
+    {
+        if (CachedHeightMapData.Length <= 0)
+        {
+            var heightmapGen = new TerrainHeightMapGenerator(this);
 
-			var heights = new float[0];
-			var holes = new byte[0];
+            float[] heights = Array.Empty<float>();
+            byte[] holes = Array.Empty<byte>();
 
-			heightmapGen.CacheHeights(ref heights, ref holes);
-			CachedHeightMapData = heights;
-			CachedHolesMask = holes;
-		}
+            heightmapGen.CacheHeights(ref heights, ref holes);
+            CachedHeightMapData = heights;
+            CachedHolesMask = holes;
+        }
 
-		return CachedHeightMapData;
-	}
-	public byte[] CacheHoleMask()
-	{
-		if (CachedHolesMask == null || CachedHolesMask.Length <= 0)
-		{
-			var heightmapGen = new TerrainHeightMapGenerator(this);
-			var heights = new float[0];
-			var holes = new byte[0];
+        return CachedHeightMapData;
+    }
 
-			heightmapGen.CacheHeights(ref heights, ref holes);
-			CachedHolesMask = holes;
-		}
+    public byte[] CacheHoleMask()
+    {
+        if (CachedHolesMask.Length <= 0)
+        {
+            var heightmapGen = new TerrainHeightMapGenerator(this);
+            float[] heights = Array.Empty<float>();
+            byte[] holes = Array.Empty<byte>();
 
-		return CachedHolesMask;
-	}
+            heightmapGen.CacheHeights(ref heights, ref holes);
+            CachedHolesMask = holes;
+        }
 
-	public Color[] CacheSplatMap(int idx)
-	{
-		if (CachedSplatMap == null || CachedSplatMap.Count < (idx + 1))
-		{
-			CachedSplatMap.Resize(idx +1);
-		}
+        return CachedHolesMask;
+    }
 
-		if (CachedSplatMap.Count < idx || CachedSplatMap[idx] == null || CachedSplatMap[idx].Length <= 0)
-		{
-			var splatmapGen = new TerrainSplatMapGenerator(this);
-			return splatmapGen.CacheSplatmap(idx);
-		}
-		else
-			return CachedSplatMap[idx];
-	}
+    public Color[] CacheSplatMap(int idx)
+    {
+        if (CachedSplatMap.Count < idx + 1)
+            CachedSplatMap.Resize(idx + 1);
+
+        if (CachedSplatMap.Count < idx || CachedSplatMap[idx] == null || CachedSplatMap[idx].Length <= 0)
+        {
+            var splatmapGen = new TerrainSplatMapGenerator(this);
+            return splatmapGen.CacheSplatmap(idx) ?? Array.Empty<Color>();
+        }
+
+        return CachedSplatMap[idx] ?? Array.Empty<Color>();
+    }
 }

@@ -12,14 +12,14 @@ public class TerrainNoiseSculpt : TerrainBaseSculpt
 
     public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
     {
-        float[]? sourceHeightMap = patch.CacheHeightData();
-        float strength = editorStrength * 1000.0f;
+        float[] sourceHeightMap = patch.CacheHeightData();
+        // float strength = editorStrength * 1000.0f;
 
         int bufferSize = modifiedSize.y * modifiedSize.x;
         var buffer = new float[bufferSize];
 
         int patchSize = patch.Info.ChunkSize * Terrain3D.PATCH_CHUNK_EDGES;
-        Vector2i patchOffset = patch.PatchCoord * patchSize;
+        Vector2i patchOffset = patch.PatchCoordinates * patchSize;
 
         var noise = new PerlinNoise(0, ApplyInfo.NoiseScale, editorStrength * ApplyInfo.NoiseAmount);
 
@@ -41,6 +41,7 @@ public class TerrainNoiseSculpt : TerrainBaseSculpt
                 buffer[id] = sourceHeight + noiseSample * paintAmount;
             }
         }
+
         patch.UpdateHeightMap(SelectedTerrain, buffer, modifiedOffset, modifiedSize);
     }
 }

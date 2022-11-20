@@ -4,24 +4,24 @@ namespace TerrainEditor.Generators;
 
 public class TerrainSplatMapGenerator : TerrainBaseGenerator
 {
-    /**
-         * Constructor
-         */
+    /// <summary>
+    /// Constructor
+    /// </summary>
     public TerrainSplatMapGenerator(TerrainPatch patch) : base(patch)
     {
     }
 
-    public Color[] CacheSplatmap(int id)
+    public Color[]? CacheSplatmap(int id)
     {
         // Prepare
-        if (id > Patch.Splatmaps.Count)
+        if (Patch == null || id > Patch.SplatMaps.Count)
         {
             GD.PrintErr("Cant load splatmap");
             return null;
         }
 
-        // Cache all the splatmaps
-        ImageTexture? splatmap = Patch.Splatmaps[id];
+        // Cache all the splat maps
+        ImageTexture? splatmap = Patch.SplatMaps[id];
         Image? splatmapImg = splatmap.GetImage();
         int heightMapLength = Patch.Info.HeightMapSize * Patch.Info.HeightMapSize;
 
@@ -39,7 +39,7 @@ public class TerrainSplatMapGenerator : TerrainBaseGenerator
 
             for (var z = 0; z < Patch.Info.VertexCountEdge; z++)
             {
-                int tz = (chunkTextureZ + z);
+                int tz = chunkTextureZ + z;
                 int sz = (chunkHeightmapZ + z) * Patch.Info.HeightMapSize;
 
                 for (var x = 0; x < Patch.Info.VertexCountEdge; x++)
@@ -51,10 +51,10 @@ public class TerrainSplatMapGenerator : TerrainBaseGenerator
 
                     //  colors[splatmapIndex]
 
-                    colors[splatmapIndex].r8 = (int)imgRgbaBuffer[textureIndex].r;
-                    colors[splatmapIndex].g8 = (int)imgRgbaBuffer[textureIndex].g;
-                    colors[splatmapIndex].b8 = (int)imgRgbaBuffer[textureIndex].b;
-                    colors[splatmapIndex].a8 = (int)imgRgbaBuffer[textureIndex].a;
+                    colors[splatmapIndex].r8 = imgRgbaBuffer[textureIndex].r;
+                    colors[splatmapIndex].g8 = imgRgbaBuffer[textureIndex].g;
+                    colors[splatmapIndex].b8 = imgRgbaBuffer[textureIndex].b;
+                    colors[splatmapIndex].a8 = imgRgbaBuffer[textureIndex].a;
                 }
             }
         }
@@ -64,13 +64,19 @@ public class TerrainSplatMapGenerator : TerrainBaseGenerator
 
     public void WriteColors(ref byte[] buffer, ref Color[] colorData)
     {
+        if (Patch == null)
+        {
+            GD.PrintErr($"{nameof(Patch)} is null.");
+            return;
+        }
+
         Rgba[] imgRgbaBuffer = FromByteArray<Rgba>(buffer);
 
         var df = 0;
         for (var chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
         {
-            int chunkX = (chunkIndex % Terrain3D.PATCH_CHUNK_EDGES);
-            int chunkZ = (chunkIndex / Terrain3D.PATCH_CHUNK_EDGES);
+            int chunkX = chunkIndex % Terrain3D.PATCH_CHUNK_EDGES;
+            int chunkZ = chunkIndex / Terrain3D.PATCH_CHUNK_EDGES;
 
             int chunkTextureX = chunkX * Patch.Info.VertexCountEdge;
             int chunkTextureZ = chunkZ * Patch.Info.VertexCountEdge;

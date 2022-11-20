@@ -13,8 +13,8 @@ public class TerrainPaintPaint : TerrainBasePaint
     {
         int splatmapIndex = ApplyInfo.Layer < 4 ? 0 : 1;
 
-        Color[]? sourceSplatmap = patch.CacheSplatMap(splatmapIndex);
-        float strength = editorStrength * 1000.0f;
+        Color[] sourceSplatmap = patch.CacheSplatMap(splatmapIndex);
+        // float strength = editorStrength * 1000.0f;
 
         int bufferSize = modifiedSize.y * modifiedSize.x;
         var buffer = new Color[bufferSize];
@@ -39,45 +39,31 @@ public class TerrainPaintPaint : TerrainBasePaint
                 // buffer[id] = new Color(0, 0, 0, 1);
                 buffer[id] = source;
 
-                var dstWeight = 0f;
+                float dstWeight = colorComponent switch
+                {
+                    0 => source.r + paintAmount,
+                    1 => source.g + paintAmount,
+                    2 => source.b + paintAmount,
+                    3 => source.a + paintAmount,
+                    _ => 0f
+                };
 
-                if (colorComponent == 0)
-                {
-                    dstWeight = source.r + paintAmount;
-                }
-                else if (colorComponent == 1)
-                {
-                    dstWeight = source.g + paintAmount;
-                }
-                else if (colorComponent == 2)
-                {
-                    dstWeight = source.b + paintAmount;
-                }
-                else if (colorComponent == 3)
-                {
-                    dstWeight = source.a + paintAmount;
-                }
+                if (dstWeight >= 1.0f) buffer[id] = Colors.Transparent;
 
-                if (dstWeight >= 1.0f)
+                switch (colorComponent)
                 {
-                    buffer[id] = Colors.Transparent;
-                }
-
-                if (colorComponent == 0)
-                {
-                    buffer[id].r = Mathf.Clamp(dstWeight, 0f, 1f);
-                }
-                else if (colorComponent == 1)
-                {
-                    buffer[id].g = Mathf.Clamp(dstWeight, 0f, 1f);
-                }
-                else if (colorComponent == 2)
-                {
-                    buffer[id].b = Mathf.Clamp(dstWeight, 0f, 1f);
-                }
-                else if (colorComponent == 3)
-                {
-                    buffer[id].a = Mathf.Clamp(dstWeight, 0f, 1f);
+                    case 0:
+                        buffer[id].r = Mathf.Clamp(dstWeight, 0f, 1f);
+                        break;
+                    case 1:
+                        buffer[id].g = Mathf.Clamp(dstWeight, 0f, 1f);
+                        break;
+                    case 2:
+                        buffer[id].b = Mathf.Clamp(dstWeight, 0f, 1f);
+                        break;
+                    case 3:
+                        buffer[id].a = Mathf.Clamp(dstWeight, 0f, 1f);
+                        break;
                 }
             }
         }

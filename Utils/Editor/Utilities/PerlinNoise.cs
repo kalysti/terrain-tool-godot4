@@ -8,7 +8,6 @@ namespace TerrainEditor.Editor.Utilities;
 /// </summary>
 public class PerlinNoise
 {
-   
     private float @base;
 
     public float NoiseScale;
@@ -16,7 +15,7 @@ public class PerlinNoise
     public float NoiseAmount;
 
     public int Octaves;
-   
+
     public PerlinNoise(float baseValue, float scale, float amount, int octaves = 4)
     {
         @base = baseValue;

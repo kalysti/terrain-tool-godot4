@@ -10,10 +10,10 @@ public class TerrainSmoothSculpt : TerrainBaseSculpt
     {
     }
 
-    public override void Apply( TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+    public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
     {
         int radius = Mathf.Max(Mathf.CeilToInt(ApplyInfo.Radius * 0.01f * ApplyInfo.BrushSize), 2);
-        float[]? sourceHeightMap = patch.CacheHeightData();
+        float[] sourceHeightMap = patch.CacheHeightData();
         float strength = Saturate(editorStrength);
         int bufferSize = modifiedSize.y * modifiedSize.x;
         var buffer = new float[bufferSize];
@@ -43,13 +43,11 @@ public class TerrainSmoothSculpt : TerrainBaseSculpt
                     int maxX = Math.Min(x + radius + modifiedOffset.x, max);
                     int maxZ = Math.Min(z + radius + modifiedOffset.y, max);
                     for (int dz = minZ; dz <= maxZ; dz++)
+                    for (int dx = minX; dx <= maxX; dx++)
                     {
-                        for (int dx = minX; dx <= maxX; dx++)
-                        {
-                            float height = sourceHeightMap[dz * patch.Info.HeightMapSize + dx];
-                            smoothValue += height;
-                            smoothValueSamples++;
-                        }
+                        float height = sourceHeightMap[dz * patch.Info.HeightMapSize + dx];
+                        smoothValue += height;
+                        smoothValueSamples++;
                     }
 
                     // Normalize

@@ -11,9 +11,9 @@ public class TerrainHoleSculpt : TerrainBaseSculpt
 
     public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
     {
-        float[]? sourceHolesData = patch.CacheHeightData();
+        float[] sourceHolesData = patch.CacheHeightData();
 
-        float targetHeight = ApplyInfo.Height;
+        // float targetHeight = ApplyInfo.Height;
         float strength = Saturate(editorStrength);
 
         int bufferSize = modifiedSize.y * modifiedSize.x;
@@ -27,7 +27,7 @@ public class TerrainHoleSculpt : TerrainBaseSculpt
                 int xx = x + modifiedOffset.x;
                 float sourceMask = sourceHolesData[zz * patch.Info.HeightMapSize + xx];
 
-                Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceMask , zz * Terrain3D.UNITS_PER_VERTEX);
+                Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, sourceMask, zz * Terrain3D.UNITS_PER_VERTEX);
                 Vector3 samplePositionWorld = SelectedTerrain.ToGlobal(samplePositionLocal);
                 samplePositionWorld.y = pos.y;
 
@@ -35,7 +35,7 @@ public class TerrainHoleSculpt : TerrainBaseSculpt
 
                 // Blend between the height and the target value
                 int id = z * modifiedSize.x + x;
-                buffer[id] = (byte)((sourceMask + paintAmount * strength) < 0.8f ? 0 : 255);
+                buffer[id] = (byte)(sourceMask + paintAmount * strength < 0.8f ? 0 : 255);
             }
         }
 

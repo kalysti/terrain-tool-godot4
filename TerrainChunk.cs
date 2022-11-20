@@ -25,60 +25,56 @@ public partial class TerrainChunk : Resource
 
     protected RID? MaterialId;
 
-    protected Material MaterialInUse;
+    protected Material? MaterialInUse;
 
     protected RID? MeshId;
 
-    protected Mesh Mesh { get; set; }
+    protected Mesh? Mesh { get; set; }
 
     protected Godot.Collections.Array<TerrainChunk> Neighbors = new();
 
     [Export]
     public int CachedDrawLod { get; set; } //not finish
 
-    /**
-		*   Get the bounding box of this chunk
-		*/
+    /// <summary>
+    ///   Get the bounding box of this chunk
+    /// </summary>
     public AABB GetBounds(TerrainPatchInfo info, Vector3 patchOffset)
     {
-        float size = (float)info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
+        float size = info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
         Vector3 origin = patchOffset + new Vector3(Position.x * size, Offset, Position.y * size);
         var bounds = new AABB(origin, new Vector3(size, Height, size));
 
         return bounds;
     }
 
-    /**
-		*  Detecting lod levels of neighbors
-		*/
+    /// <summary>
+    ///  Detecting lod levels of neighbors
+    /// </summary>
     protected Plane GetNeighbors()
     {
         int lod = CachedDrawLod;
         int minLod = Math.Max(lod + 1, 0);
 
-        var pl = new Plane();
-        pl.x = (float)Math.Clamp(Neighbors[0].CachedDrawLod, lod, minLod);
-        pl.y = (float)Math.Clamp(Neighbors[1].CachedDrawLod, lod, minLod);
-        pl.z = (float)Math.Clamp(Neighbors[2].CachedDrawLod, lod, minLod);
-        pl.D = (float)Math.Clamp(Neighbors[3].CachedDrawLod, lod, minLod);
+        var pl = new Plane
+        {
+            x = Math.Clamp(Neighbors[0].CachedDrawLod, lod, minLod),
+            y = Math.Clamp(Neighbors[1].CachedDrawLod, lod, minLod),
+            z = Math.Clamp(Neighbors[2].CachedDrawLod, lod, minLod),
+            D = Math.Clamp(Neighbors[3].CachedDrawLod, lod, minLod)
+        };
 
         return pl;
     }
 
-    /**
-		*  Clear and reset draw (free on physic server)
-		*/
+    /// <summary>
+    ///  Clear and reset draw (free on physic server)
+    /// </summary>
     public void ClearDraw()
     {
-        if (MeshId.HasValue)
-        {
-            RenderingServer.FreeRid(MeshId.Value);
-        }
+        if (MeshId.HasValue) RenderingServer.FreeRid(MeshId.Value);
 
-        if (InstanceRid.HasValue)
-        {
-            RenderingServer.FreeRid(InstanceRid.Value);
-        }
+        if (InstanceRid.HasValue) RenderingServer.FreeRid(InstanceRid.Value);
 
         Mesh = null;
         MaterialInUse = null;
@@ -87,16 +83,18 @@ public partial class TerrainChunk : Resource
         InstanceRid = null;
     }
 
-    /**
-		*  Updating position of chunk
-		*/
-    public Transform3D UpdatePosition(TerrainPatchInfo info, Transform3D terrainTransform, Vector3 patchoffset)
+    /// <summary>
+    ///  Updating position of chunk
+    /// </summary>
+    public Transform3D UpdatePosition(TerrainPatchInfo info, Transform3D terrainTransform, Vector3 patchOffset)
     {
-        float size = (info.ChunkSize) * Terrain3D.UNITS_PER_VERTEX;
-        Vector3 localPosition = patchoffset + new Vector3(Position.x * size, info.PatchOffset, Position.y * size);
-        var localTransform = new Transform3D();
-        localTransform.origin = localPosition;
-        localTransform.basis = new Basis(Quaternion.Identity);
+        float size = info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
+        Vector3 localPosition = patchOffset + new Vector3(Position.x * size, info.PatchOffset, Position.y * size);
+        var localTransform = new Transform3D
+        {
+            origin = localPosition,
+            basis = new Basis(Quaternion.Identity)
+        };
         localTransform.basis = localTransform.basis.Scaled(new Vector3(1.0f, info.PatchHeight, 1.0f));
 
         Transform3D global = terrainTransform * localTransform;
@@ -111,36 +109,48 @@ public partial class TerrainChunk : Resource
     }
 
 
-    /**
-		*  Get the UV Scale for the chunk
-		*/
+    /// <summary>
+    ///  Get the UV Scale for the chunk
+    /// </summary>
     private Plane GetUvScale()
     {
         Quaternion q = new Quaternion(1.0f, 1.0f, Position.x, Position.y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
         return new Plane(q.x, q.y, q.z, q.w);
     }
 
-    /**
-		*  Send inspector material to shader
-		*/
+    /// <summary>
+    ///  Send inspector material to shader
+    /// </summary>
     public void UpdateInspectorMaterial(Color color, Plane brushData0, Plane brushData1)
     {
+        if (MaterialId == null)
+        {
+            GD.PrintErr($"{nameof(MaterialId)} is null");
+            return;
+        }
+
         RenderingServer.MaterialSetParam(MaterialId.Value, "Color", color);
         RenderingServer.MaterialSetParam(MaterialId.Value, "BrushData0", brushData0);
         RenderingServer.MaterialSetParam(MaterialId.Value, "BrushData1", brushData1);
     }
 
-    /**
-		*  Send default material to shader
-		*/
+    /// <summary>
+    ///  Send default material to shader
+    /// </summary>
     public void SetDefaultMaterial(Texture2D image)
     {
+        if (MaterialId == null)
+        {
+            GD.PrintErr($"{nameof(MaterialId)} is null");
+            return;
+        }
+
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainDefaultMaterial", image.GetRid());
     }
 
-    /**
-		*  Cache neighbours for lod detection
-		*/
+    /// <summary>
+    ///  Cache neighbours for lod detection
+    /// </summary>
     public void CacheNeighbors(Terrain3D terrainNode, TerrainPatch currentPatch)
     {
         Neighbors.Clear();
@@ -176,7 +186,7 @@ public partial class TerrainChunk : Resource
         // 2: right
         if (Position.x < Terrain3D.PATCH_CHUNK_EDGES - 1)
         {
-            Neighbors[2] = currentPatch.Chunks[Position.y * Terrain3D.PATCH_CHUNK_EDGES + (Position.x + 1)];
+            Neighbors[2] = currentPatch.Chunks[Position.y * Terrain3D.PATCH_CHUNK_EDGES + Position.x + 1];
         }
         else
         {
@@ -198,20 +208,25 @@ public partial class TerrainChunk : Resource
         }
     }
 
-    /**
-		 *  Draw the chunk on physic server
-		 */
-    public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
+    /// <summary>
+    ///  Draw the chunk on physic server
+    /// </summary>
+    public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture? heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
     {
+        Mesh = GenerateMesh(patch, info.ChunkSize, 0);
+        MeshId = Mesh?.GetRid();
+        if (MeshId == null)
+        {
+            GD.PrintErr($"{nameof(MeshId)} is null");
+            return;
+        }
+
         CachedDrawLod = 0;
         int lod = CachedDrawLod;
-        int minLod = Math.Max(lod + 1, 0);
-        int chunkSize = info.ChunkSize;
+        // int minLod = Math.Max(lod + 1, 0);
+        // int chunkSize = info.ChunkSize;
 
-        Mesh = GenerateMesh(patch, info.ChunkSize, 0);
-        MeshId = Mesh.GetRid();
-
-        float size = (float)info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
+        float size = info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
 
         InstanceRid = RenderingServer.InstanceCreate();
         RenderingServer.InstanceSetScenario(InstanceRid.Value, scenario); //adding to the scene
@@ -220,13 +235,16 @@ public partial class TerrainChunk : Resource
         RenderingServer.MeshSetCustomAabb(MeshId.Value, new AABB(new Vector3(), new Vector3(size, Height, size)));
         RenderingServer.InstanceSetCustomAabb(InstanceRid.Value, new AABB(new Vector3(), new Vector3(size, Height, size)));
 
-        MaterialInUse = mat.Duplicate() as Material;
+        MaterialInUse = (Material)mat.Duplicate();
         MaterialId = MaterialInUse.GetRid();
 
         RenderingServer.InstanceGeometrySetMaterialOverride(InstanceRid.Value, MaterialId.Value);
         var nextChunkSizeLod = (float)(((info.ChunkSize + 1) >> (lod + 1)) - 1);
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainHeightMap", heightMap.GetRid());
+        if (heightMap == null)
+            GD.PrintErr($"{heightMap} is null");
+        else
+            RenderingServer.MaterialSetParam(MaterialId.Value, "terrainHeightMap", heightMap.GetRid());
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainChunkSize", TerrainChunkSizeLod0);
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainNextLodChunkSize", nextChunkSizeLod);
 
@@ -241,7 +259,7 @@ public partial class TerrainChunk : Resource
 
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainSmoothing", true);
 
-        OffsetUv = new Vector2((float)(patch.PatchCoord.x * Terrain3D.PATCH_CHUNK_EDGES + Position.x), (float)(patch.PatchCoord.y * Terrain3D.PATCH_CHUNK_EDGES + Position.y));
+        OffsetUv = new Vector2(patch.PatchCoordinates.x * Terrain3D.PATCH_CHUNK_EDGES + Position.x, patch.PatchCoordinates.y * Terrain3D.PATCH_CHUNK_EDGES + Position.y);
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainUvOffset", OffsetUv);
         RenderingServer.InstanceSetVisible(InstanceRid.Value, false);
 
@@ -249,36 +267,36 @@ public partial class TerrainChunk : Resource
         tf.ForceUpdateTransform();
     }
 
-    /**
-		 * Updating settings from inspector on physic server
-		 */
+    /// <summary>
+    /// Updating settings from inspector on physic server
+    /// </summary>
     public void UpdateSettings(Terrain3D tf)
     {
         if (!tf.IsInsideTree())
             return;
+        if (InstanceRid == null)
+        {
+            GD.PrintErr($"{nameof(InstanceRid)} is null");
+            return;
+        }
 
         RenderingServer.InstanceSetVisible(InstanceRid.Value, tf.IsVisibleInTree());
         RenderingServer.InstanceGeometrySetCastShadowsSetting(InstanceRid.Value, tf.CastShadow);
 
         switch (tf.GiMode)
         {
+            default:
             case GiMode.DISABLED:
-            {
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, false);
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, false);
-            }
                 break;
             case GiMode.BAKED:
-            {
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, true);
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, false);
-            }
                 break;
             case GiMode.DYNAMIC:
-            {
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, false);
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, true);
-            }
                 break;
         }
 
@@ -286,75 +304,72 @@ public partial class TerrainChunk : Resource
         RenderingServer.InstanceSetExtraVisibilityMargin(InstanceRid.Value, tf.ExtraCullMargin);
     }
 
-    /**
-		 * Generating a mesh this chunk by given lodLevel
-		 */
-    public ArrayMesh GenerateMesh(TerrainPatch patch, int chunkSize, int lodIndex)
+    /// <summary>
+    /// Generating a mesh this chunk by given lodLevel
+    /// </summary>
+    public static ArrayMesh GenerateMesh(TerrainPatch patch, int chunkSize, int lodIndex)
     {
         if (patch.MeshCache.ContainsKey(lodIndex))
         {
-            return (ArrayMesh)patch.MeshCache[lodIndex].Duplicate();
+            ArrayMesh meshLod = patch.MeshCache[lodIndex];
+            return (ArrayMesh)meshLod.Duplicate();
         }
 
-        int chunkSizeLod0 = chunkSize;
+        // int chunkSizeLod0 = chunkSize;
 
         // Prepare
         int vertexCount = (chunkSize + 1) >> lodIndex;
         chunkSize = vertexCount - 1;
-        int indexCount = chunkSize * chunkSize * 2 * 3;
-        int vertexCount2 = vertexCount * vertexCount;
+        // int indexCount = chunkSize * chunkSize * 2 * 3;
+        // int vertexCount2 = vertexCount * vertexCount;
 
-        float vertexTexelSnapTexCoord = 1.0f / chunkSize;
+        float vertexTexelSnapTexCoordinates = 1.0f / chunkSize;
 
         var st = new SurfaceTool();
         st.Begin(Mesh.PrimitiveType.Triangles);
         for (var z = 0; z < vertexCount; z++)
+        for (var x = 0; x < vertexCount; x++)
         {
-            for (var x = 0; x < vertexCount; x++)
+            var buff = new Vector3(x * vertexTexelSnapTexCoordinates, 0f, z * vertexTexelSnapTexCoordinates);
+
+            // Smooth LODs morphing based on Barycentric coordinates to morph to the lower LOD near chunk edges
+            var coordinates = new Quaternion(buff.z, buff.x, 1.0f - buff.x, 1.0f - buff.z);
+
+            // Apply some contrast
+            const float adjustPower = 0.3f;
+
+            var color = new Color
             {
-                var buff = new Vector3(x * vertexTexelSnapTexCoord, 0f, z * vertexTexelSnapTexCoord);
-
-                // Smooth LODs morphing based on Barycentric coordinates to morph to the lower LOD near chunk edges
-                var coord = new Quaternion(buff.z, buff.x, 1.0f - buff.x, 1.0f - buff.z);
-
-                // Apply some contrast
-                const float adjustPower = 0.3f;
-
-                var color = new Color
-                {
-                    r = Convert.ToSingle(Math.Pow(coord.x, adjustPower)),
-                    g = Convert.ToSingle(Math.Pow(coord.y, adjustPower)),
-                    b = Convert.ToSingle(Math.Pow(coord.z, adjustPower)),
-                    a = Convert.ToSingle(Math.Pow(coord.w, adjustPower))
-                };
+                r = Convert.ToSingle(Math.Pow(coordinates.x, adjustPower)),
+                g = Convert.ToSingle(Math.Pow(coordinates.y, adjustPower)),
+                b = Convert.ToSingle(Math.Pow(coordinates.z, adjustPower)),
+                a = Convert.ToSingle(Math.Pow(coordinates.w, adjustPower))
+            };
 
 
-                st.SetColor(color);
-                var uv = new Vector2(x * vertexTexelSnapTexCoord, z * vertexTexelSnapTexCoord);
-                st.SetUv(uv);
+            st.SetColor(color);
+            var uv = new Vector2(x * vertexTexelSnapTexCoordinates, z * vertexTexelSnapTexCoordinates);
+            st.SetUv(uv);
 
-                st.SetNormal(Vector3.Up);
-                st.AddVertex(buff); //x
-            }
+            st.SetNormal(Vector3.Up);
+            st.AddVertex(buff); //x
         }
 
         for (var z = 0; z < chunkSize; z++)
+        for (var x = 0; x < chunkSize; x++)
         {
-            for (var x = 0; x < chunkSize; x++)
-            {
-                int i00 = (x + 0) + (z + 0) * vertexCount;
-                int i10 = (x + 1) + (z + 0) * vertexCount;
-                int i11 = (x + 1) + (z + 1) * vertexCount;
-                int i01 = (x + 0) + (z + 1) * vertexCount;
+            int i00 = x + 0 + (z + 0) * vertexCount;
+            int i10 = x + 1 + (z + 0) * vertexCount;
+            int i11 = x + 1 + (z + 1) * vertexCount;
+            int i01 = x + 0 + (z + 1) * vertexCount;
 
-                st.AddIndex(i00);
-                st.AddIndex(i10);
-                st.AddIndex(i11);
+            st.AddIndex(i00);
+            st.AddIndex(i10);
+            st.AddIndex(i11);
 
-                st.AddIndex(i00);
-                st.AddIndex(i11);
-                st.AddIndex(i01);
-            }
+            st.AddIndex(i00);
+            st.AddIndex(i11);
+            st.AddIndex(i01);
         }
 
         st.GenerateTangents();

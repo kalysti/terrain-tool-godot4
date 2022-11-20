@@ -10,6 +10,7 @@ public enum TerrainToolMode
     PAINT,
     NONE
 }
+
 public enum TerrainSculptMode
 {
     FLATTEN,
@@ -32,7 +33,6 @@ public enum TerrainBrushType
     CIRCLE
 }
 
-
 public struct VertexResult
 {
     public int I { get; set; }
@@ -46,6 +46,7 @@ public enum HeightmapAlgo
     RGBA8_HALF,
     RGB8_FULL
 };
+
 public enum GiMode
 {
     DISABLED,
@@ -53,15 +54,14 @@ public enum GiMode
     DYNAMIC
 };
 
-public enum LightmapScale
+public enum LightMapScale
 {
     LIGHTMAP_SCALE_1_X,
     LIGHTMAP_SCALE_2_X,
     LIGHTMAP_SCALE_4_X,
     LIGHTMAP_SCALE_8_X,
-    LIGHTMAP_SCALE_MAX,
+    LIGHTMAP_SCALE_MAX
 };
-
 
 [StructLayout(LayoutKind.Sequential)]
 public struct Rgba
@@ -75,5 +75,5 @@ public struct Rgba
 [StructLayout(LayoutKind.Sequential)]
 public struct R16
 {
-    public UInt16 r;
+    public ushort r;
 }

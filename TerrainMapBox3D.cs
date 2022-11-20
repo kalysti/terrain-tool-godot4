@@ -1,5 +1,4 @@
-using System.Net;
-using System.Net.Cache;
+using System;
 using Godot;
 
 namespace TerrainEditor;
@@ -15,66 +14,58 @@ public partial class TerrainMapBox3D : Terrain3D
     [Export]
     public string MapBoxCachePath { get; set; } = "user://mapCache";
 
-    protected void InitCacheFolder()
+    protected static void InitCacheFolder()
     {
         DirAccess? dir = DirAccess.Open("user://");
         if (!dir.DirExists("mapCache"))
             dir.MakeDir("mapCache");
     }
 
-    private Image LoadImageFromBox(string filePath)
-    {
-        var image = new Image();
-        image.Load(filePath);
-
-        return image;
-    }
-
     public Error LoadHeightmapFromBox(ref Image image, int x = 12558, int y = 6127, int zoomLevel = 14)
     {
         InitCacheFolder();
 
-        string? url = "https://api.mapbox.com/v4/mapbox.terrain-rgb/" + zoomLevel + "/" + x + "/" + y + ".pngraw?access_token=" + MapBoxAccessToken;
+        string url = $"https://api.mapbox.com/v4/mapbox.terrain-rgb/{zoomLevel}/{x}/{y}.pngraw?access_token={MapBoxAccessToken}";
 
-        string? filename = zoomLevel + "_" + x + "_" + y + ".png";
-        string? filePath = MapBoxCachePath + "/" + filename;
+        string filename = $"{zoomLevel}_{x}_{y}.png";
+        var filePath = $"{MapBoxCachePath}/{filename}";
 
         if (FileAccess.FileExists(filePath))
         {
-            image = LoadImageFromBox(filePath);
+            image = Image.LoadFromFile(filePath);
             return Error.Ok;
         }
-        else
+
+
+        using (var client = new HTTPClient())
         {
-            using (var client = new WebClient())
+            // ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            // ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => true;
+            // client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache); //why do we request 
+            // client.Headers.Add("Cache-Control", "no-cache");
+
+            GD.Print($"Download: {url}");
+            byte[] data = { };
+            client.RequestRaw(HTTPClient.Method.Get, url, Array.Empty<string>(), data);
+            GD.Print($"Store in: {filePath}");
+
+            FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
+            if (result.IsOpen())
             {
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
-                ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => true;
-                client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-                client.Headers.Add("Cache-Control", "no-cache");
-
-                GD.Print("Download: " + url);
-                byte[] data = client.DownloadData(url);
-                GD.Print("Store in: " + filePath);
-
-                FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
-                if (result.IsOpen())
-                {
-                    result.StoreBuffer(data);
-                }
-                else
-                {
-                    GD.PrintErr("Cant write file: " + result);
-                    return Error.FileNotFound;
-                }
-
-                image = LoadImageFromBox(filePath);
-
-                result.Flush();
-                GD.PrintErr("Ready storing image succesfull");
-
-                return Error.Ok;
+                result.StoreBuffer(data);
             }
+            else
+            {
+                GD.PrintErr($"Cant write file: {result}");
+                return Error.FileNotFound;
+            }
+
+            image = Image.LoadFromFile(filePath);
+
+            result.Flush();
+            GD.PrintErr("Done storing image successfully");
+
+            return Error.Ok;
         }
     }
 
@@ -95,9 +86,6 @@ public partial class TerrainMapBox3D : Terrain3D
         var image = new Image();
         Error error = LoadHeightmapFromBox(ref image, x, y, zoomLevel);
 
-        if (error == Error.Ok)
-        {
-            LoadHeightmapFromImage(patch, image, HeightmapAlgo.RGB8_FULL);
-        }
+        if (error == Error.Ok) LoadHeightmapFromImage(patch, image, HeightmapAlgo.RGB8_FULL);
     }
 }

@@ -6,92 +6,112 @@ namespace TerrainEditor.Generators;
 
 public class TerrainColliderGenerator : TerrainBaseGenerator
 {
-    /**
-     * Constructor
-     */
+    /// <summary>
+    /// Constructor
+    /// </summary>
     public TerrainColliderGenerator(TerrainPatch patch) : base(patch)
     {
     }
 
 
-    /**
-     * Generate collider data by given lod level
-     */
+    /// <summary>
+    /// Generate collider data by given lod level
+    /// </summary>
     public float[] GenerateLod(int collisionLod)
     {
         GD.Print("Create height collider");
         int newCollisionLod = Mathf.Clamp(collisionLod, 0, 2);
 
         // Prepare data
-        int heightFieldChunkSize = ((Patch.Info.ChunkSize + 1) >> newCollisionLod) - 1;
-        int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
-        int heightFieldLength = heightFieldSize * heightFieldSize;
-
-        int vertexCountEdgeMip = Patch.Info.VertexCountEdge >> newCollisionLod;
-        int textureSizeMip = Patch.Info.TextureSize >> newCollisionLod;
-
-        Image? img = Patch.Heightmap.GetImage();
-        Rgba[] imgRgbaBuffer = FromByteArray<Rgba>(img.GetData());
-
-        int heightMapLength = Patch.Info.HeightMapSize * Patch.Info.HeightMapSize;
-        var heightField = new float[heightMapLength];
-
-        GD.Print("size:" + Patch.Info.HeightMapSize);
-
-        for (var chunkZ = 0; chunkZ < Terrain3D.PATCH_CHUNK_EDGES; chunkZ++)
+        if (Patch == null)
         {
-            int chunkTextureZ = chunkZ * vertexCountEdgeMip;
-            int chunkStartZ = chunkZ * heightFieldChunkSize;
+            GD.PrintErr($"{nameof(Patch)} is null");
+        }
+        else
+        {
+            int heightFieldChunkSize = ((Patch.Info.ChunkSize + 1) >> newCollisionLod) - 1;
+            int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
+            // int heightFieldLength = heightFieldSize * heightFieldSize;
 
-            for (var chunkX = 0; chunkX < Terrain3D.PATCH_CHUNK_EDGES; chunkX++)
+            int vertexCountEdgeMip = Patch.Info.VertexCountEdge >> newCollisionLod;
+            int textureSizeMip = Patch.Info.TextureSize >> newCollisionLod;
+
+            Image? img = Patch.HeightMap?.GetImage();
+            if (img == null)
             {
-                int chunkTextureX = chunkX * vertexCountEdgeMip;
-                int chunkStartX = chunkX * heightFieldChunkSize;
+                GD.PrintErr("Patch.HeightMap?.GetImage is null.");
+            }
+            else
+            {
+                Rgba[] imgRgbaBuffer = FromByteArray<Rgba>(img.GetData());
 
-                for (var z = 0; z < vertexCountEdgeMip; z++)
+                int heightMapLength = Patch.Info.HeightMapSize * Patch.Info.HeightMapSize;
+                var heightField = new float[heightMapLength];
+
+                GD.Print($"size:{Patch.Info.HeightMapSize}");
+
+                for (var chunkZ = 0; chunkZ < Terrain3D.PATCH_CHUNK_EDGES; chunkZ++)
                 {
-                    for (var x = 0; x < vertexCountEdgeMip; x++)
+                    int chunkTextureZ = chunkZ * vertexCountEdgeMip;
+                    int chunkStartZ = chunkZ * heightFieldChunkSize;
+
+                    for (var chunkX = 0; chunkX < Terrain3D.PATCH_CHUNK_EDGES; chunkX++)
                     {
-                        int textureIndexZ = (chunkTextureZ + z) * textureSizeMip;
-                        int textureIndexX = chunkTextureX + x;
-                        int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
+                        int chunkTextureX = chunkX * vertexCountEdgeMip;
+                        int chunkStartX = chunkX * heightFieldChunkSize;
 
-                        float normalizedHeight = TerrainByteConverter.ReadNormalizedHeightByte(imgRgbaBuffer[textureIndex]);
-                        float height = (normalizedHeight * Patch.Info.PatchHeight) + Patch.Info.PatchOffset;
-                        bool isHole = TerrainByteConverter.ReadIsHoleByte(imgRgbaBuffer[textureIndex]);
+                        for (var z = 0; z < vertexCountEdgeMip; z++)
+                        for (var x = 0; x < vertexCountEdgeMip; x++)
+                        {
+                            // int textureIndexZ = (chunkTextureZ + z) * textureSizeMip;
+                            // int textureIndexX = chunkTextureX + x;
+                            int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
 
-                        int heightmapX = chunkStartX + x;
-                        int heightmapZ = chunkStartZ + z;
+                            float normalizedHeight = TerrainByteConverter.ReadNormalizedHeightByte(imgRgbaBuffer[textureIndex]);
+                            float height = normalizedHeight * Patch.Info.PatchHeight + Patch.Info.PatchOffset;
 
-                        int dstIndex = heightmapX + (heightmapZ * heightFieldSize);
-                        heightField[dstIndex] = height;
+                            // bool isHole = TerrainByteConverter.ReadIsHoleByte(imgRgbaBuffer[textureIndex]);
+                            int heightmapX = chunkStartX + x;
+                            int heightmapZ = chunkStartZ + z;
+
+                            int dstIndex = heightmapX + heightmapZ * heightFieldSize;
+                            heightField[dstIndex] = height;
+                        }
                     }
                 }
+
+                return heightField;
             }
         }
 
-        return heightField;
+        return Array.Empty<float>();
     }
 
-    /**
-     * Modify collider data (todo)
-     */
-    public float[] ModifyCollision(byte[] buffer, int _collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
+    /// <summary>
+    /// Modify collider data (todo)
+    /// </summary>
+    public float[] ModifyCollision(byte[] buffer, int collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
     {
+        if (Patch == null)
+        {
+            GD.PrintErr($"{nameof(Patch)} is null.");
+            return Array.Empty<float>();
+        }
+
         GD.Print("modify height collider");
-        var newHeightfieldData = (float[])heightFieldData.Clone();
+        var newHeightFieldData = (float[])heightFieldData.Clone();
         Rgba[] imgRgbaBuffer = FromByteArray<Rgba>(buffer);
 
         // Prepare data
         var modifiedOffsetRatio = new Vector2((float)modifiedOffset.x / Patch.Info.HeightMapSize, (float)modifiedOffset.y / Patch.Info.HeightMapSize);
         var modifiedSizeRatio = new Vector2((float)modifiedSize.x / Patch.Info.HeightMapSize, (float)modifiedSize.y / Patch.Info.HeightMapSize);
 
-        int collisionLod = Mathf.Clamp(_collisionLod, 0, 0); //from mip //TODO clamp 0,0 makes it 0, please double check when working on it.
-        int heightFieldChunkSize = ((Patch.Info.ChunkSize + 1) >> collisionLod) - 1;
+        int newCollisionLod = Mathf.Clamp(collisionLod, 0, 0); //from mip //TODO clamp 0,0 makes it 0, please double check when working on it.
+        int heightFieldChunkSize = ((Patch.Info.ChunkSize + 1) >> newCollisionLod) - 1;
         int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
 
-        var samplesOffset = new Vector2i(Mathf.FloorToInt(modifiedOffsetRatio.x * (float)heightFieldSize), Mathf.FloorToInt(modifiedOffsetRatio.y * (float)heightFieldSize));
-        var samplesSize = new Vector2i(Mathf.CeilToInt(modifiedSizeRatio.x * (float)heightFieldSize), Mathf.CeilToInt(modifiedSizeRatio.y * (float)heightFieldSize));
+        var samplesOffset = new Vector2i(Mathf.FloorToInt(modifiedOffsetRatio.x * heightFieldSize), Mathf.FloorToInt(modifiedOffsetRatio.y * heightFieldSize));
+        var samplesSize = new Vector2i(Mathf.CeilToInt(modifiedSizeRatio.x * heightFieldSize), Mathf.CeilToInt(modifiedSizeRatio.y * heightFieldSize));
 
         samplesSize.x = Math.Max(samplesSize.x, 1);
         samplesSize.y = Math.Max(samplesSize.y, 1);
@@ -101,8 +121,8 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
         samplesEnd.y = Math.Min(samplesEnd.y, heightFieldSize);
 
         // Setup terrain collision information
-        int vertexCountEdgeMip = Patch.Info.VertexCountEdge >> collisionLod;
-        int textureSizeMip = Patch.Info.TextureSize >> collisionLod;
+        int vertexCountEdgeMip = Patch.Info.VertexCountEdge >> newCollisionLod;
+        int textureSizeMip = Patch.Info.TextureSize >> newCollisionLod;
 
         for (var chunkZ = 0; chunkZ < Terrain3D.PATCH_CHUNK_EDGES; chunkZ++)
         {
@@ -142,20 +162,20 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
                         int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
 
                         float normalizedHeight = TerrainByteConverter.ReadNormalizedHeightByte(imgRgbaBuffer[textureIndex]);
-                        float height = (normalizedHeight * Patch.Info.PatchHeight) + Patch.Info.PatchOffset;
+                        float height = normalizedHeight * Patch.Info.PatchHeight + Patch.Info.PatchOffset;
 
                         bool isHole = TerrainByteConverter.ReadIsHoleByte(imgRgbaBuffer[textureIndex]);
-                        int dstIndex = (heightmapLocalX * samplesSize.y) + heightmapLocalZ;
+                        int dstIndex = heightmapLocalX * samplesSize.y + heightmapLocalZ;
 
                         if (isHole)
                             height = 0f;
 
-                        //newHeightfieldData[dstIndex] = height;
+                        newHeightFieldData[dstIndex] = height;
                     }
                 }
             }
         }
 
-        return newHeightfieldData;
+        return newHeightFieldData;
     }
 }

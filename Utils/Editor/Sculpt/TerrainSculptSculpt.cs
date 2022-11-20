@@ -11,7 +11,7 @@ public class TerrainSculptSculpt : TerrainBaseSculpt
 
     public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
     {
-        float[]? sourceHeightMap = patch.CacheHeightData();
+        float[] sourceHeightMap = patch.CacheHeightData();
         float strength = editorStrength * 1000.0f;
 
         int bufferSize = modifiedSize.y * modifiedSize.x;
@@ -34,6 +34,7 @@ public class TerrainSculptSculpt : TerrainBaseSculpt
                 buffer[id] = sourceHeight + paintAmount * strength;
             }
         }
+
         patch.UpdateHeightMap(SelectedTerrain, buffer, modifiedOffset, modifiedSize);
     }
 }

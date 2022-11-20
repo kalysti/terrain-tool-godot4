@@ -1,11 +1,13 @@
 using Godot;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Godot.Collections;
 using TerrainEditor.Utils.Editor;
 using TerrainEditor.Utils.Editor.Sculpt;
 using TerrainEditor.Utils.Editor.Paint;
+using Array = System.Array;
 
 namespace TerrainEditor;
 #if TOOLS
@@ -21,7 +23,7 @@ public partial class TerrainPlugin : EditorPlugin
     protected TerrainToolMode CurrentToolMode = TerrainToolMode.NONE;
 
     private Vector2 mousePosition = Vector2.Zero;
-    private Camera3D editorCamera;
+    private Camera3D? editorCamera;
     private MenuButton menuButton = new();
     private SpinBox patchXControl = new();
     private SpinBox patchYControl = new();
@@ -41,7 +43,7 @@ public partial class TerrainPlugin : EditorPlugin
     protected string? SplatmapPath1;
     protected string? SplatmapPath2;
 
-    public override long _Forward3dGuiInput(Camera3D camera, InputEvent @event)
+    public override long _Forward3dGuiInput(Camera3D? camera, InputEvent @event)
     {
         editorCamera = camera;
 
@@ -49,7 +51,6 @@ public partial class TerrainPlugin : EditorPlugin
             return 0;
 
         if (CurrentToolMode != TerrainToolMode.NONE)
-        {
             switch (@event)
             {
                 case InputEventMouseButton mouseButton:
@@ -73,11 +74,8 @@ public partial class TerrainPlugin : EditorPlugin
                     break;
                 }
             }
-        }
         else
-        {
             handleClicked = false;
-        }
 
         return base._Forward3dGuiInput(camera, @event);
     }
@@ -105,24 +103,16 @@ public partial class TerrainPlugin : EditorPlugin
             TerrainEditorInfo applyInformation = GetEditorApply();
             AABB cursorBrush = CursorBrushBounds(applyInformation, pos);
 
-            TerrainChunk[] selectedChunks = null;
+            TerrainChunk[] selectedChunks = Array.Empty<TerrainChunk>();
             if (reset == false)
                 selectedChunks = GetChunks(cursorBrush);
 
             foreach (TerrainPatch? patch in SelectedTerrain.TerrainPatches)
-            {
-                foreach (TerrainChunk? chunk in patch.Chunks)
-                {
-                    if (selectedChunks == null || !selectedChunks.Contains(chunk))
-                    {
-                        ResetMaterialParams(chunk);
-                    }
-                    else
-                    {
-                        SetMaterialParams(applyInformation, chunk, pos, new Color(1.0f, 0.85f, 0.0f));
-                    }
-                }
-            }
+            foreach (TerrainChunk? chunk in patch.Chunks)
+                if (selectedChunks == null || !selectedChunks.Contains(chunk))
+                    ResetMaterialParams(chunk);
+                else
+                    SetMaterialParams(applyInformation, chunk, pos, new Color(1.0f, 0.85f, 0.0f));
         }
     }
 
@@ -131,16 +121,12 @@ public partial class TerrainPlugin : EditorPlugin
         //sculpting or painting
         if (SelectedTerrain != null && editorCamera != null && SelectedTerrain.IsInsideTree())
         {
-            long start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            ;
+            // long start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             Vector3 cast = DoRayCast(mousePosition);
 
             if (cast != Vector3.Inf)
             {
-                if (handleClicked)
-                {
-                    DoEditTerrain(cast, delta);
-                }
+                if (handleClicked) DoEditTerrain(cast, delta);
 
                 DrawInspector(cast);
             }
@@ -150,9 +136,7 @@ public partial class TerrainPlugin : EditorPlugin
     protected Vector3 DoRayCast(Vector2 pos)
     {
         if (SelectedTerrain != null && editorCamera != null)
-        {
             if (editorCamera.GetViewport() is SubViewport viewport)
-            {
                 if (viewport.GetParent() is SubViewportContainer viewportContainer)
                 {
                     Vector2 screenPos = pos * viewport.Size / viewportContainer.Size;
@@ -169,13 +153,9 @@ public partial class TerrainPlugin : EditorPlugin
                     Dictionary? result = spaceState.IntersectRay(query);
 
                     if (result.Count > 0 && result["collider"].Obj != null)
-                    {
                         if (result["collider"].Obj == SelectedTerrain)
                             return (Vector3)result["position"];
-                    }
                 }
-            }
-        }
 
         return Vector3.Inf;
     }
@@ -189,106 +169,109 @@ public partial class TerrainPlugin : EditorPlugin
             return;
 
         applyInformation.Inverse = Input.IsActionPressed("ui_cancel");
-        if (applyInformation.Inverse)
-        {
-            applyInformation.Strength *= -1;
-        }
+        if (applyInformation.Inverse) applyInformation.Strength *= -1;
 
         AABB cursorBrush = CursorBrushBounds(applyInformation, pos);
-        TerrainPatch[]? patches = GetPatches(cursorBrush);
-        var brushExtentY = 10000.0f;
+        TerrainPatch[] patches = GetPatches(cursorBrush);
+        const float brushExtentY = 10000.0f;
         float brushSizeHalf = applyInformation.BrushSize * 0.5f;
 
         // Get brush bounds in terrain local space
-        Vector3 bMin = SelectedTerrain.ToLocal(new Vector3(pos.x - brushSizeHalf, pos.y - brushSizeHalf - brushExtentY, pos.z - brushSizeHalf));
-        Vector3 bMax = SelectedTerrain.ToLocal(new Vector3(pos.x + brushSizeHalf, pos.y + brushSizeHalf + brushExtentY, pos.z + brushSizeHalf));
-
-        long start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-        ;
-
-        foreach (TerrainPatch? patch in patches)
+        if (SelectedTerrain == null)
         {
-            int chunkSize = patch.Info.ChunkSize;
+            GD.PrintErr($"{nameof(SelectedTerrain)} is null");
+        }
+        else
+        {
+            Vector3 bMin = SelectedTerrain.ToLocal(new Vector3(pos.x - brushSizeHalf, pos.y - brushSizeHalf - brushExtentY, pos.z - brushSizeHalf));
+            Vector3 bMax = SelectedTerrain.ToLocal(new Vector3(pos.x + brushSizeHalf, pos.y + brushSizeHalf + brushExtentY, pos.z + brushSizeHalf));
 
-            float patchSize = chunkSize * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
-            float unitsPerVertexInv = 1.0f / Terrain3D.UNITS_PER_VERTEX;
+            // long start = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
 
-            var patchPositionLocal = new Vector3(patch.PatchCoord.x * patchSize, 0, patch.PatchCoord.y * patchSize);
-            Vector3 brushBoundsPatchLocalMin = (bMin - patchPositionLocal) * unitsPerVertexInv;
-            Vector3 brushBoundsPatchLocalMax = (bMax - patchPositionLocal) * unitsPerVertexInv;
-
-            // Calculate patch heightmap area to modify by brush
-            var brushPatchMin = new Vector2i(Mathf.FloorToInt(brushBoundsPatchLocalMin.x), Mathf.FloorToInt(brushBoundsPatchLocalMin.z));
-            var brushPatchMax = new Vector2i(Mathf.CeilToInt(brushBoundsPatchLocalMax.x), Mathf.FloorToInt(brushBoundsPatchLocalMax.z));
-            Vector2i modifiedOffset = brushPatchMin;
-            Vector2i modifiedSize = brushPatchMax - brushPatchMin;
-
-            // Expand the modification area by one vertex in each direction to ensure normal vectors are updated for edge cases, also clamp to prevent overflows
-            if (modifiedOffset.x < 0)
+            foreach (TerrainPatch? patch in patches)
             {
-                modifiedSize.x += modifiedOffset.x;
-                modifiedOffset.x = 0;
-            }
+                int chunkSize = patch.Info.ChunkSize;
 
-            if (modifiedOffset.y < 0)
-            {
-                modifiedSize.y += modifiedOffset.y;
-                modifiedOffset.y = 0;
-            }
+                float patchSize = chunkSize * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
+                float unitsPerVertexInv = 1.0f / Terrain3D.UNITS_PER_VERTEX;
 
-            modifiedSize.x = Mathf.Min(modifiedSize.x + 2, patch.Info.HeightMapSize - modifiedOffset.x);
-            modifiedSize.y = Mathf.Min(modifiedSize.y + 2, patch.Info.HeightMapSize - modifiedOffset.y);
+                var patchPositionLocal = new Vector3(patch.PatchCoordinates.x * patchSize, 0, patch.PatchCoordinates.y * patchSize);
+                Vector3 brushBoundsPatchLocalMin = (bMin - patchPositionLocal) * unitsPerVertexInv;
+                Vector3 brushBoundsPatchLocalMax = (bMax - patchPositionLocal) * unitsPerVertexInv;
 
-            // Skip patch won't be modified at all
-            if (modifiedSize.x <= 0 || modifiedSize.y <= 0)
-                continue;
+                // Calculate patch heightmap area to modify by brush
+                var brushPatchMin = new Vector2i(Mathf.FloorToInt(brushBoundsPatchLocalMin.x), Mathf.FloorToInt(brushBoundsPatchLocalMin.z));
+                var brushPatchMax = new Vector2i(Mathf.CeilToInt(brushBoundsPatchLocalMax.x), Mathf.FloorToInt(brushBoundsPatchLocalMax.z));
+                Vector2i modifiedOffset = brushPatchMin;
+                Vector2i modifiedSize = brushPatchMax - brushPatchMin;
 
-            switch (CurrentToolMode)
-            {
-                case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.SCULPT:
+                // Expand the modification area by one vertex in each direction to ensure normal vectors are updated for edge cases, also clamp to prevent overflows
+                if (modifiedOffset.x < 0)
                 {
-                    var mode = new TerrainSculptSculpt(SelectedTerrain, applyInformation);
-                    mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                    break;
+                    modifiedSize.x += modifiedOffset.x;
+                    modifiedOffset.x = 0;
                 }
-                case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.FLATTEN:
+
+                if (modifiedOffset.y < 0)
                 {
-                    var mode = new TerrainFlattenSculpt(SelectedTerrain, applyInformation);
-                    mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                    break;
+                    modifiedSize.y += modifiedOffset.y;
+                    modifiedOffset.y = 0;
                 }
-                case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.SMOOTH:
+
+                modifiedSize.x = Mathf.Min(modifiedSize.x + 2, patch.Info.HeightMapSize - modifiedOffset.x);
+                modifiedSize.y = Mathf.Min(modifiedSize.y + 2, patch.Info.HeightMapSize - modifiedOffset.y);
+
+                // Skip patch won't be modified at all
+                if (modifiedSize.x <= 0 || modifiedSize.y <= 0)
+                    continue;
+
+                switch (CurrentToolMode)
                 {
-                    var mode = new TerrainSmoothSculpt(SelectedTerrain, applyInformation);
-                    mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                    break;
-                }
-                case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.NOISE:
-                {
-                    var mode = new TerrainNoiseSculpt(SelectedTerrain, applyInformation);
-                    mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                    break;
-                }
-                case TerrainToolMode.SCULPT:
-                {
-                    if (CurrentSculptMode == TerrainSculptMode.HOLES)
+                    case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.SCULPT:
                     {
-                        var mode = new TerrainHoleSculpt(SelectedTerrain, applyInformation);
+                        var mode = new TerrainSculptSculpt(SelectedTerrain, applyInformation);
                         mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                        break;
                     }
+                    case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.FLATTEN:
+                    {
+                        var mode = new TerrainFlattenSculpt(SelectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                        break;
+                    }
+                    case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.SMOOTH:
+                    {
+                        var mode = new TerrainSmoothSculpt(SelectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                        break;
+                    }
+                    case TerrainToolMode.SCULPT when CurrentSculptMode == TerrainSculptMode.NOISE:
+                    {
+                        var mode = new TerrainNoiseSculpt(SelectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                        break;
+                    }
+                    case TerrainToolMode.SCULPT:
+                    {
+                        if (CurrentSculptMode == TerrainSculptMode.HOLES)
+                        {
+                            var mode = new TerrainHoleSculpt(SelectedTerrain, applyInformation);
+                            mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                        }
 
-                    break;
+                        break;
+                    }
+                    case TerrainToolMode.PAINT:
+                    {
+                        var mode = new TerrainPaintPaint(SelectedTerrain, applyInformation);
+                        mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
+                        break;
+                    }
+                    case TerrainToolMode.NONE:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                case TerrainToolMode.PAINT:
-                {
-                    var mode = new TerrainPaintPaint(SelectedTerrain, applyInformation);
-                    mode.Apply(patch, pos, patchPositionLocal, strength, modifiedSize, modifiedOffset);
-                    break;
-                }
-                case TerrainToolMode.NONE:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
     }
@@ -296,15 +279,15 @@ public partial class TerrainPlugin : EditorPlugin
     protected TerrainPatch[] GetPatches(AABB cursorBrush)
     {
         var list = new Array<TerrainPatch>();
-        foreach (TerrainPatch? patch in SelectedTerrain.TerrainPatches)
-        {
-            AABB patchBound = patch.GetBounds();
-            patchBound.Position += SelectedTerrain.GlobalTransform.origin;
-            if (patchBound.Intersects(cursorBrush))
+        if (SelectedTerrain == null)
+            GD.PrintErr($"{nameof(SelectedTerrain)} is null");
+        else
+            foreach (TerrainPatch? patch in SelectedTerrain.TerrainPatches)
             {
-                list.Add(patch);
+                AABB patchBound = patch.GetBounds();
+                patchBound.Position += SelectedTerrain.GlobalTransform.origin;
+                if (patchBound.Intersects(cursorBrush)) list.Add(patch);
             }
-        }
 
         return list.ToArray();
     }
@@ -312,29 +295,27 @@ public partial class TerrainPlugin : EditorPlugin
     protected TerrainChunk[] GetChunks(AABB cursorBrush)
     {
         var list = new Array<TerrainChunk>();
-        foreach (TerrainPatch? patch in GetPatches(cursorBrush))
-        {
+        if (SelectedTerrain == null)
+            GD.PrintErr($"{nameof(SelectedTerrain)} is null");
+        else
+            foreach (TerrainPatch? patch in GetPatches(cursorBrush))
             foreach (TerrainChunk? chunk in patch.Chunks)
             {
                 AABB bound = chunk.GetBounds(patch.Info, patch.GetOffset());
                 bound.Position += SelectedTerrain.GlobalTransform.origin;
 
-                if (bound.Intersects(cursorBrush))
-                {
-                    list.Add(chunk);
-                }
+                if (bound.Intersects(cursorBrush)) list.Add(chunk);
             }
-        }
 
         return list.ToArray();
     }
 
-    protected AABB CursorBrushBounds(TerrainEditorInfo info, Vector3 hitPosition)
+    protected static AABB CursorBrushBounds(TerrainEditorInfo info, Vector3 hitPosition)
     {
         const float brushExtentY = 10000.0f;
         float brushSizeHalf = info.BrushSize * 0.5f;
 
-        var ab = new AABB(hitPosition, new Vector3(brushSizeHalf, (brushSizeHalf + brushExtentY), brushSizeHalf));
+        var ab = new AABB(hitPosition, new Vector3(brushSizeHalf, brushSizeHalf + brushExtentY, brushSizeHalf));
 
         return ab;
     }
@@ -342,16 +323,17 @@ public partial class TerrainPlugin : EditorPlugin
     public override void _EnterTree()
     {
         EditorInterface? editorInterface = GetEditorInterface();
-        // var inspector = editorInterface?.GetInspector();
-        // inspector.PropertyEdited += RefreshEditor; // Connect("property_edited", new Callable(this, "refreshEditor"), null, (uint)ConnectFlags.Deferred);
-        Control? baseControl = editorInterface.GetBaseControl();
+        EditorInspector? inspector = editorInterface?.GetInspector();
+        if (inspector != null)
+            inspector.PropertyEdited += RefreshEditor; // Connect("property_edited", new Callable(this, "refreshEditor"), null, (uint)ConnectFlags.Deferred);
+        // Control? baseControl = editorInterface.GetBaseControl();
 
-        var script = GD.Load<Script>(typeof(Terrain3D).GetCustomAttribute<ScriptPathAttribute>()?.Path);
-        var scriptMapBox = GD.Load<Script>(typeof(TerrainMapBox3D).GetCustomAttribute<ScriptPathAttribute>()?.Path);
-        var scriptPatch = GD.Load<Script>(typeof(TerrainPatch).GetCustomAttribute<ScriptPathAttribute>()?.Path);
-        var scriptPatchInfo = GD.Load<Script>(typeof(TerrainPatchInfo).GetCustomAttribute<ScriptPathAttribute>()?.Path);
-        var scriptChunk = GD.Load<Script>(typeof(TerrainChunk).GetCustomAttribute<ScriptPathAttribute>()?.Path);
-        var texture = GD.Load<Texture2D>("res://addons/TerrainPlugin/icons/terrain.png"); //TODO: find a solution for this
+        var script = GD.Load<CSharpScript>(ResourcePath($"{nameof(Terrain3D)}.cs"));
+        var scriptMapBox = GD.Load<CSharpScript>(ResourcePath($"{nameof(TerrainMapBox3D)}.cs"));
+        var scriptPatch = GD.Load<CSharpScript>(ResourcePath($"{nameof(TerrainPatch)}.cs"));
+        var scriptPatchInfo = GD.Load<CSharpScript>(ResourcePath($"{nameof(TerrainPatchInfo)}.cs"));
+        var scriptChunk = GD.Load<CSharpScript>(ResourcePath($"{nameof(TerrainChunk)}.cs"));
+        var texture = GD.Load<Texture2D>(ResourcePath("icons/terrain.png"));
 
         AddCustomType(nameof(TerrainPatchInfo), nameof(Resource), scriptPatchInfo, texture);
         AddCustomType(nameof(TerrainPatch), nameof(Resource), scriptPatch, texture);
@@ -397,6 +379,12 @@ public partial class TerrainPlugin : EditorPlugin
 
 
         RefreshPanel();
+    }
+
+    private void RefreshEditor(string property)
+    {
+        RefreshPanel();
+        RefreshGizmo();
     }
 
     public void SelectFilePathSplatmap1(string path)
@@ -538,7 +526,10 @@ public partial class TerrainPlugin : EditorPlugin
         GizmoPlugin.ShowAabb = GetPanelControlBoolean("show_aabb");
         GizmoPlugin.ShowCollider = GetPanelControlBoolean("show_collider");
 
-        SelectedTerrain.UpdateGizmos();
+        if (SelectedTerrain == null)
+            GD.PrintErr($"{nameof(SelectedTerrain)} is null");
+        else
+            SelectedTerrain.UpdateGizmos();
     }
 
     private void RefreshPanel()
@@ -546,17 +537,17 @@ public partial class TerrainPlugin : EditorPlugin
         var modeValue = GetPanelControlValue<TerrainToolMode>("mode");
         var sculptValue = GetPanelControlValue<TerrainSculptMode>("sculpt_mode");
 
-        HideInspector("sculpt_mode", (modeValue == TerrainToolMode.SCULPT));
-        HideInspector("layer", (modeValue == TerrainToolMode.PAINT));
-        HideInspector("strength", (modeValue != TerrainToolMode.NONE));
-        HideInspector("radius", (modeValue == TerrainToolMode.SCULPT
-                                 && sculptValue == TerrainSculptMode.SMOOTH));
-        HideInspector("height", (modeValue == TerrainToolMode.SCULPT
-                                 && sculptValue == TerrainSculptMode.FLATTEN));
-        HideInspector("noise_amount", (modeValue == TerrainToolMode.SCULPT
-                                       && sculptValue == TerrainSculptMode.NOISE));
-        HideInspector("noise_scale", (modeValue == TerrainToolMode.SCULPT
-                                      && sculptValue == TerrainSculptMode.NOISE));
+        HideInspector("sculpt_mode", modeValue == TerrainToolMode.SCULPT);
+        HideInspector("layer", modeValue == TerrainToolMode.PAINT);
+        HideInspector("strength", modeValue != TerrainToolMode.NONE);
+        HideInspector("radius", modeValue == TerrainToolMode.SCULPT
+                                && sculptValue == TerrainSculptMode.SMOOTH);
+        HideInspector("height", modeValue == TerrainToolMode.SCULPT
+                                && sculptValue == TerrainSculptMode.FLATTEN);
+        HideInspector("noise_amount", modeValue == TerrainToolMode.SCULPT
+                                      && sculptValue == TerrainSculptMode.NOISE);
+        HideInspector("noise_scale", modeValue == TerrainToolMode.SCULPT
+                                     && sculptValue == TerrainSculptMode.NOISE);
         CurrentToolMode = modeValue;
         CurrentSculptMode = sculptValue;
     }
@@ -653,7 +644,7 @@ public partial class TerrainPlugin : EditorPlugin
         {
             if (SelectedTerrain.TerrainDefaultMaterial == null)
             {
-                var mat = GD.Load<ShaderMaterial>("res://addons/TerrainPlugin/Shader/TerrainVisualShader.tres");
+                var mat = GD.Load<ShaderMaterial>(ResourcePath("Shader/TerrainVisualShader.tres"));
                 if (mat.Duplicate() is ShaderMaterial dup)
                 {
                     dup.ResourceLocalToScene = true;
@@ -663,7 +654,7 @@ public partial class TerrainPlugin : EditorPlugin
 
             if (SelectedTerrain.TerrainDefaultTexture == null)
             {
-                var mat = GD.Load<CompressedTexture2D>("res://addons/TerrainPlugin/TestTextures/texel.png");
+                var mat = GD.Load<CompressedTexture2D>(ResourcePath("TestTextures/texel.png"));
                 SelectedTerrain.TerrainDefaultTexture = mat;
             }
 
@@ -673,7 +664,7 @@ public partial class TerrainPlugin : EditorPlugin
             var patchX = (int)patchXControl.Value;
             var patchY = (int)patchYControl.Value;
 
-            var heightScale = (int)importHeightScale.Value;
+            // var heightScale = (int)importHeightScale.Value;
 
             SelectedTerrain.CreatePatchGrid(patchX, patchY, chunkSize);
 
@@ -742,12 +733,12 @@ public partial class TerrainPlugin : EditorPlugin
         //check of terrain
         if (SelectedTerrain == null)
         {
-            GD.PrintErr("No terrain selected");
+            GD.PrintErr($"{nameof(SelectedTerrain)} is null");
             return;
         }
 
         //check of patches
-        TerrainPatch? firstPatch = SelectedTerrain.TerrainPatches.FirstOrDefault() as TerrainPatch;
+        TerrainPatch? firstPatch = SelectedTerrain.TerrainPatches.FirstOrDefault();
         if (firstPatch == null)
         {
             GD.PrintErr("No heightmap found.");
@@ -759,12 +750,19 @@ public partial class TerrainPlugin : EditorPlugin
         int patchVertexCount = patchEdgeVertexCount * patchEdgeVertexCount;
 
         // Find size of heightmap in patches
-        Vector2i start = firstPatch.PatchCoord;
+        Vector2i start = firstPatch.PatchCoordinates;
         var end = new Vector2i(start.x, start.y);
 
         for (var i = 0; i < SelectedTerrain.GetPatchesCount(); i++)
         {
-            Vector2i patchPos = SelectedTerrain.GetPatch(i).PatchCoord;
+            TerrainPatch? terrainPatch = SelectedTerrain.GetPatch(i);
+            if (terrainPatch == null)
+            {
+                GD.PrintErr($"{nameof(TerrainPatch)} is null");
+                continue;
+            }
+
+            Vector2i patchPos = terrainPatch.PatchCoordinates;
 
             if (patchPos.x < start.x)
                 start.x = patchPos.x;
@@ -776,25 +774,22 @@ public partial class TerrainPlugin : EditorPlugin
                 end.y = patchPos.y;
         }
 
-        Vector2i size = (end + new Vector2i(1, 1)) - start;
+        Vector2i size = end + new Vector2i(1, 1) - start;
 
         // Allocate - with space for non-existent patches
         var heightmap = new Array<float>();
         heightmap.Resize(patchVertexCount * size.x * size.y);
 
-        float[]? heightData = firstPatch.CacheHeightData();
+        float[] heightData = firstPatch.CacheHeightData();
 
-        if (heightData == null || heightData.Length <= 0)
+        if (heightData.Length <= 0)
         {
             GD.PrintErr("Heightmap cache is empty..");
             return;
         }
 
         // Set to any element, where: min < elem < max
-        for (var i = 0; i < heightmap.Count; i++)
-        {
-            heightmap[i] = heightData[0];
-        }
+        for (var i = 0; i < heightmap.Count; i++) heightmap[i] = heightData[0];
 
         int heightmapWidth = patchEdgeVertexCount * size.x;
 
@@ -803,28 +798,31 @@ public partial class TerrainPlugin : EditorPlugin
         {
             // Pick a patch
             TerrainPatch? patch = SelectedTerrain.GetPatch(patchIndex);
-            float[]? data = patch.CacheHeightData();
+            if (patch == null)
+            {
+                GD.PrintErr($"{nameof(TerrainPatch)} is null");
+                continue;
+            }
+
+            float[] data = patch.CacheHeightData();
 
             // Beginning of patch
-            int dstIndex = (patch.PatchCoord.x - start.x) * patchEdgeVertexCount +
-                           (patch.PatchCoord.y - start.y) * size.y * patchVertexCount;
+            int dstIndex = (patch.PatchCoordinates.x - start.x) * patchEdgeVertexCount +
+                           (patch.PatchCoordinates.y - start.y) * size.y * patchVertexCount;
 
             // Iterate over lines in patch
             for (var z = 0; z < patchEdgeVertexCount; z++)
             {
                 // Iterate over vertices in line
-                for (var x = 0; x < patchEdgeVertexCount; x++)
-                {
-                    heightmap[dstIndex + x] = data[z * patchEdgeVertexCount + x];
-                }
+                for (var x = 0; x < patchEdgeVertexCount; x++) heightmap[dstIndex + x] = data[z * patchEdgeVertexCount + x];
 
                 dstIndex += heightmapWidth;
             }
         }
 
         // Interpolate to 16-bit int
-        float maxHeight, minHeight;
-        maxHeight = minHeight = heightmap[0];
+        float minHeight;
+        float maxHeight = minHeight = heightmap[0];
         for (var i = 1; i < heightmap.Count; i++)
         {
             float h = heightmap[i];
@@ -834,7 +832,7 @@ public partial class TerrainPlugin : EditorPlugin
                 minHeight = h;
         }
 
-        var maxValue = 65535.0f;
+        const float maxValue = 65535.0f;
         float alpha = maxValue / (maxHeight - minHeight);
 
         // Storage for pixel data
@@ -920,6 +918,13 @@ public partial class TerrainPlugin : EditorPlugin
             handleClicked = false;
             DockAttached = false;
         }
+    }
+
+    public static string ResourcePath(string subPath)
+    {
+        // const string DefaultAddonBasePath = "res://addons/TerrainPlugin/";
+        string? calculatedBasePath = typeof(TerrainPlugin).GetCustomAttribute<ScriptPathAttribute>()?.Path.Replace($"{nameof(TerrainPlugin)}.cs", "");
+        return Path.Join(calculatedBasePath, subPath);
     }
 }
 #endif

@@ -11,10 +11,10 @@ public class TerrainFlattenSculpt : TerrainBaseSculpt
 
     public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
     {
-        float[]? sourceHeightMap = patch.CacheHeightData();
+        float[] sourceHeightMap = patch.CacheHeightData();
 
         float targetHeight = ApplyInfo.Height;
-        float strength = Saturate(editorStrength);
+        // float strength = Saturate(editorStrength);
 
         int bufferSize = modifiedSize.y * modifiedSize.x;
         var buffer = new float[bufferSize];

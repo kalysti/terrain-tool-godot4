@@ -9,7 +9,8 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 {
     public bool ShowCollider = false;
     public bool ShowAabb = false;
-    public TerrainGizmoPlugin() : base()
+
+    public TerrainGizmoPlugin()
     {
         CreateMaterial("main", new Color(1, 0, 0));
         CreateMaterial("collider", new Color(0, 1, 0));
@@ -18,16 +19,18 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
         var gizmoColor = new Color(0.5f, 0.7f, 1);
         CreateMaterial("shape_material", gizmoColor);
     }
+
     public override bool _HasGizmo(Node3D spatial)
     {
         return spatial is Terrain3D;
     }
+
     public override string _GetGizmoName()
     {
         return "TerrainGizmo";
     }
 
-    void GetEdge(int pEdge, Vector3 position, Vector3 size, ref Vector3 rFrom, ref Vector3 rTo)
+    public static void GetEdge(int pEdge, Vector3 position, Vector3 size, ref Vector3 rFrom, ref Vector3 rTo)
     {
         switch (pEdge)
         {
@@ -47,14 +50,12 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
             {
                 rFrom = new Vector3(position.x, position.y, position.z + size.z);
                 rTo = new Vector3(position.x + size.x, position.y, position.z + size.z);
-
             }
                 break;
             case 3:
             {
                 rFrom = new Vector3(position.x, position.y, position.z);
                 rTo = new Vector3(position.x, position.y, position.z + size.z);
-
             }
                 break;
             case 4:
@@ -73,53 +74,47 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
             {
                 rFrom = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
                 rTo = new Vector3(position.x, position.y + size.y, position.z + size.z);
-
             }
                 break;
             case 7:
             {
                 rFrom = new Vector3(position.x, position.y + size.y, position.z + size.z);
                 rTo = new Vector3(position.x, position.y + size.y, position.z);
-
             }
                 break;
             case 8:
             {
                 rFrom = new Vector3(position.x, position.y, position.z + size.z);
                 rTo = new Vector3(position.x, position.y + size.y, position.z + size.z);
-
             }
                 break;
             case 9:
             {
                 rFrom = new Vector3(position.x, position.y, position.z);
                 rTo = new Vector3(position.x, position.y + size.y, position.z);
-
             }
                 break;
             case 10:
             {
                 rFrom = new Vector3(position.x + size.x, position.y, position.z);
                 rTo = new Vector3(position.x + size.x, position.y + size.y, position.z);
-
             }
                 break;
             case 11:
             {
                 rFrom = new Vector3(position.x + size.x, position.y, position.z + size.z);
                 rTo = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
-
             }
                 break;
         }
     }
 
-    private StandardMaterial3D GetDebugMaterial()
+    private static StandardMaterial3D GetDebugMaterial()
     {
         var lineMaterial = new StandardMaterial3D();
         lineMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
         lineMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-        lineMaterial.AlbedoColor = new Color(0, 1, 1, 1);
+        lineMaterial.AlbedoColor = new Color(0, 1, 1);
 
         lineMaterial.AlbedoTextureForceSrgb = true;
         lineMaterial.VertexColorIsSrgb = true;
@@ -128,7 +123,7 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
         return lineMaterial;
     }
 
-    public ArrayMesh GetDebugMesh(Vector3[] lines)
+    public static ArrayMesh GetDebugMesh(Vector3[] lines)
     {
         var debugMeshCache = new ArrayMesh();
 
@@ -143,14 +138,14 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
     }
 
 
-    public Vector3[] GetDebugMeshLines(TerrainPatch patch)
+    public static Vector3[] GetDebugMeshLines(TerrainPatch patch)
     {
-        float[]? heightField = patch.CacheHeightData();
+        float[] heightField = patch.CacheHeightData();
         int mapWidth = patch.Info.HeightMapSize;
         int mapDepth = patch.Info.HeightMapSize;
 
-        Vector3[]? points = Array.Empty<Vector3>();
-        if ((mapWidth != 0) && (mapDepth != 0))
+        Vector3[] points = Array.Empty<Vector3>();
+        if (mapWidth != 0 && mapDepth != 0)
         {
             // This will be slow for large maps...
             // also we'll have to figure out how well bullet centers this shape...
@@ -159,7 +154,7 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
             Vector2 start = size * -0.5f;
 
             // reserve some memory for our points..
-            points = new Vector3[((mapWidth - 1) * mapDepth * 2) + (mapWidth * (mapDepth - 1) * 2)];
+            points = new Vector3[(mapWidth - 1) * mapDepth * 2 + mapWidth * (mapDepth - 1) * 2];
 
             // now set our points
             var rOffset = 0;
@@ -205,7 +200,6 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 
         foreach (TerrainPatch? patch in spatial.TerrainPatches)
         {
-
             if (ShowAabb)
             {
                 var lines = new Godot.Collections.Array<Vector3>();
@@ -213,9 +207,8 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 
                 for (var i = 0; i < 8; i++)
                 {
-                    Vector3 a, b;
-                    a = new Vector3();
-                    b = new Vector3();
+                    var a = new Vector3();
+                    var b = new Vector3();
 
                     GetEdge(i, aabb.Position, aabb.Size, ref a, ref b);
 
@@ -228,18 +221,19 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 
             if (ShowCollider)
             {
-                Vector3[]? meshLines = GetDebugMeshLines(patch);
+                Vector3[] meshLines = GetDebugMeshLines(patch);
 
                 var st = new SurfaceTool();
                 Transform3D tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
-                tf.origin = tf.origin - spatial.GlobalTransform.origin;
+                tf.origin -= spatial.GlobalTransform.origin;
                 st.AppendFrom(GetDebugMesh(meshLines), 0, tf);
                 gizmo.AddMesh(st.Commit(), GetMaterial("shape_material", gizmo));
             }
         }
     }
 
-    ArrayMesh get_debug_mesh(Godot.Collections.Array<Vector3> lines)
+
+    private static ArrayMesh get_debug_mesh(Godot.Collections.Array<Vector3> lines)
     {
         var mt = new ArrayMesh();
         var arr = new Godot.Collections.Array();
