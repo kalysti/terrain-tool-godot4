@@ -133,7 +133,7 @@ namespace TerrainEditor
 			heightmapGen.WriteNormals(ref imageBuffer, heightMapdata, null, Vector2i.Zero, new Vector2i(info.heightMapSize, info.heightMapSize));
 
 			//store heightmap in rgba8
-			image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imageBuffer);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imageBuffer);
 
 			if (heightmap == null)
 			{
@@ -172,7 +172,7 @@ namespace TerrainEditor
 			else
 			{
 				splatmapGen.WriteColors(ref splatmapData, ref splatmapDataImport);
-				splatmapImage.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
+				splatmapImage = Image.CreateFromData(splatmapImage.GetWidth(), splatmapImage.GetHeight(), false, Image.Format.Rgba8, splatmapData);
 			}
 
 			splatmapTexture = ImageTexture.CreateFromImage(splatmapImage);
@@ -334,7 +334,7 @@ namespace TerrainEditor
 			var heightmapGen = new TerrainHeightMapGenerator(this);
 			heightmapGen.WriteNormals(ref imgData, heightMap, holesMask, modifiedOffset, modifiedSize);
 
-			image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
 			heightmap.Update(image);
 
 			UpdateColliderData(terrain, heightMap);
@@ -393,7 +393,7 @@ namespace TerrainEditor
 				chunkIndex++;
 			}
 
-			image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
 			heightmap.Update(image);
 
 			var genCollider = new TerrainColliderGenerator(this);
@@ -437,7 +437,7 @@ namespace TerrainEditor
 			var splatMapGen = new TerrainSplatMapGenerator(this);
 			splatMapGen.WriteColors(ref imgData, ref data);
 
-			image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
+			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imgData);
 
 			splatmaps[splatmapIndex].Update(image);
 			cachedSplatMap[splatmapIndex] = data;
