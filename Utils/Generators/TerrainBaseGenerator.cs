@@ -24,8 +24,7 @@ namespace TerrainEditor.Generators
 
         public Image createImage()
         {
-            var initData = new Image();
-            initData.Create(patch.info.textureSize, patch.info.textureSize, false, Image.Format.Rgba8);
+            var initData = Image.Create(patch.info.textureSize, patch.info.textureSize, false, Image.Format.Rgba8);
 
             return initData;
         }
