@@ -59,7 +59,7 @@ namespace TerrainEditor
 			for (int i = 0; i < terrainPatches.Count(); i++)
 			{
 				TerrainPatch? patch = terrainPatches[i];
-				if (patch.patchCoord.x == x && patch.patchCoord.y == z)
+				if (patch.patchCoord.X == x && patch.patchCoord.Y == z)
 				{
 					return patch;
 				}
@@ -119,9 +119,9 @@ namespace TerrainEditor
 		/**
 		 * Creating a patch by given coords and chunksize
 		 */
-		public void createPatch(Vector2i coord, int chunkSize)
+		public void createPatch(Vector2I coord, int chunkSize)
 		{
-			createPatch(coord.x, coord.y, chunkSize);
+			createPatch(coord.X, coord.Y, chunkSize);
 		}
 
 		/**
@@ -137,7 +137,7 @@ namespace TerrainEditor
 
 			patch.offset = new Vector3(x * size, 0.0f, y * size);
 			patch.ResourceLocalToScene = true;
-			patch.patchCoord = new Vector2i(x, y);
+			patch.patchCoord = new Vector2I(x, y);
 
 			terrainPatches.Add(patch);
 			patch.Init(chunkSize);
@@ -150,9 +150,9 @@ namespace TerrainEditor
 		/**
 		* Load heightmap from given image
 		*/
-		public Error loadHeightmapFromImage(Vector2i patchCoord, Image heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
+		public Error loadHeightmapFromImage(Vector2I patchCoord, Image heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
 		{
-			TerrainPatch? patch = GetPatch(patchCoord.x, patchCoord.y);
+			TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
 			if (patch == null || heightMapImage == null)
 			{
 				return Error.FileNotFound;
@@ -197,14 +197,14 @@ namespace TerrainEditor
 					}
 					else if (algo == HeightmapAlgo.RGB8_Full) //mapbox default
 					{
-						float height = -10000f + ((raw.r8 * 256f * 256f + raw.g8 * 256f + raw.b8) * 0.1f);
+						float height = -10000f + ((raw.R8 * 256f * 256f + raw.G8 * 256f + raw.B8) * 0.1f);
 						float normalizedHeight = height / 50; //reduce because 24bit of mapbox
 
 						heightmapData[z * patch.info.heightMapSize + x] = normalizedHeight * heightmapScale;
 					}
 					else if (algo == HeightmapAlgo.R16) //industrial default
 					{
-						heightmapData[z * patch.info.heightMapSize + x] = raw.r * heightmapScale;
+						heightmapData[z * patch.info.heightMapSize + x] = raw.R * heightmapScale;
 					}
 				}
 			}
@@ -216,9 +216,9 @@ namespace TerrainEditor
 		/**
 		* Load splatmap from given image
 		*/
-		public Error loadSplatmapFromImage(Vector2i patchCoord, int idx, Image splatmapImage)
+		public Error loadSplatmapFromImage(Vector2I patchCoord, int idx, Image splatmapImage)
 		{
-			TerrainPatch? patch = GetPatch(patchCoord.x, patchCoord.y);
+			TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
 			if (patch == null || splatmapImage == null)
 			{
 				return Error.FileNotFound;
@@ -264,8 +264,8 @@ namespace TerrainEditor
 			UpdateGizmos();
 
 
-			float kmX = getBounds().Size.x * 0.00001f;
-			float kmY = getBounds().Size.z * 0.00001f;
+			float kmX = getBounds().Size.X * 0.00001f;
+			float kmY = getBounds().Size.Z * 0.00001f;
 
 			GD.Print("[Draw Size] " + kmX + "x" + kmY + "km");
 
@@ -300,9 +300,9 @@ namespace TerrainEditor
 			}
 		}
 
-		public AABB getBounds()
+		public Aabb getBounds()
 		{
-			var bounds = new AABB();
+			var bounds = new Aabb();
 			foreach (TerrainPatch? patch in terrainPatches)
 			{
 				bounds = bounds.Merge(patch.getBounds());

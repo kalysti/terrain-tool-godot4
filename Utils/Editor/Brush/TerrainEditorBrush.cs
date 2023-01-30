@@ -61,8 +61,8 @@ namespace TerrainEditor.Utils.Editor.Brush
 
         public static void DistanceXZ(Vector3 value1, Vector3 value2, out float result)
         {
-            float x = value1.x - value2.x;
-            float z = value1.z - value2.z;
+            float x = value1.X - value2.X;
+            float z = value1.Z - value2.Z;
 
             result = (float)Math.Sqrt(x * x + z * z);
         }
