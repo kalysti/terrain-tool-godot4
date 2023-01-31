@@ -7,7 +7,7 @@ namespace TerrainEditor;
 public partial class TerrainChunk : Resource
 {
     [Export]
-    public Vector2i Position { get; set; }
+    public Vector2I Position { get; set; }
 
     [Export]
     public Vector2 OffsetUv { get; set; }
@@ -21,13 +21,13 @@ public partial class TerrainChunk : Resource
     [Export]
     public float Height { get; set; } = 1;
 
-    protected RID? InstanceRid;
+    protected Rid? InstanceRid;
 
-    protected RID? MaterialId;
+    protected Rid? MaterialId;
 
     protected Material? MaterialInUse;
 
-    protected RID? MeshId;
+    protected Rid? MeshId;
 
     protected Mesh? Mesh { get; set; }
 
@@ -39,11 +39,11 @@ public partial class TerrainChunk : Resource
     /// <summary>
     ///   Get the bounding box of this chunk
     /// </summary>
-    public AABB GetBounds(TerrainPatchInfo info, Vector3 patchOffset)
+    public Aabb GetBounds(TerrainPatchInfo info, Vector3 patchOffset)
     {
         float size = info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
-        Vector3 origin = patchOffset + new Vector3(Position.x * size, Offset, Position.y * size);
-        var bounds = new AABB(origin, new Vector3(size, Height, size));
+        Vector3 origin = patchOffset + new Vector3(Position.X * size, Offset, Position.Y * size);
+        var bounds = new Aabb(origin, new Vector3(size, Height, size));
 
         return bounds;
     }
@@ -58,9 +58,9 @@ public partial class TerrainChunk : Resource
 
         var pl = new Plane
         {
-            x = Math.Clamp(Neighbors[0].CachedDrawLod, lod, minLod),
-            y = Math.Clamp(Neighbors[1].CachedDrawLod, lod, minLod),
-            z = Math.Clamp(Neighbors[2].CachedDrawLod, lod, minLod),
+            X = Math.Clamp(Neighbors[0].CachedDrawLod, lod, minLod),
+            Y = Math.Clamp(Neighbors[1].CachedDrawLod, lod, minLod),
+            Z = Math.Clamp(Neighbors[2].CachedDrawLod, lod, minLod),
             D = Math.Clamp(Neighbors[3].CachedDrawLod, lod, minLod)
         };
 
@@ -89,13 +89,13 @@ public partial class TerrainChunk : Resource
     public Transform3D UpdatePosition(TerrainPatchInfo info, Transform3D terrainTransform, Vector3 patchOffset)
     {
         float size = info.ChunkSize * Terrain3D.UNITS_PER_VERTEX;
-        Vector3 localPosition = patchOffset + new Vector3(Position.x * size, info.PatchOffset, Position.y * size);
+        Vector3 localPosition = patchOffset + new Vector3(Position.X * size, info.PatchOffset, Position.Y * size);
         var localTransform = new Transform3D
         {
-            origin = localPosition,
-            basis = new Basis(Quaternion.Identity)
+            Origin = localPosition,
+            Basis = new Basis(Quaternion.Identity)
         };
-        localTransform.basis = localTransform.basis.Scaled(new Vector3(1.0f, info.PatchHeight, 1.0f));
+        localTransform.Basis = localTransform.Basis.Scaled(new Vector3(1.0f, info.PatchHeight, 1.0f));
 
         Transform3D global = terrainTransform * localTransform;
 
@@ -114,8 +114,8 @@ public partial class TerrainChunk : Resource
     /// </summary>
     private Plane GetUvScale()
     {
-        Quaternion q = new Quaternion(1.0f, 1.0f, Position.x, Position.y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
-        return new Plane(q.x, q.y, q.z, q.w);
+        Quaternion q = new Quaternion(1.0f, 1.0f, Position.X, Position.Y) * (1.0f / Terrain3D.PATCH_CHUNK_EDGES);
+        return new Plane(q.X, q.Y, q.Z, q.W);
     }
 
     /// <summary>
@@ -160,58 +160,58 @@ public partial class TerrainChunk : Resource
         Neighbors.Add(this);
 
         // 0: bottom
-        if (Position.y > 0)
+        if (Position.Y > 0)
         {
-            Neighbors[0] = currentPatch.Chunks[(Position.y - 1) * Terrain3D.PATCH_CHUNK_EDGES + Position.x];
+            Neighbors[0] = currentPatch.Chunks[(Position.Y - 1) * Terrain3D.PATCH_CHUNK_EDGES + Position.X];
         }
         else
         {
-            TerrainPatch? patch = terrainNode.GetPatch(Position.x, Position.y - 1);
+            TerrainPatch? patch = terrainNode.GetPatch(Position.X, Position.Y - 1);
             if (patch != null)
-                Neighbors[0] = patch.Chunks[(Terrain3D.PATCH_CHUNK_EDGES - 1) * Terrain3D.PATCH_CHUNK_EDGES + Position.x];
+                Neighbors[0] = patch.Chunks[(Terrain3D.PATCH_CHUNK_EDGES - 1) * Terrain3D.PATCH_CHUNK_EDGES + Position.X];
         }
 
         // 1: left
-        if (Position.x > 0)
+        if (Position.X > 0)
         {
-            Neighbors[1] = currentPatch.Chunks[Position.y * Terrain3D.PATCH_CHUNK_EDGES + (Position.x - 1)];
+            Neighbors[1] = currentPatch.Chunks[Position.Y * Terrain3D.PATCH_CHUNK_EDGES + (Position.X - 1)];
         }
         else
         {
-            TerrainPatch? patch = terrainNode.GetPatch(Position.x - 1, Position.y);
+            TerrainPatch? patch = terrainNode.GetPatch(Position.X - 1, Position.Y);
             if (patch != null)
-                Neighbors[1] = patch.Chunks[Position.y * Terrain3D.PATCH_CHUNK_EDGES + (Terrain3D.PATCH_CHUNK_EDGES - 1)];
+                Neighbors[1] = patch.Chunks[Position.Y * Terrain3D.PATCH_CHUNK_EDGES + (Terrain3D.PATCH_CHUNK_EDGES - 1)];
         }
 
         // 2: right
-        if (Position.x < Terrain3D.PATCH_CHUNK_EDGES - 1)
+        if (Position.X < Terrain3D.PATCH_CHUNK_EDGES - 1)
         {
-            Neighbors[2] = currentPatch.Chunks[Position.y * Terrain3D.PATCH_CHUNK_EDGES + Position.x + 1];
+            Neighbors[2] = currentPatch.Chunks[Position.Y * Terrain3D.PATCH_CHUNK_EDGES + Position.X + 1];
         }
         else
         {
-            TerrainPatch? patch = terrainNode.GetPatch(Position.x + 1, Position.y);
+            TerrainPatch? patch = terrainNode.GetPatch(Position.X + 1, Position.Y);
             if (patch != null)
-                Neighbors[2] = patch.Chunks[Position.y * Terrain3D.PATCH_CHUNK_EDGES];
+                Neighbors[2] = patch.Chunks[Position.Y * Terrain3D.PATCH_CHUNK_EDGES];
         }
 
         // 3: top
-        if (Position.y < Terrain3D.PATCH_CHUNK_EDGES - 1)
+        if (Position.Y < Terrain3D.PATCH_CHUNK_EDGES - 1)
         {
-            Neighbors[3] = currentPatch.Chunks[(Position.y + 1) * Terrain3D.PATCH_CHUNK_EDGES + Position.x];
+            Neighbors[3] = currentPatch.Chunks[(Position.Y + 1) * Terrain3D.PATCH_CHUNK_EDGES + Position.X];
         }
         else
         {
-            TerrainPatch? patch = terrainNode.GetPatch(Position.x, Position.y + 1);
+            TerrainPatch? patch = terrainNode.GetPatch(Position.X, Position.Y + 1);
             if (patch != null)
-                Neighbors[3] = patch.Chunks[Position.x];
+                Neighbors[3] = patch.Chunks[Position.X];
         }
     }
 
     /// <summary>
     ///  Draw the chunk on physic server
     /// </summary>
-    public void Draw(TerrainPatch patch, TerrainPatchInfo info, RID scenario, ref ImageTexture? heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
+    public void Draw(TerrainPatch patch, TerrainPatchInfo info, Rid scenario, ref ImageTexture? heightMap, ref Godot.Collections.Array<ImageTexture> splatMaps, Terrain3D tf, Vector3 patchoffset, Material mat)
     {
         Mesh = GenerateMesh(patch, info.ChunkSize, 0);
         MeshId = Mesh?.GetRid();
@@ -232,8 +232,8 @@ public partial class TerrainChunk : Resource
         RenderingServer.InstanceSetScenario(InstanceRid.Value, scenario); //adding to the scene
         RenderingServer.InstanceSetBase(InstanceRid.Value, MeshId.Value);
         RenderingServer.InstanceAttachObjectInstanceId(InstanceRid.Value, tf.GetInstanceId()); // attach to node
-        RenderingServer.MeshSetCustomAabb(MeshId.Value, new AABB(new Vector3(), new Vector3(size, Height, size)));
-        RenderingServer.InstanceSetCustomAabb(InstanceRid.Value, new AABB(new Vector3(), new Vector3(size, Height, size)));
+        RenderingServer.MeshSetCustomAabb(MeshId.Value, new Aabb(new Vector3(), new Vector3(size, Height, size)));
+        RenderingServer.InstanceSetCustomAabb(InstanceRid.Value, new Aabb(new Vector3(), new Vector3(size, Height, size)));
 
         MaterialInUse = (Material)mat.Duplicate();
         MaterialId = MaterialInUse.GetRid();
@@ -259,7 +259,7 @@ public partial class TerrainChunk : Resource
 
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainSmoothing", true);
 
-        OffsetUv = new Vector2(patch.PatchCoordinates.x * Terrain3D.PATCH_CHUNK_EDGES + Position.x, patch.PatchCoordinates.y * Terrain3D.PATCH_CHUNK_EDGES + Position.y);
+        OffsetUv = new Vector2(patch.PatchCoordinates.X * Terrain3D.PATCH_CHUNK_EDGES + Position.X, patch.PatchCoordinates.Y * Terrain3D.PATCH_CHUNK_EDGES + Position.Y);
         RenderingServer.MaterialSetParam(MaterialId.Value, "terrainUvOffset", OffsetUv);
         RenderingServer.InstanceSetVisible(InstanceRid.Value, false);
 
@@ -288,15 +288,15 @@ public partial class TerrainChunk : Resource
             default:
             case GiMode.DISABLED:
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, false);
-                RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, false);
+                RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGI, false);
                 break;
             case GiMode.BAKED:
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, true);
-                RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, false);
+                RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGI, false);
                 break;
             case GiMode.DYNAMIC:
                 RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseBakedLight, false);
-                RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGi, true);
+                RenderingServer.InstanceGeometrySetFlag(InstanceRid.Value, RenderingServer.InstanceFlags.UseDynamicGI, true);
                 break;
         }
 
@@ -333,23 +333,23 @@ public partial class TerrainChunk : Resource
             var buff = new Vector3(x * vertexTexelSnapTexCoordinates, 0f, z * vertexTexelSnapTexCoordinates);
 
             // Smooth LODs morphing based on Barycentric coordinates to morph to the lower LOD near chunk edges
-            var coordinates = new Quaternion(buff.z, buff.x, 1.0f - buff.x, 1.0f - buff.z);
+            var coordinates = new Quaternion(buff.Z, buff.X, 1.0f - buff.X, 1.0f - buff.Z);
 
             // Apply some contrast
             const float adjustPower = 0.3f;
 
             var color = new Color
             {
-                r = Convert.ToSingle(Math.Pow(coordinates.x, adjustPower)),
-                g = Convert.ToSingle(Math.Pow(coordinates.y, adjustPower)),
-                b = Convert.ToSingle(Math.Pow(coordinates.z, adjustPower)),
-                a = Convert.ToSingle(Math.Pow(coordinates.w, adjustPower))
+                R = Convert.ToSingle(Math.Pow(coordinates.X, adjustPower)),
+                G = Convert.ToSingle(Math.Pow(coordinates.Y, adjustPower)),
+                B = Convert.ToSingle(Math.Pow(coordinates.Z, adjustPower)),
+                A = Convert.ToSingle(Math.Pow(coordinates.W, adjustPower))
             };
 
 
             st.SetColor(color);
             var uv = new Vector2(x * vertexTexelSnapTexCoordinates, z * vertexTexelSnapTexCoordinates);
-            st.SetUv(uv);
+            st.SetUV(uv);
 
             st.SetNormal(Vector3.Up);
             st.AddVertex(buff); //x

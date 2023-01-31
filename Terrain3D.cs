@@ -45,7 +45,7 @@ public partial class Terrain3D : Node3D
 
     public TerrainPatch? GetPatch(int x, int z)
     {
-        return TerrainPatches.FirstOrDefault(patch => patch != null && patch.PatchCoordinates.x == x && patch.PatchCoordinates.y == z);
+        return TerrainPatches.FirstOrDefault(patch => patch != null && patch.PatchCoordinates.X == x && patch.PatchCoordinates.Y == z);
     }
 
     public int GetPatchesCount()
@@ -76,9 +76,9 @@ public partial class Terrain3D : Node3D
     /// <summary>
     /// Creating a patch by given coords and chunksize
     /// </summary>
-    public void CreatePatch(Vector2i coord, int chunkSize)
+    public void CreatePatch(Vector2I coord, int chunkSize)
     {
-        CreatePatch(coord.x, coord.y, chunkSize);
+        CreatePatch(coord.X, coord.Y, chunkSize);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public partial class Terrain3D : Node3D
             {
                 patch.Offset = new Vector3(x * size, 0.0f, y * size);
                 patch.ResourceLocalToScene = true;
-                patch.PatchCoordinates = new Vector2i(x, y);
+                patch.PatchCoordinates = new Vector2I(x, y);
 
                 TerrainPatches.Add(patch);
                 patch.Init(chunkSize);
@@ -116,11 +116,11 @@ public partial class Terrain3D : Node3D
     /// <summary>
     /// Load heightmap from given image
     /// </summary>
-    public Error LoadHeightmapFromImage(Vector2i patchCoord, Image? heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
+    public Error LoadHeightmapFromImage(Vector2I patchCoord, Image? heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
     {
         try
         {
-            TerrainPatch? patch = GetPatch(patchCoord.x, patchCoord.y);
+            TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
             if (patch == null)
             {
                 GD.PrintErr($"Patch {patchCoord} not found.");
@@ -164,7 +164,7 @@ public partial class Terrain3D : Node3D
                     //mapbox default
                     case HeightmapAlgo.RGB8_FULL:
                     {
-                        float height = -10000f + (raw.r8 * 256f * 256f + raw.g8 * 256f + raw.b8) * 0.1f;
+                        float height = -10000f + (raw.R8 * 256f * 256f + raw.G8 * 256f + raw.B8) * 0.1f;
                         float normalizedHeight = height / 50; //reduce because 24bit of mapbox
 
                         heightmapData[z * patch.Info.HeightMapSize + x] = normalizedHeight * heightmapScale;
@@ -172,7 +172,7 @@ public partial class Terrain3D : Node3D
                     }
                     //industrial default
                     case HeightmapAlgo.R16:
-                        heightmapData[z * patch.Info.HeightMapSize + x] = raw.r * heightmapScale;
+                        heightmapData[z * patch.Info.HeightMapSize + x] = raw.R * heightmapScale;
                         break;
                     case HeightmapAlgo.RGBA8_NORMAL:
                         break;
@@ -195,11 +195,11 @@ public partial class Terrain3D : Node3D
     /// <summary>
     /// Load splatmap from given image
     /// </summary>
-    public Error LoadSplatmapFromImage(Vector2i patchCoord, int idx, Image splatmapImage)
+    public Error LoadSplatmapFromImage(Vector2I patchCoord, int idx, Image splatmapImage)
     {
         try
         {
-            TerrainPatch? patch = GetPatch(patchCoord.x, patchCoord.y);
+            TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
             if (patch == null) return Error.FileNotFound;
 
             var splatmapData = new Color[patch.Info.HeightMapSize * patch.Info.HeightMapSize];
@@ -244,8 +244,8 @@ public partial class Terrain3D : Node3D
             UpdateGizmos();
 
 
-            float kmX = GetBounds().Size.x * 0.00001f;
-            float kmY = GetBounds().Size.z * 0.00001f;
+            float kmX = GetBounds().Size.X * 0.00001f;
+            float kmY = GetBounds().Size.Z * 0.00001f;
 
             GD.Print($"[Draw Size] {kmX}x{kmY}km");
 
@@ -297,9 +297,9 @@ public partial class Terrain3D : Node3D
         }
     }
 
-    public AABB GetBounds()
+    public Aabb GetBounds()
     {
-        var bounds = new AABB();
+        var bounds = new Aabb();
         return TerrainPatches.Aggregate(bounds, (current, patch) => patch != null ? current.Merge(patch.GetBounds()) : default);
     }
 }

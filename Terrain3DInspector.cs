@@ -19,10 +19,10 @@ public partial class Terrain3D : Node3D
     [ExportGroup("Collision")]
     public bool CollisionEnabled { get; set; } = true;
 
-    [Export(PropertyHint.Layers3dPhysics)]
+    [Export(PropertyHint.Layers3DPhysics)]
     public uint CollisionLayer { get; set; } = 1;
 
-    [Export(PropertyHint.Layers3dRender)]
+    [Export(PropertyHint.Layers3DRender)]
     public uint CollisionMask { get; set; } = 1;
 
     [ExportGroup("Geometry")]

@@ -12,7 +12,7 @@ public static class TerrainByteConverter
 
     public static float ReadNormalizedHeight16Bit(Color raw)
     {
-        int test = raw.r8 | (raw.g8 << 8);
+        int test = raw.R8 | (raw.G8 << 8);
         var quantizedHeight = Convert.ToUInt16(test);
 
         float normalizedHeight = (float)quantizedHeight / UInt16.MaxValue;

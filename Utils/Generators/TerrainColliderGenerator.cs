@@ -90,7 +90,7 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
     /// <summary>
     /// Modify collider data (todo)
     /// </summary>
-    public float[] ModifyCollision(byte[] buffer, int collisionLod, Vector2i modifiedOffset, Vector2i modifiedSize, float[] heightFieldData) //modifing
+    public float[] ModifyCollision(byte[] buffer, int collisionLod, Vector2I modifiedOffset, Vector2I modifiedSize, float[] heightFieldData) //modifing
     {
         if (Patch == null)
         {
@@ -103,22 +103,22 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
         Rgba[] imgRgbaBuffer = FromByteArray<Rgba>(buffer);
 
         // Prepare data
-        var modifiedOffsetRatio = new Vector2((float)modifiedOffset.x / Patch.Info.HeightMapSize, (float)modifiedOffset.y / Patch.Info.HeightMapSize);
-        var modifiedSizeRatio = new Vector2((float)modifiedSize.x / Patch.Info.HeightMapSize, (float)modifiedSize.y / Patch.Info.HeightMapSize);
+        var modifiedOffsetRatio = new Vector2((float)modifiedOffset.X / Patch.Info.HeightMapSize, (float)modifiedOffset.Y / Patch.Info.HeightMapSize);
+        var modifiedSizeRatio = new Vector2((float)modifiedSize.X / Patch.Info.HeightMapSize, (float)modifiedSize.Y / Patch.Info.HeightMapSize);
 
         int newCollisionLod = Mathf.Clamp(collisionLod, 0, 0); //from mip //TODO clamp 0,0 makes it 0, please double check when working on it.
         int heightFieldChunkSize = ((Patch.Info.ChunkSize + 1) >> newCollisionLod) - 1;
         int heightFieldSize = heightFieldChunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
 
-        var samplesOffset = new Vector2i(Mathf.FloorToInt(modifiedOffsetRatio.x * heightFieldSize), Mathf.FloorToInt(modifiedOffsetRatio.y * heightFieldSize));
-        var samplesSize = new Vector2i(Mathf.CeilToInt(modifiedSizeRatio.x * heightFieldSize), Mathf.CeilToInt(modifiedSizeRatio.y * heightFieldSize));
+        var samplesOffset = new Vector2I(Mathf.FloorToInt(modifiedOffsetRatio.X * heightFieldSize), Mathf.FloorToInt(modifiedOffsetRatio.Y * heightFieldSize));
+        var samplesSize = new Vector2I(Mathf.CeilToInt(modifiedSizeRatio.X * heightFieldSize), Mathf.CeilToInt(modifiedSizeRatio.Y * heightFieldSize));
 
-        samplesSize.x = Math.Max(samplesSize.x, 1);
-        samplesSize.y = Math.Max(samplesSize.y, 1);
+        samplesSize.X = Math.Max(samplesSize.X, 1);
+        samplesSize.Y = Math.Max(samplesSize.Y, 1);
 
-        Vector2i samplesEnd = samplesOffset + samplesSize;
-        samplesEnd.x = Math.Min(samplesEnd.x, heightFieldSize);
-        samplesEnd.y = Math.Min(samplesEnd.y, heightFieldSize);
+        Vector2I samplesEnd = samplesOffset + samplesSize;
+        samplesEnd.X = Math.Min(samplesEnd.X, heightFieldSize);
+        samplesEnd.Y = Math.Min(samplesEnd.Y, heightFieldSize);
 
         // Setup terrain collision information
         int vertexCountEdgeMip = Patch.Info.VertexCountEdge >> newCollisionLod;
@@ -130,7 +130,7 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
             int chunkStartZ = chunkZ * heightFieldChunkSize;
 
             // Skip unmodified chunks
-            if (chunkStartZ >= samplesEnd.y || chunkStartZ + vertexCountEdgeMip < samplesOffset.y)
+            if (chunkStartZ >= samplesEnd.Y || chunkStartZ + vertexCountEdgeMip < samplesOffset.Y)
                 continue;
 
             for (var chunkX = 0; chunkX < Terrain3D.PATCH_CHUNK_EDGES; chunkX++)
@@ -139,15 +139,15 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
                 int chunkStartX = chunkX * heightFieldChunkSize;
 
                 // Skip unmodified chunks
-                if (chunkStartX >= samplesEnd.x || chunkStartX + vertexCountEdgeMip < samplesOffset.x)
+                if (chunkStartX >= samplesEnd.X || chunkStartX + vertexCountEdgeMip < samplesOffset.X)
                     continue;
 
                 for (var z = 0; z < vertexCountEdgeMip; z++)
                 {
                     // Skip unmodified columns
                     int heightmapZ = chunkStartZ + z;
-                    int heightmapLocalZ = heightmapZ - samplesOffset.y;
-                    if (heightmapLocalZ < 0 || heightmapLocalZ >= samplesSize.y)
+                    int heightmapLocalZ = heightmapZ - samplesOffset.Y;
+                    if (heightmapLocalZ < 0 || heightmapLocalZ >= samplesSize.Y)
                         continue;
 
                     // TODO: adjust loop range to reduce iterations count for edge cases (skip checking unmodified samples)
@@ -155,8 +155,8 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
                     {
                         // Skip unmodified rows
                         int heightmapX = chunkStartX + x;
-                        int heightmapLocalX = heightmapX - samplesOffset.x;
-                        if (heightmapLocalX < 0 || heightmapLocalX >= samplesSize.x)
+                        int heightmapLocalX = heightmapX - samplesOffset.X;
+                        if (heightmapLocalX < 0 || heightmapLocalX >= samplesSize.X)
                             continue;
 
                         int textureIndex = (chunkTextureZ + z) * textureSizeMip + chunkTextureX + x;
@@ -165,7 +165,7 @@ public class TerrainColliderGenerator : TerrainBaseGenerator
                         float height = normalizedHeight * Patch.Info.PatchHeight + Patch.Info.PatchOffset;
 
                         bool isHole = TerrainByteConverter.ReadIsHoleByte(imgRgbaBuffer[textureIndex]);
-                        int dstIndex = heightmapLocalX * samplesSize.y + heightmapLocalZ;
+                        int dstIndex = heightmapLocalX * samplesSize.Y + heightmapLocalZ;
 
                         if (isHole)
                             height = 0f;
