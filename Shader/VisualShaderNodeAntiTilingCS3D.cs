@@ -107,7 +107,7 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
     {
         return @"float rand(vec2 input)
 				{
-					return fract(sin(dot(input.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+					return fract(sin(dot(input.Xy, vec2(12.9898, 78.233))) * 43758.5453123);
 				}
 
 				vec2 rotatedUV(vec2 uv, float tiling, float randomize_rotation)
@@ -128,24 +128,24 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
     {
         var heightStr = "";
 
-        heightStr += $"vec4 colorMap = texture({inputVars[0]}, {inputVars[5]}.xy);\n";
-        heightStr += $"vec4 dispMap = texture({inputVars[1]},  {inputVars[5]}.xy);\n";
-        heightStr += $"vec4 normalMap = texture({inputVars[2]},  {inputVars[5]}.xy);\n";
-        heightStr += $"vec4 roughMap = texture({inputVars[3]},  {inputVars[5]}.xy);\n";
-        heightStr += $"vec4 aoMap = texture({inputVars[4]},  {inputVars[5]}.xy);\n";
+        heightStr += $"vec4 colorMap = texture({inputVars[0]}, {inputVars[5]}.Xy);\n";
+        heightStr += $"vec4 dispMap = texture({inputVars[1]},  {inputVars[5]}.Xy);\n";
+        heightStr += $"vec4 normalMap = texture({inputVars[2]},  {inputVars[5]}.Xy);\n";
+        heightStr += $"vec4 roughMap = texture({inputVars[3]},  {inputVars[5]}.Xy);\n";
+        heightStr += $"vec4 aoMap = texture({inputVars[4]},  {inputVars[5]}.Xy);\n";
 
         heightStr += "mat4 packedOriginal = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));\n";
         heightStr += "packedOriginal[0].rgb = colorMap.rgb;\n";
-        heightStr += "packedOriginal[1].r = dispMap.r;\n";
+        heightStr += "packedOriginal[1].R = dispMap.R;\n";
         heightStr += "packedOriginal[2].rg = normalMap.rg;\n";
-        heightStr += "packedOriginal[3].r = roughMap.r;\n";
-        heightStr += "packedOriginal[3].b = aoMap.r;\n";
+        heightStr += "packedOriginal[3].R = roughMap.R;\n";
+        heightStr += "packedOriginal[3].B = aoMap.R;\n";
 
 
         heightStr += $"{outputVars[1]} = packedOriginal;\n";
 
 
-        heightStr += $"vec2 newUv = rotatedUV({inputVars[5]}.xy, {inputVars[7]}, {inputVars[6]});";
+        heightStr += $"vec2 newUv = rotatedUV({inputVars[5]}.Xy, {inputVars[7]}, {inputVars[6]});";
         heightStr += $"vec4 colorMapRot = texture({inputVars[0]}, newUv);\n";
         heightStr += $"vec4 dispMapRot = texture({inputVars[1]},  newUv);\n";
         heightStr += $"vec4 normalMapRot = texture({inputVars[2]},  newUv);\n";
@@ -155,10 +155,10 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
 
         heightStr += "mat4 packedMixed = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));\n";
         heightStr += "packedMixed[0].rgb = colorMapRot.rgb;\n";
-        heightStr += "packedMixed[1].r = dispMapRot.r;\n";
+        heightStr += "packedMixed[1].R = dispMapRot.R;\n";
         heightStr += "packedMixed[2].rg = normalMapRot.rg;\n";
-        heightStr += "packedMixed[3].r = roughMapRot.r;\n";
-        heightStr += "packedMixed[3].b = aoMapRot.r;\n";
+        heightStr += "packedMixed[3].R = roughMapRot.R;\n";
+        heightStr += "packedMixed[3].B = aoMapRot.R;\n";
 
         heightStr += $"packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  {inputVars[8]});\n";
         heightStr += $"packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  {inputVars[8]});\n";

@@ -36,74 +36,74 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
         {
             case 0:
             {
-                rFrom = new Vector3(position.x + size.x, position.y, position.z);
-                rTo = new Vector3(position.x, position.y, position.z);
+                rFrom = new Vector3(position.X + size.X, position.Y, position.Z);
+                rTo = new Vector3(position.X, position.Y, position.Z);
             }
                 break;
             case 1:
             {
-                rFrom = new Vector3(position.x + size.x, position.y, position.z + size.z);
-                rTo = new Vector3(position.x + size.x, position.y, position.z);
+                rFrom = new Vector3(position.X + size.X, position.Y, position.Z + size.Z);
+                rTo = new Vector3(position.X + size.X, position.Y, position.Z);
             }
                 break;
             case 2:
             {
-                rFrom = new Vector3(position.x, position.y, position.z + size.z);
-                rTo = new Vector3(position.x + size.x, position.y, position.z + size.z);
+                rFrom = new Vector3(position.X, position.Y, position.Z + size.Z);
+                rTo = new Vector3(position.X + size.X, position.Y, position.Z + size.Z);
             }
                 break;
             case 3:
             {
-                rFrom = new Vector3(position.x, position.y, position.z);
-                rTo = new Vector3(position.x, position.y, position.z + size.z);
+                rFrom = new Vector3(position.X, position.Y, position.Z);
+                rTo = new Vector3(position.X, position.Y, position.Z + size.Z);
             }
                 break;
             case 4:
             {
-                rFrom = new Vector3(position.x, position.y + size.y, position.z);
-                rTo = new Vector3(position.x + size.x, position.y + size.y, position.z);
+                rFrom = new Vector3(position.X, position.Y + size.Y, position.Z);
+                rTo = new Vector3(position.X + size.X, position.Y + size.Y, position.Z);
             }
                 break;
             case 5:
             {
-                rFrom = new Vector3(position.x + size.x, position.y + size.y, position.z);
-                rTo = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
+                rFrom = new Vector3(position.X + size.X, position.Y + size.Y, position.Z);
+                rTo = new Vector3(position.X + size.X, position.Y + size.Y, position.Z + size.Z);
             }
                 break;
             case 6:
             {
-                rFrom = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
-                rTo = new Vector3(position.x, position.y + size.y, position.z + size.z);
+                rFrom = new Vector3(position.X + size.X, position.Y + size.Y, position.Z + size.Z);
+                rTo = new Vector3(position.X, position.Y + size.Y, position.Z + size.Z);
             }
                 break;
             case 7:
             {
-                rFrom = new Vector3(position.x, position.y + size.y, position.z + size.z);
-                rTo = new Vector3(position.x, position.y + size.y, position.z);
+                rFrom = new Vector3(position.X, position.Y + size.Y, position.Z + size.Z);
+                rTo = new Vector3(position.X, position.Y + size.Y, position.Z);
             }
                 break;
             case 8:
             {
-                rFrom = new Vector3(position.x, position.y, position.z + size.z);
-                rTo = new Vector3(position.x, position.y + size.y, position.z + size.z);
+                rFrom = new Vector3(position.X, position.Y, position.Z + size.Z);
+                rTo = new Vector3(position.X, position.Y + size.Y, position.Z + size.Z);
             }
                 break;
             case 9:
             {
-                rFrom = new Vector3(position.x, position.y, position.z);
-                rTo = new Vector3(position.x, position.y + size.y, position.z);
+                rFrom = new Vector3(position.X, position.Y, position.Z);
+                rTo = new Vector3(position.X, position.Y + size.Y, position.Z);
             }
                 break;
             case 10:
             {
-                rFrom = new Vector3(position.x + size.x, position.y, position.z);
-                rTo = new Vector3(position.x + size.x, position.y + size.y, position.z);
+                rFrom = new Vector3(position.X + size.X, position.Y, position.Z);
+                rTo = new Vector3(position.X + size.X, position.Y + size.Y, position.Z);
             }
                 break;
             case 11:
             {
-                rFrom = new Vector3(position.x + size.x, position.y, position.z + size.z);
-                rTo = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
+                rFrom = new Vector3(position.X + size.X, position.Y, position.Z + size.Z);
+                rTo = new Vector3(position.X + size.X, position.Y + size.Y, position.Z + size.Z);
             }
                 break;
         }
@@ -162,28 +162,28 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 
             for (var d = 0; d < mapDepth; d++)
             {
-                var height = new Vector3(start.x, 0.0f, start.y);
+                var height = new Vector3(start.X, 0.0f, start.Y);
 
                 for (var w = 0; w < mapWidth; w++)
                 {
-                    height.y = heightField[rOffset++];
+                    height.Y = heightField[rOffset++];
 
                     if (w != mapWidth - 1)
                     {
                         points[wOffset++] = height;
-                        points[wOffset++] = new Vector3(height.x + 1.0f, heightField[rOffset], height.z);
+                        points[wOffset++] = new Vector3(height.X + 1.0f, heightField[rOffset], height.Z);
                     }
 
                     if (d != mapDepth - 1)
                     {
                         points[wOffset++] = height;
-                        points[wOffset++] = new Vector3(height.x, heightField[rOffset + mapWidth - 1], height.z + 1.0f);
+                        points[wOffset++] = new Vector3(height.X, heightField[rOffset + mapWidth - 1], height.Z + 1.0f);
                     }
 
-                    height.x += 1.0f;
+                    height.X += 1.0f;
                 }
 
-                start.y += 1.0f;
+                start.Y += 1.0f;
             }
         }
 
@@ -195,7 +195,7 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
     {
         gizmo.Clear();
 
-        if (gizmo.GetNode3d() is not Terrain3D spatial || spatial.Visible == false || !spatial.IsInsideTree())
+        if (gizmo.GetNode3D() is not Terrain3D spatial || spatial.Visible == false || !spatial.IsInsideTree())
             return;
 
         foreach (TerrainPatch? patch in spatial.TerrainPatches)
@@ -203,14 +203,14 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
             if (ShowAabb)
             {
                 var lines = new Godot.Collections.Array<Vector3>();
-                AABB aabb = patch.GetBounds();
+                Aabb Aabb = patch.GetBounds();
 
                 for (var i = 0; i < 8; i++)
                 {
                     var a = new Vector3();
                     var b = new Vector3();
 
-                    GetEdge(i, aabb.Position, aabb.Size, ref a, ref b);
+                    GetEdge(i, Aabb.Position, Aabb.Size, ref a, ref b);
 
                     lines.Add(a);
                     lines.Add(b);
@@ -225,7 +225,7 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 
                 var st = new SurfaceTool();
                 Transform3D tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
-                tf.origin -= spatial.GlobalTransform.origin;
+                tf.Origin -= spatial.GlobalTransform.Origin;
                 st.AppendFrom(GetDebugMesh(meshLines), 0, tf);
                 gizmo.AddMesh(st.Commit(), GetMaterial("shape_material", gizmo));
             }

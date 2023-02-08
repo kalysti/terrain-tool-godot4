@@ -9,24 +9,24 @@ public class TerrainPaintPaint : TerrainBasePaint
     {
     }
 
-    public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+    public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2I modifiedSize, Vector2I modifiedOffset)
     {
         int splatmapIndex = ApplyInfo.Layer < 4 ? 0 : 1;
 
         Color[] sourceSplatmap = patch.CacheSplatMap(splatmapIndex);
         // float strength = editorStrength * 1000.0f;
 
-        int bufferSize = modifiedSize.y * modifiedSize.x;
+        int bufferSize = modifiedSize.Y * modifiedSize.X;
         var buffer = new Color[bufferSize];
 
         int colorComponent = ApplyInfo.Layer % 4;
 
-        for (var z = 0; z < modifiedSize.y; z++)
+        for (var z = 0; z < modifiedSize.Y; z++)
         {
-            int zz = z + modifiedOffset.y;
-            for (var x = 0; x < modifiedSize.x; x++)
+            int zz = z + modifiedOffset.Y;
+            for (var x = 0; x < modifiedSize.X; x++)
             {
-                int xx = x + modifiedOffset.x;
+                int xx = x + modifiedOffset.X;
                 Color source = sourceSplatmap[zz * patch.Info.HeightMapSize + xx];
 
                 Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, 0, zz * Terrain3D.UNITS_PER_VERTEX);
@@ -34,17 +34,17 @@ public class TerrainPaintPaint : TerrainBasePaint
 
                 float paintAmount = TerrainEditorBrush.Sample(ApplyInfo.BrushFalloffType, ApplyInfo.BrushFalloff, ApplyInfo.BrushSize, pos, samplePositionWorld) * ApplyInfo.Strength;
 
-                int id = z * modifiedSize.x + x;
+                int id = z * modifiedSize.X + x;
 
                 // buffer[id] = new Color(0, 0, 0, 1);
                 buffer[id] = source;
 
                 float dstWeight = colorComponent switch
                 {
-                    0 => source.r + paintAmount,
-                    1 => source.g + paintAmount,
-                    2 => source.b + paintAmount,
-                    3 => source.a + paintAmount,
+                    0 => source.R + paintAmount,
+                    1 => source.G + paintAmount,
+                    2 => source.B + paintAmount,
+                    3 => source.A + paintAmount,
                     _ => 0f
                 };
 
@@ -53,16 +53,16 @@ public class TerrainPaintPaint : TerrainBasePaint
                 switch (colorComponent)
                 {
                     case 0:
-                        buffer[id].r = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].R = Mathf.Clamp(dstWeight, 0f, 1f);
                         break;
                     case 1:
-                        buffer[id].g = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].G = Mathf.Clamp(dstWeight, 0f, 1f);
                         break;
                     case 2:
-                        buffer[id].b = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].B = Mathf.Clamp(dstWeight, 0f, 1f);
                         break;
                     case 3:
-                        buffer[id].a = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].A = Mathf.Clamp(dstWeight, 0f, 1f);
                         break;
                 }
             }

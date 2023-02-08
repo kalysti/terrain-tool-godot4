@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Godot;
+using HttpClient = System.Net.Http.HttpClient;
 
 namespace TerrainEditor;
 
@@ -47,7 +48,7 @@ public partial class TerrainMapBox3D : Terrain3D
             }
 
 
-            using (var client = new HttpClient())
+            using (var client = new HttpClient()) //TODO: check if Godot HttpClient is better.
             {
                 // ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
                 // ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => true;
@@ -100,10 +101,10 @@ public partial class TerrainMapBox3D : Terrain3D
         {
             CreatePatchGrid(1, 4, 64);
 
-            LoadTile(new Vector2i(0, 0), 62360, 48541);
-            LoadTile(new Vector2i(0, 1), 62360, 48542);
-            LoadTile(new Vector2i(0, 2), 62360, 48543);
-            LoadTile(new Vector2i(0, 3), 62360, 48544);
+            LoadTile(new Vector2I(0, 0), 62360, 48541);
+            LoadTile(new Vector2I(0, 1), 62360, 48542);
+            LoadTile(new Vector2I(0, 2), 62360, 48543);
+            LoadTile(new Vector2I(0, 3), 62360, 48544);
 
             Draw();
         }
@@ -113,7 +114,7 @@ public partial class TerrainMapBox3D : Terrain3D
         }
     }
 
-    public void LoadTile(Vector2i patch, int x = 62360, int y = 48541, int zoomLevel = 17)
+    public void LoadTile(Vector2I patch, int x = 62360, int y = 48541, int zoomLevel = 17)
     {
         try
         {

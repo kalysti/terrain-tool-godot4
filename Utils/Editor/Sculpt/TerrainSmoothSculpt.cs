@@ -10,21 +10,21 @@ public class TerrainSmoothSculpt : TerrainBaseSculpt
     {
     }
 
-    public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+    public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2I modifiedSize, Vector2I modifiedOffset)
     {
         int radius = Mathf.Max(Mathf.CeilToInt(ApplyInfo.Radius * 0.01f * ApplyInfo.BrushSize), 2);
         float[] sourceHeightMap = patch.CacheHeightData();
         float strength = Saturate(editorStrength);
-        int bufferSize = modifiedSize.y * modifiedSize.x;
+        int bufferSize = modifiedSize.Y * modifiedSize.X;
         var buffer = new float[bufferSize];
 
-        for (var z = 0; z < modifiedSize.y; z++)
+        for (var z = 0; z < modifiedSize.Y; z++)
         {
-            int zz = z + modifiedOffset.y;
-            for (var x = 0; x < modifiedSize.x; x++)
+            int zz = z + modifiedOffset.Y;
+            for (var x = 0; x < modifiedSize.X; x++)
             {
-                int id = z * modifiedSize.x + x;
-                int xx = x + modifiedOffset.x;
+                int id = z * modifiedSize.X + x;
+                int xx = x + modifiedOffset.X;
 
                 float sourceHeight = sourceHeightMap[zz * patch.Info.HeightMapSize + xx];
 
@@ -38,10 +38,10 @@ public class TerrainSmoothSculpt : TerrainBaseSculpt
 
                     float smoothValue = 0;
                     var smoothValueSamples = 0;
-                    int minX = Math.Max(x - radius + modifiedOffset.x, 0);
-                    int minZ = Math.Max(z - radius + modifiedOffset.y, 0);
-                    int maxX = Math.Min(x + radius + modifiedOffset.x, max);
-                    int maxZ = Math.Min(z + radius + modifiedOffset.y, max);
+                    int minX = Math.Max(x - radius + modifiedOffset.X, 0);
+                    int minZ = Math.Max(z - radius + modifiedOffset.Y, 0);
+                    int maxX = Math.Min(x + radius + modifiedOffset.X, max);
+                    int maxZ = Math.Min(z + radius + modifiedOffset.Y, max);
                     for (int dz = minZ; dz <= maxZ; dz++)
                     for (int dx = minX; dx <= maxX; dx++)
                     {

@@ -31,11 +31,11 @@ public class TerrainSplatMapGenerator : TerrainBaseGenerator
 
         for (var chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
         {
-            int chunkTextureX = Patch.Chunks[chunkIndex].Position.x * Patch.Info.VertexCountEdge;
-            int chunkTextureZ = Patch.Chunks[chunkIndex].Position.y * Patch.Info.VertexCountEdge;
+            int chunkTextureX = Patch.Chunks[chunkIndex].Position.X * Patch.Info.VertexCountEdge;
+            int chunkTextureZ = Patch.Chunks[chunkIndex].Position.Y * Patch.Info.VertexCountEdge;
 
-            int chunkHeightmapX = Patch.Chunks[chunkIndex].Position.x * Patch.Info.ChunkSize;
-            int chunkHeightmapZ = Patch.Chunks[chunkIndex].Position.y * Patch.Info.ChunkSize;
+            int chunkHeightmapX = Patch.Chunks[chunkIndex].Position.X * Patch.Info.ChunkSize;
+            int chunkHeightmapZ = Patch.Chunks[chunkIndex].Position.Y * Patch.Info.ChunkSize;
 
             for (var z = 0; z < Patch.Info.VertexCountEdge; z++)
             {
@@ -51,10 +51,10 @@ public class TerrainSplatMapGenerator : TerrainBaseGenerator
 
                     //  colors[splatmapIndex]
 
-                    colors[splatmapIndex].r8 = imgRgbaBuffer[textureIndex].r;
-                    colors[splatmapIndex].g8 = imgRgbaBuffer[textureIndex].g;
-                    colors[splatmapIndex].b8 = imgRgbaBuffer[textureIndex].b;
-                    colors[splatmapIndex].a8 = imgRgbaBuffer[textureIndex].a;
+                    colors[splatmapIndex].R8 = imgRgbaBuffer[textureIndex].r;
+                    colors[splatmapIndex].G8 = imgRgbaBuffer[textureIndex].g;
+                    colors[splatmapIndex].B8 = imgRgbaBuffer[textureIndex].b;
+                    colors[splatmapIndex].A8 = imgRgbaBuffer[textureIndex].a;
                 }
             }
         }
@@ -102,10 +102,10 @@ public class TerrainSplatMapGenerator : TerrainBaseGenerator
 
                     Color img = colorData[heightmapIndex];
 
-                    imgRgbaBuffer[textureIndex].r = (byte)img.r8;
-                    imgRgbaBuffer[textureIndex].g = (byte)img.g8;
-                    imgRgbaBuffer[textureIndex].b = (byte)img.b8;
-                    imgRgbaBuffer[textureIndex].a = (byte)img.a8;
+                    imgRgbaBuffer[textureIndex].r = (byte)img.R8;
+                    imgRgbaBuffer[textureIndex].g = (byte)img.G8;
+                    imgRgbaBuffer[textureIndex].b = (byte)img.B8;
+                    imgRgbaBuffer[textureIndex].a = (byte)img.A8;
                 }
             }
         }
