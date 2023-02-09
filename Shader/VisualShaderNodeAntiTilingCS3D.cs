@@ -28,23 +28,23 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         return "Anti tiling for terrain textures";
     }
 
-    public override long _GetReturnIconType()
+    public override PortType _GetReturnIconType()
     {
-        return (int)PortType.Scalar;
+        return PortType.Scalar;
     }
 
-    public override long _GetInputPortCount()
+    public override int _GetInputPortCount()
     {
         return 9;
     }
 
 
-    public override long _GetOutputPortCount()
+    public override int _GetOutputPortCount()
     {
         return 2;
     }
 
-    public override string _GetOutputPortName(long port)
+    public override string _GetOutputPortName(int port)
     {
         switch (port)
         {
@@ -55,19 +55,19 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         return "";
     }
 
-    public override long _GetOutputPortType(long port)
+    public override PortType _GetOutputPortType(int port)
     {
         switch (port)
         {
-            case 0: return (int)PortType.Transform;
-            case 1: return (int)PortType.Transform;
+            case 0: return PortType.Transform;
+            case 1: return PortType.Transform;
         }
 
         return 0;
     }
 
 
-    public override string _GetInputPortName(long port)
+    public override string _GetInputPortName(int port)
     {
         switch (port)
         {
@@ -85,19 +85,19 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         return "";
     }
 
-    public override long _GetInputPortType(long port)
+    public override PortType _GetInputPortType(int port)
     {
         switch (port)
         {
-            case 0: return (int)PortType.Sampler;
-            case 1: return (int)PortType.Sampler;
-            case 2: return (int)PortType.Sampler;
-            case 3: return (int)PortType.Sampler;
-            case 4: return (int)PortType.Sampler;
-            case 5: return (int)PortType.Sampler;
-            case 6: return (int)PortType.Sampler;
-            case 7: return (int)PortType.Sampler;
-            case 8: return (int)PortType.Sampler;
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8: return PortType.Sampler;
         }
 
         return 0;

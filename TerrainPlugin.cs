@@ -44,7 +44,7 @@ public partial class TerrainPlugin : EditorPlugin
 	protected string? SplatmapPath1;
 	protected string? SplatmapPath2;
 
-    public override long _Forward3DGuiInput(Camera3D? camera, InputEvent @event)
+    public override int _Forward3DGuiInput(Camera3D? camera, InputEvent @event)
     {
         editorCamera = camera;
 
@@ -414,7 +414,7 @@ public partial class TerrainPlugin : EditorPlugin
 				OpenDialog();
 				break;
 			case 1:
-				fileDialogExport.MinSize = new Vector2i(400, 400);
+				fileDialogExport.MinSize = new Vector2I(400, 400);
 				fileDialogExport.PopupCentered();
 				break;
 			case 3:

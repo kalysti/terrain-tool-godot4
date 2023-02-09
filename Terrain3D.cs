@@ -258,11 +258,11 @@ public partial class Terrain3D : Node3D
 		}
 	}
 
-	public override void _Notification(long what)
+	public override void _Notification(int what)
 	{
 		try
 		{
-			switch (what)
+			switch ((long)what)
 			{
 				case NotificationExitWorld:
 					ClearDraw();
