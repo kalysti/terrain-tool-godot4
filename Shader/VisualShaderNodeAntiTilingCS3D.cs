@@ -31,23 +31,23 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		return "Anti tiling for terrain textures";
 
 	}
-	public override long _GetReturnIconType()
+	public override VisualShaderNode.PortType _GetReturnIconType()//long
 	{
-		return (int)VisualShaderNode.PortType.Scalar;
+		return (int)VisualShaderNode.PortType.Scalar;//(int)
 	}
 
-	public override long _GetInputPortCount()
+	public override int _GetInputPortCount()//long
 	{
 		return 9;
 	}
 
 
-	public override long _GetOutputPortCount()
+	public override int _GetOutputPortCount()//int
 	{
 		return 2;
 	}
 
-	public override string _GetOutputPortName(long port)
+	public override string _GetOutputPortName(int port)//long
 	{
 		switch (port)
 		{
@@ -58,18 +58,18 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		return "";
 	}
 
-	public override long _GetOutputPortType(long port)
+	public override VisualShaderNode.PortType _GetOutputPortType(int port)//long
 	{
 		switch (port)
 		{
-			case 0: return (int)VisualShaderNode.PortType.Transform;
-			case 1: return (int)VisualShaderNode.PortType.Transform;
+			case 0: return VisualShaderNode.PortType.Transform;//(int)
+			case 1: return VisualShaderNode.PortType.Transform;//(int)
 		}
 		return 0;
 	}
 
 
-	public override string _GetInputPortName(long port)
+	public override string _GetInputPortName(int port)
 	{
 		switch (port)
 		{
@@ -87,19 +87,19 @@ public partial class VisualShaderNodeAntiTilingCS3D : VisualShaderNodeCustom
 		return "";
 	}
 
-	public override long _GetInputPortType(long port)
+	public override VisualShaderNode.PortType _GetInputPortType(int port)
 	{
 		switch (port)
 		{
-			case 0: return (int)VisualShaderNode.PortType.Sampler;
-			case 1: return (int)VisualShaderNode.PortType.Sampler;
-			case 2: return (int)VisualShaderNode.PortType.Sampler;
-			case 3: return (int)VisualShaderNode.PortType.Sampler;
-			case 4: return (int)VisualShaderNode.PortType.Sampler;
-			case 5: return (int)VisualShaderNode.PortType.Sampler;
-			case 6: return (int)VisualShaderNode.PortType.Sampler;
-			case 7: return (int)VisualShaderNode.PortType.Sampler;
-			case 8: return (int)VisualShaderNode.PortType.Sampler;
+			case 0: return VisualShaderNode.PortType.Sampler;//(int)
+			case 1: return VisualShaderNode.PortType.Sampler;//(int)
+			case 2: return VisualShaderNode.PortType.Sampler;//(int)
+			case 3: return VisualShaderNode.PortType.Sampler;//(int)
+			case 4: return VisualShaderNode.PortType.Sampler;//(int)
+			case 5: return VisualShaderNode.PortType.Sampler;//(int)
+			case 6: return VisualShaderNode.PortType.Sampler;//(int)
+			case 7: return VisualShaderNode.PortType.Sampler;//(int)
+			case 8: return VisualShaderNode.PortType.Sampler;//(int)
 		}
 
 		return 0;

@@ -10,24 +10,24 @@ namespace TerrainEditor.Utils.Editor.Paint
         {
         }
 
-        public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset)
+        public override void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2I modifiedSize, Vector2I modifiedOffset)
         {
             int splatmapIndex = applyInfo.layer < 4 ? 0 : 1;
 
             Color[]? sourceSplatmap = patch.CacheSplatMap(splatmapIndex);
             float strength = editorStrength * 1000.0f;
 
-            int bufferSize = modifiedSize.y * modifiedSize.x;
+            int bufferSize = modifiedSize.Y * modifiedSize.X;
             var buffer = new Color[bufferSize];
 
             int colorComponent = applyInfo.layer % 4;
 
-            for (int z = 0; z < modifiedSize.y; z++)
+            for (int z = 0; z < modifiedSize.Y; z++)
             {
-                int zz = z + modifiedOffset.y;
-                for (int x = 0; x < modifiedSize.x; x++)
+                int zz = z + modifiedOffset.Y;
+                for (int x = 0; x < modifiedSize.X; x++)
                 {
-                    int xx = x + modifiedOffset.x;
+                    int xx = x + modifiedOffset.X;
                     Color source = sourceSplatmap[zz * patch.info.heightMapSize + xx];
 
                     Vector3 samplePositionLocal = patchPositionLocal + new Vector3(xx * Terrain3D.UNITS_PER_VERTEX, 0, zz * Terrain3D.UNITS_PER_VERTEX);
@@ -35,7 +35,7 @@ namespace TerrainEditor.Utils.Editor.Paint
 
                     float paintAmount = TerrainEditorBrush.Sample(applyInfo.brushFalloffType, applyInfo.brushFalloff, applyInfo.brushSize, pos, samplePositionWorld) * applyInfo.strength;
 
-                    int id = z * modifiedSize.x + x;
+                    int id = z * modifiedSize.X + x;
 
                     // buffer[id] = new Color(0, 0, 0, 1);
                     buffer[id] = source;
@@ -44,19 +44,19 @@ namespace TerrainEditor.Utils.Editor.Paint
 
                     if (colorComponent == 0)
                     {
-                        dstWeight = source.r + paintAmount;
+                        dstWeight = source.R + paintAmount;
                     }
                     else if (colorComponent == 1)
                     {
-                        dstWeight = source.g + paintAmount;
+                        dstWeight = source.G + paintAmount;
                     }
                     else if (colorComponent == 2)
                     {
-                        dstWeight = source.b + paintAmount;
+                        dstWeight = source.B + paintAmount;
                     }
                     else if (colorComponent == 3)
                     {
-                        dstWeight = source.a + paintAmount;
+                        dstWeight = source.A + paintAmount;
                     }
 
                     if (dstWeight >= 1.0f)
@@ -66,19 +66,19 @@ namespace TerrainEditor.Utils.Editor.Paint
 
                     if (colorComponent == 0)
                     {
-                        buffer[id].r = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].R = Mathf.Clamp(dstWeight, 0f, 1f);
                     }
                     else if (colorComponent == 1)
                     {
-                        buffer[id].g = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].G = Mathf.Clamp(dstWeight, 0f, 1f);
                     }
                     else if (colorComponent == 2)
                     {
-                        buffer[id].b = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].B = Mathf.Clamp(dstWeight, 0f, 1f);
                     }
                     else if (colorComponent == 3)
                     {
-                        buffer[id].a = Mathf.Clamp(dstWeight, 0f, 1f);
+                        buffer[id].A = Mathf.Clamp(dstWeight, 0f, 1f);
                     }
                 }
             }

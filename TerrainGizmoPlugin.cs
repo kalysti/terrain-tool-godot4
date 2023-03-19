@@ -9,7 +9,7 @@ namespace TerrainEditor
     public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
     {
         public bool showCollider = false;
-        public bool showAABB = false;
+        public bool showAabb = false;
         public TerrainGizmoPlugin() : base()
         {
             CreateMaterial("main", new Color(1, 0, 0));
@@ -34,81 +34,81 @@ namespace TerrainEditor
             {
                 case 0:
                     {
-                        r_from = new Vector3(position.x + size.x, position.y, position.z);
-                        r_to = new Vector3(position.x, position.y, position.z);
+                        r_from = new Vector3(position.X + size.X, position.Y, position.Z);
+                        r_to = new Vector3(position.X, position.Y, position.Z);
                     }
                     break;
                 case 1:
                     {
-                        r_from = new Vector3(position.x + size.x, position.y, position.z + size.z);
-                        r_to = new Vector3(position.x + size.x, position.y, position.z);
+                        r_from = new Vector3(position.X + size.X, position.Y, position.Z + size.Z);
+                        r_to = new Vector3(position.X + size.X, position.Y, position.Z);
                     }
                     break;
                 case 2:
                     {
-                        r_from = new Vector3(position.x, position.y, position.z + size.z);
-                        r_to = new Vector3(position.x + size.x, position.y, position.z + size.z);
+                        r_from = new Vector3(position.X, position.Y, position.Z + size.Z);
+                        r_to = new Vector3(position.X + size.X, position.Y, position.Z + size.Z);
 
                     }
                     break;
                 case 3:
                     {
-                        r_from = new Vector3(position.x, position.y, position.z);
-                        r_to = new Vector3(position.x, position.y, position.z + size.z);
+                        r_from = new Vector3(position.X, position.Y, position.Z);
+                        r_to = new Vector3(position.X, position.Y, position.Z + size.Z);
 
                     }
                     break;
                 case 4:
                     {
-                        r_from = new Vector3(position.x, position.y + size.y, position.z);
-                        r_to = new Vector3(position.x + size.x, position.y + size.y, position.z);
+                        r_from = new Vector3(position.X, position.Y + size.Y, position.Z);
+                        r_to = new Vector3(position.X + size.X, position.Y + size.Y, position.Z);
                     }
                     break;
                 case 5:
                     {
-                        r_from = new Vector3(position.x + size.x, position.y + size.y, position.z);
-                        r_to = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
+                        r_from = new Vector3(position.X + size.X, position.Y + size.Y, position.Z);
+                        r_to = new Vector3(position.X + size.X, position.Y + size.Y, position.Z + size.Z);
                     }
                     break;
                 case 6:
                     {
-                        r_from = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
-                        r_to = new Vector3(position.x, position.y + size.y, position.z + size.z);
+                        r_from = new Vector3(position.X + size.X, position.Y + size.Y, position.Z + size.Z);
+                        r_to = new Vector3(position.X, position.Y + size.Y, position.Z + size.Z);
 
                     }
                     break;
                 case 7:
                     {
-                        r_from = new Vector3(position.x, position.y + size.y, position.z + size.z);
-                        r_to = new Vector3(position.x, position.y + size.y, position.z);
+                        r_from = new Vector3(position.X, position.Y + size.Y, position.Z + size.Z);
+                        r_to = new Vector3(position.X, position.Y + size.Y, position.Z);
 
                     }
                     break;
                 case 8:
                     {
-                        r_from = new Vector3(position.x, position.y, position.z + size.z);
-                        r_to = new Vector3(position.x, position.y + size.y, position.z + size.z);
+                        r_from = new Vector3(position.X, position.Y, position.Z + size.Z);
+                        r_to = new Vector3(position.X, position.Y + size.Y, position.Z + size.Z);
 
                     }
                     break;
                 case 9:
                     {
-                        r_from = new Vector3(position.x, position.y, position.z);
-                        r_to = new Vector3(position.x, position.y + size.y, position.z);
+                        r_from = new Vector3(position.X, position.Y, position.Z);
+                        r_to = new Vector3(position.X, position.Y + size.Y, position.Z);
 
                     }
                     break;
                 case 10:
                     {
-                        r_from = new Vector3(position.x + size.x, position.y, position.z);
-                        r_to = new Vector3(position.x + size.x, position.y + size.y, position.z);
+                        r_from = new Vector3(position.X + size.X, position.Y, position.Z);
+                        r_to = new Vector3(position.X + size.X, position.Y + size.Y, position.Z);
 
                     }
                     break;
                 case 11:
                     {
-                        r_from = new Vector3(position.x + size.x, position.y, position.z + size.z);
-                        r_to = new Vector3(position.x + size.x, position.y + size.y, position.z + size.z);
+                        r_from = new Vector3(position.X + size.X, position.Y, position.Z + size.Z);
+                        r_to = new Vector3(position.X + size.X, position.Y + size.Y, position.Z + size.Z);
 
                     }
                     break;
@@ -168,28 +168,28 @@ namespace TerrainEditor
 
                 for (int d = 0; d < map_depth; d++)
                 {
-                    Vector3 height = new Vector3(start.x, 0.0f, start.y);
+                    Vector3 height = new Vector3(start.X, 0.0f, start.Y);
 
                     for (int w = 0; w < map_width; w++)
                     {
-                        height.y = heightField[r_offset++];
+                        height.Y = heightField[r_offset++];
 
                         if (w != map_width - 1)
                         {
                             points[w_offset++] = height;
-                            points[w_offset++] = new Vector3(height.x + 1.0f, heightField[r_offset], height.z);
+                            points[w_offset++] = new Vector3(height.X + 1.0f, heightField[r_offset], height.Z);
                         }
 
                         if (d != map_depth - 1)
                         {
                             points[w_offset++] = height;
-                            points[w_offset++] = new Vector3(height.x, heightField[r_offset + map_width - 1], height.z + 1.0f);
+                            points[w_offset++] = new Vector3(height.X, heightField[r_offset + map_width - 1], height.Z + 1.0f);
                         }
 
-                        height.x += 1.0f;
+                        height.X += 1.0f;
                     }
 
-                    start.y += 1.0f;
+                    start.Y += 1.0f;
                 }
             }
 
@@ -200,7 +200,7 @@ namespace TerrainEditor
         public override void _Redraw(EditorNode3DGizmo gizmo)
         {
             gizmo.Clear();
-            var spatial = gizmo.GetNode3d() as Terrain3D;
+            var spatial = gizmo.GetNode3D() as Terrain3D;
 
             if (spatial == null || spatial.Visible == false || !spatial.IsInsideTree())
                 return;
@@ -208,10 +208,10 @@ namespace TerrainEditor
             foreach (TerrainPatch? patch in spatial.terrainPatches)
             {
 
-                if (showAABB)
+                if (showAabb)
                 {
                     var lines = new Godot.Collections.Array<Vector3>();
-                    AABB aabb = patch.getBounds();
+                    Aabb Aabb = patch.getBounds();
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -219,7 +219,7 @@ namespace TerrainEditor
                         a = new Vector3();
                         b = new Vector3();
 
-                        GetEdge(i, aabb.Position, aabb.Size, ref a, ref b);
+                        GetEdge(i, Aabb.Position, Aabb.Size, ref a, ref b);
 
                         lines.Add(a);
                         lines.Add(b);
@@ -234,7 +234,7 @@ namespace TerrainEditor
 
                     SurfaceTool st = new SurfaceTool();
                     Transform3D tf = patch.GetColliderPosition(spatial, false); //todo: fix scaling gizmo
-                    tf.origin = tf.origin - spatial.GlobalTransform.origin;
+                    tf.Origin = tf.Origin - spatial.GlobalTransform.Origin;
                     st.AppendFrom(GetDebugMesh(meshLines), 0, tf);
                     gizmo.AddMesh(st.Commit(), GetMaterial("shape_material", gizmo));
                 }
