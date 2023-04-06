@@ -13,7 +13,7 @@ namespace TerrainEditor.Utils.Editor.Sculpt
             selectedTerrain = _selectedTerrain;
             applyInfo = info;
         }
-        public abstract void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2i modifiedSize, Vector2i modifiedOffset);
+        public abstract void Apply(TerrainPatch patch, Vector3 pos, Vector3 patchPositionLocal, float editorStrength, Vector2I modifiedSize, Vector2I modifiedOffset);
         protected float Saturate(float value)
         {
             if (value < 0f)

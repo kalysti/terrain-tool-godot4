@@ -11,7 +11,7 @@ namespace TerrainEditor
 	public partial class TerrainPatch : Resource
 	{
 		[Export]
-		public Vector2i patchCoord = new Vector2i();
+		public Vector2I patchCoord = new Vector2I();
 
 		[Export]
 		public Vector3 offset = new Vector3();
@@ -28,7 +28,7 @@ namespace TerrainEditor
 		[Export]
 		public TerrainPatchInfo info = new TerrainPatchInfo();
 
-		protected RID? bodyRid;
+		protected Rid? bodyRid;
 
 		//cache for meshes
 		public Godot.Collections.Dictionary<int, ArrayMesh> meshCache = new Godot.Collections.Dictionary<int, ArrayMesh>();
@@ -85,7 +85,7 @@ namespace TerrainEditor
 
 				int px = i % Terrain3D.PATCH_CHUNK_EDGES;
 				int py = i / Terrain3D.PATCH_CHUNK_EDGES;
-				res.position = new Vector2i((int)px, (int)py);
+				res.position = new Vector2I((int)px, (int)py);
 
 				//  res.ChunkSizeNextLOD = (float)(((info.chunkSize + 1) >> (lod + 1)) - 1);
 				res.TerrainChunkSizeLOD0 = Terrain3D.UNITS_PER_VERTEX * info.chunkSize;
@@ -118,8 +118,8 @@ namespace TerrainEditor
 			//calculate height ranges
 			Vector2 result = heightmapGen.CalculateHeightRange(heightMapdata, ref chunkOffsets, ref chunkHeights);
 
-			info.patchOffset = result.x;
-			info.patchHeight = result.y;
+			info.patchOffset = result.X;
+			info.patchHeight = result.Y;
 
 			int chunkIndex = 0;
 			foreach (TerrainChunk? chunk in chunks)
@@ -130,7 +130,7 @@ namespace TerrainEditor
 			}
 
 			heightmapGen.WriteHeights(ref imageBuffer, ref heightMapdata);
-			heightmapGen.WriteNormals(ref imageBuffer, heightMapdata, null, Vector2i.Zero, new Vector2i(info.heightMapSize, info.heightMapSize));
+			heightmapGen.WriteNormals(ref imageBuffer, heightMapdata, null, Vector2I.Zero, new Vector2I(info.heightMapSize, info.heightMapSize));
 
 			//store heightmap in rgba8
 			image = Image.CreateFromData(image.GetWidth(), image.GetHeight(), false, Image.Format.Rgba8, imageBuffer);
@@ -184,7 +184,7 @@ namespace TerrainEditor
 		 */
 		public void Draw(Terrain3D terrainNode, Material mat)
 		{
-			RID scenario = terrainNode.GetWorld3d().Scenario;
+			Rid scenario = terrainNode.GetWorld3D().Scenario;
 
 			//clear chunks scene
 			foreach (TerrainChunk? chunk in chunks)
@@ -196,7 +196,7 @@ namespace TerrainEditor
 
 			PhysicsServer3D.BodySetMode(bodyRid.Value, PhysicsServer3D.BodyMode.Static);
 			PhysicsServer3D.BodyAttachObjectInstanceId(bodyRid.Value, terrainNode.GetInstanceId());
-			PhysicsServer3D.BodySetSpace(bodyRid.Value, terrainNode.GetWorld3d().Space);
+			PhysicsServer3D.BodySetSpace(bodyRid.Value, terrainNode.GetWorld3D().Space);
 			PhysicsServer3D.BodySetCollisionLayer(bodyRid.Value, terrainNode.collisionLayer);
 			PhysicsServer3D.BodySetCollisionMask(bodyRid.Value, terrainNode.collisionMask);
 			//    PhysicsServer3D.BodySetRayPickable(bodyRid, true);
@@ -306,28 +306,28 @@ namespace TerrainEditor
 		/** 
 		 *  Updating heightmap texture for holes, collider and rendering device
 		 */
-		public void UpdateHolesMask(Terrain3D terrain, byte[] samples, Vector2i modifiedOffset, Vector2i modifiedSize)
+		public void UpdateHolesMask(Terrain3D terrain, byte[] samples, Vector2I modifiedOffset, Vector2I modifiedSize)
 		{
 			Image? image = heightmap.GetImage();
 			byte[]? holesMask = CacheHoleMask();
 			float[]? heightMap = CacheHeightData();
 
 			byte[]? imgData = image.GetData();
-			if (modifiedOffset.x < 0 || modifiedOffset.y < 0 ||
-				modifiedSize.x <= 0 || modifiedSize.y <= 0 ||
-				modifiedOffset.x + modifiedSize.x > info.heightMapSize ||
-				modifiedOffset.y + modifiedSize.y > info.heightMapSize)
+			if (modifiedOffset.X < 0 || modifiedOffset.Y < 0 ||
+				modifiedSize.X <= 0 || modifiedSize.Y <= 0 ||
+				modifiedOffset.X + modifiedSize.X > info.heightMapSize ||
+				modifiedOffset.Y + modifiedSize.Y > info.heightMapSize)
 			{
 				GD.PrintErr("Invalid heightmap samples range.");
 			}
 
 
 			int heightMapSize = info.chunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
-			for (int z = 0; z < modifiedSize.y; z++)
+			for (int z = 0; z < modifiedSize.Y; z++)
 			{
-				for (int x = 0; x < modifiedSize.x; x++)
+				for (int x = 0; x < modifiedSize.X; x++)
 				{
-					holesMask[(z + modifiedOffset.y) * heightMapSize + (x + modifiedOffset.x)] = samples[z * modifiedSize.x + x];
+					holesMask[(z + modifiedOffset.Y) * heightMapSize + (x + modifiedOffset.X)] = samples[z * modifiedSize.X + x];
 				}
 			}
 
@@ -347,16 +347,16 @@ namespace TerrainEditor
 		/** 
 		 *  Updating heightmap texture, collider and rendering device
 		 */
-		public void UpdateHeightMap(Terrain3D terrain, float[] samples, Vector2i modifiedOffset, Vector2i modifiedSize)
+		public void UpdateHeightMap(Terrain3D terrain, float[] samples, Vector2I modifiedOffset, Vector2I modifiedSize)
 		{
 			Image? image = heightmap.GetImage();
 			float[]? data = CacheHeightData();
 
 			byte[]? imgData = image.GetData();
-			if (modifiedOffset.x < 0 || modifiedOffset.y < 0 ||
-				modifiedSize.x <= 0 || modifiedSize.y <= 0 ||
-				modifiedOffset.x + modifiedSize.x > info.heightMapSize ||
-				modifiedOffset.y + modifiedSize.y > info.heightMapSize)
+			if (modifiedOffset.X < 0 || modifiedOffset.Y < 0 ||
+				modifiedSize.X <= 0 || modifiedSize.Y <= 0 ||
+				modifiedOffset.X + modifiedSize.X > info.heightMapSize ||
+				modifiedOffset.Y + modifiedSize.Y > info.heightMapSize)
 			{
 				GD.PrintErr("Invalid heightmap samples range.");
 			}
@@ -365,12 +365,12 @@ namespace TerrainEditor
 			info.patchHeight = 1.0f;
 
 			int heightMapSize = info.chunkSize * Terrain3D.PATCH_CHUNK_EDGES + 1;
-			for (int z = 0; z < modifiedSize.y; z++)
+			for (int z = 0; z < modifiedSize.Y; z++)
 			{
-				for (int x = 0; x < modifiedSize.x; x++)
+				for (int x = 0; x < modifiedSize.X; x++)
 				{
-					int index = (z + modifiedOffset.y) * heightMapSize + (x + modifiedOffset.x);
-					data[index] = samples[z * modifiedSize.x + x];
+					int index = (z + modifiedOffset.Y) * heightMapSize + (x + modifiedOffset.X);
+					data[index] = samples[z * modifiedSize.X + x];
 				}
 			}
 
@@ -379,8 +379,8 @@ namespace TerrainEditor
 			var heightmapGen = new TerrainHeightMapGenerator(this);
 
 			Vector2 result = heightmapGen.CalculateHeightRange(data, ref chunkOffsets, ref chunkHeights);
-			info.patchOffset = result.x;
-			info.patchHeight = result.y;
+			info.patchOffset = result.X;
+			info.patchHeight = result.Y;
 
 			heightmapGen.WriteHeights(ref imgData, ref data);
 			heightmapGen.WriteNormals(ref imgData, data, null, modifiedOffset, modifiedSize);
@@ -408,17 +408,17 @@ namespace TerrainEditor
 		/** 
 		 *  Updating splatmap texture, collider and rendering device
 		 */
-		public void UpdateSplatMap(int splatmapIndex, Terrain3D terrain, Color[] samples, Vector2i modifiedOffset, Vector2i modifiedSize)
+		public void UpdateSplatMap(int splatmapIndex, Terrain3D terrain, Color[] samples, Vector2I modifiedOffset, Vector2I modifiedSize)
 		{
 			var image = splatmaps[splatmapIndex].GetImage() as Image;
 			byte[]? imgData = image.GetData();
 
 			Color[]? data = CacheSplatMap(splatmapIndex);
 
-			if (modifiedOffset.x < 0 || modifiedOffset.y < 0 ||
-				modifiedSize.x <= 0 || modifiedSize.y <= 0 ||
-				modifiedOffset.x + modifiedSize.x > info.heightMapSize ||
-				modifiedOffset.y + modifiedSize.y > info.heightMapSize)
+			if (modifiedOffset.X < 0 || modifiedOffset.Y < 0 ||
+				modifiedSize.X <= 0 || modifiedSize.Y <= 0 ||
+				modifiedOffset.X + modifiedSize.X > info.heightMapSize ||
+				modifiedOffset.Y + modifiedSize.Y > info.heightMapSize)
 			{
 				GD.PrintErr("Invalid heightmap samples range.");
 			}
@@ -426,11 +426,11 @@ namespace TerrainEditor
 			info.patchOffset = 0.0f;
 			info.patchHeight = 1.0f;
 
-			for (int z = 0; z < modifiedSize.y; z++)
+			for (int z = 0; z < modifiedSize.Y; z++)
 			{
-				for (int x = 0; x < modifiedSize.x; x++)
+				for (int x = 0; x < modifiedSize.X; x++)
 				{
-					data[(z + modifiedOffset.y) * info.heightMapSize + (x + modifiedOffset.x)] = samples[z * modifiedSize.x + x];
+					data[(z + modifiedOffset.Y) * info.heightMapSize + (x + modifiedOffset.X)] = samples[z * modifiedSize.X + x];
 				}
 			}
 
@@ -446,15 +446,15 @@ namespace TerrainEditor
 		/**
 		* Get the patch bounding box
 		*/
-		public AABB getBounds()
+		public Aabb getBounds()
 		{
 			Vector3 patchoffset = getOffset();
 
 			int i = 0;
-			var bounds = new AABB();
+			var bounds = new Aabb();
 			foreach (TerrainChunk? chunk in chunks)
 			{
-				AABB newBounds = chunk.getBounds(info, patchoffset);
+				Aabb newBounds = chunk.getBounds(info, patchoffset);
 
 				if (i == 0)
 					bounds = newBounds;
@@ -473,7 +473,7 @@ namespace TerrainEditor
 		public Vector3 getOffset()
 		{
 			float size = info.chunkSize * Terrain3D.UNITS_PER_VERTEX * Terrain3D.PATCH_CHUNK_EDGES;
-			return new Vector3(patchCoord.x * size, 0.0f, patchCoord.y * size);
+			return new Vector3(patchCoord.X * size, 0.0f, patchCoord.Y * size);
 		}
 
 		/**
@@ -482,7 +482,7 @@ namespace TerrainEditor
 		private void UpdateColliderData(Terrain3D terrain, float[] heightMapData)
 		{
 			//create heightmap shape
-			AABB bound = getBounds();
+			Aabb bound = getBounds();
 
 			shapeHeight.MapWidth = (int)Math.Sqrt(heightMapData.Length);
 			shapeHeight.MapDepth = (int)Math.Sqrt(heightMapData.Length);
@@ -510,21 +510,21 @@ namespace TerrainEditor
 			int heightFieldLength = heightFieldSize * heightFieldSize;
 
 			var scale2 = new Vector3((float)info.heightMapSize / heightFieldSize, 1, (float)info.heightMapSize / heightFieldSize);
-			var scaleFac = new Vector3(scale2.x * Terrain3D.UNITS_PER_VERTEX, scale2.x, scale2.x * Terrain3D.UNITS_PER_VERTEX);
+			var scaleFac = new Vector3(scale2.X * Terrain3D.UNITS_PER_VERTEX, scale2.X, scale2.X * Terrain3D.UNITS_PER_VERTEX);
 
 			var transform = new Transform3D();
-			transform.origin = terrain.GlobalTransform.origin + new Vector3(chunks[0].TerrainChunkSizeLOD0 * 2, 0, chunks[0].TerrainChunkSizeLOD0 * 2) + offset;
-			transform.basis = terrain.GlobalTransform.basis;
+			transform.Origin = terrain.GlobalTransform.Origin + new Vector3(chunks[0].TerrainChunkSizeLOD0 * 2, 0, chunks[0].TerrainChunkSizeLOD0 * 2) + offset;
+			transform.Basis = terrain.GlobalTransform.Basis;
 
 			if (attachScale)
-				transform.origin *= terrain.Scale;
+				transform.Origin *= terrain.Scale;
 
-			Vector3 scale = transform.basis.Scale;
-			scale.x *= Terrain3D.UNITS_PER_VERTEX;
-			scale.z *= Terrain3D.UNITS_PER_VERTEX;
-			transform.basis.Scale = scale;
+			Vector3 scale = transform.Basis.Scale;
+			scale.X *= Terrain3D.UNITS_PER_VERTEX;
+			scale.Z *= Terrain3D.UNITS_PER_VERTEX;
+			transform.Basis = transform.Basis.Scaled(scale); //TODO test: this is new through beta 15 refactoring
 
-			GD.Print(transform.origin);
+			GD.Print(transform.Origin);
 
 			return transform;
 		}
