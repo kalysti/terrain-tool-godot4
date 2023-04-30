@@ -80,16 +80,16 @@ namespace TerrainEditor
 		{
 			this.CreatePatchGrid(1, 4, 64);
 
-			loadTile(new Vector2i(0, 0), 62360, 48541);
-			loadTile(new Vector2i(0, 1), 62360, 48542);
-			loadTile(new Vector2i(0, 2), 62360, 48543);
-			loadTile(new Vector2i(0, 3), 62360, 48544);
+			loadTile(new Vector2I(0, 0), 62360, 48541);
+			loadTile(new Vector2I(0, 1), 62360, 48542);
+			loadTile(new Vector2I(0, 2), 62360, 48543);
+			loadTile(new Vector2I(0, 3), 62360, 48544);
 
 			this.Draw();
 
 		}
 
-		public void loadTile(Vector2i patch, int x = 62360, int y = 48541, int zoomLevel = 17)
+		public void loadTile(Vector2I patch, int x = 62360, int y = 48541, int zoomLevel = 17)
 		{
 			var image = new Image();
 			Error error = loadHeightmapFromBox(ref image, x, y, zoomLevel);

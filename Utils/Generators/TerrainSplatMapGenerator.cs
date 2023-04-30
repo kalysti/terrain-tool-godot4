@@ -32,11 +32,11 @@ namespace TerrainEditor.Generators
 
             for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
-                int chunkTextureX = patch.chunks[chunkIndex].position.x * patch.info.vertexCountEdge;
-                int chunkTextureZ = patch.chunks[chunkIndex].position.y * patch.info.vertexCountEdge;
+                int chunkTextureX = patch.chunks[chunkIndex].position.X * patch.info.vertexCountEdge;
+                int chunkTextureZ = patch.chunks[chunkIndex].position.Y * patch.info.vertexCountEdge;
 
-                int chunkHeightmapX = patch.chunks[chunkIndex].position.x * patch.info.chunkSize;
-                int chunkHeightmapZ = patch.chunks[chunkIndex].position.y * patch.info.chunkSize;
+                int chunkHeightmapX = patch.chunks[chunkIndex].position.X * patch.info.chunkSize;
+                int chunkHeightmapZ = patch.chunks[chunkIndex].position.Y * patch.info.chunkSize;
 
                 for (int z = 0; z < patch.info.vertexCountEdge; z++)
                 {
@@ -52,10 +52,10 @@ namespace TerrainEditor.Generators
 
                         //  colors[splatmapIndex]
 
-                        colors[splatmapIndex].r8 = (int)imgRGBABuffer[textureIndex].r;
-                        colors[splatmapIndex].g8 = (int)imgRGBABuffer[textureIndex].g;
-                        colors[splatmapIndex].b8 = (int)imgRGBABuffer[textureIndex].b;
-                        colors[splatmapIndex].a8 = (int)imgRGBABuffer[textureIndex].a;
+                        colors[splatmapIndex].R8 = (int)imgRGBABuffer[textureIndex].r;
+                        colors[splatmapIndex].G8 = (int)imgRGBABuffer[textureIndex].g;
+                        colors[splatmapIndex].B8 = (int)imgRGBABuffer[textureIndex].b;
+                        colors[splatmapIndex].A8 = (int)imgRGBABuffer[textureIndex].a;
                     }
                 }
             }
@@ -97,10 +97,10 @@ namespace TerrainEditor.Generators
 
                         Color img = colorData[heightmapIndex];
 
-                        imgRGBABuffer[textureIndex].r = (byte)img.r8;
-                        imgRGBABuffer[textureIndex].g = (byte)img.g8;
-                        imgRGBABuffer[textureIndex].b = (byte)img.b8;
-                        imgRGBABuffer[textureIndex].a = (byte)img.a8;
+                        imgRGBABuffer[textureIndex].r = (byte)img.R8;
+                        imgRGBABuffer[textureIndex].g = (byte)img.G8;
+                        imgRGBABuffer[textureIndex].b = (byte)img.B8;
+                        imgRGBABuffer[textureIndex].a = (byte)img.A8;
                     }
                 }
             }

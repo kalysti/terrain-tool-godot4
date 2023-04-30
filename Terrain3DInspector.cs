@@ -20,9 +20,9 @@ namespace TerrainEditor
 
         [ExportGroup("Collision")]
         public bool collisionEnabled = true;
-        [Export(PropertyHint.Layers3dPhysics)]
+        [Export(PropertyHint.Layers3DPhysics)]
         public uint collisionLayer = 1;
-        [Export(PropertyHint.Layers3dRender)]
+        [Export(PropertyHint.Layers3DRender)]
         public uint collisionMask = 1;
 
         [ExportGroup("Geometry")]

@@ -39,11 +39,11 @@ namespace TerrainEditor.Generators
 
             for (int chunkIndex = 0; chunkIndex < Terrain3D.PATCH_CHUNKS_AMOUNT; chunkIndex++)
             {
-                int chunkTextureX = patch.chunks[chunkIndex].position.x * patch.info.vertexCountEdge;
-                int chunkTextureZ = patch.chunks[chunkIndex].position.y * patch.info.vertexCountEdge;
+                int chunkTextureX = patch.chunks[chunkIndex].position.X * patch.info.vertexCountEdge;
+                int chunkTextureZ = patch.chunks[chunkIndex].position.Y * patch.info.vertexCountEdge;
 
-                int chunkHeightmapX = patch.chunks[chunkIndex].position.x * patch.info.chunkSize;
-                int chunkHeightmapZ = patch.chunks[chunkIndex].position.y * patch.info.chunkSize;
+                int chunkHeightmapX = patch.chunks[chunkIndex].position.X * patch.info.chunkSize;
+                int chunkHeightmapZ = patch.chunks[chunkIndex].position.Y * patch.info.chunkSize;
 
                 for (int z = 0; z < patch.info.vertexCountEdge; z++)
                 {
@@ -118,30 +118,30 @@ namespace TerrainEditor.Generators
         /**
          * Writing normals to image (with smoothing)
          */
-        public void WriteNormals(ref byte[] buffer, float[] heightmapData, byte[] holesMask, Vector2i modifiedOffset, Vector2i modifiedSize)
+        public void WriteNormals(ref byte[] buffer, float[] heightmapData, byte[] holesMask, Vector2I modifiedOffset, Vector2I modifiedSize)
         {
             RGBA[] imgRGBABuffer = FromByteArray<RGBA>(buffer);
 
             // Expand the area for the normals to prevent issues on the edges (for the averaged normals)
             int heightMapSize = patch.info.heightMapSize;
-            Vector2i modifiedEnd = modifiedOffset + modifiedSize;
-            Vector2i normalsStart = new Vector2i(Math.Max(0, modifiedOffset.x - 1), Math.Max(0, modifiedOffset.y - 1));
-            Vector2i normalsEnd = new Vector2i(Math.Min(heightMapSize, modifiedEnd.x + 1), Math.Min(heightMapSize, modifiedEnd.y + 1));
-            Vector2i normalsSize = normalsEnd - normalsStart;
+            Vector2I modifiedEnd = modifiedOffset + modifiedSize;
+            Vector2I normalsStart = new Vector2I(Math.Max(0, modifiedOffset.X - 1), Math.Max(0, modifiedOffset.Y - 1));
+            Vector2I normalsEnd = new Vector2I(Math.Min(heightMapSize, modifiedEnd.X + 1), Math.Min(heightMapSize, modifiedEnd.Y + 1));
+            Vector2I normalsSize = normalsEnd - normalsStart;
 
             // Prepare memory
-            int normalsLength = normalsSize.x * normalsSize.y;
+            int normalsLength = normalsSize.X * normalsSize.Y;
             var normalsPerVertex = new Vector3[normalsLength];
 
             Func<int, int, int, int, VertexResult> getVertex = (a, b, x, z) =>
               {
-                  int i = (z + (b) - normalsStart.y) * normalsSize.x + (x + (a) - normalsStart.x);
+                  int i = (z + (b) - normalsStart.Y) * normalsSize.X + (x + (a) - normalsStart.X);
                   int h = (z + (b)) * heightMapSize + (x + (a));
 
                   Vector3 v = new Vector3();
-                  v.x = (x + (a)) * Terrain3D.UNITS_PER_VERTEX;
-                  v.y = heightmapData[h]; // << takes time
-                  v.z = (z + (b)) * Terrain3D.UNITS_PER_VERTEX;
+                  v.X = (x + (a)) * Terrain3D.UNITS_PER_VERTEX;
+                  v.Y = heightmapData[h]; // << takes time
+                  v.Z = (z + (b)) * Terrain3D.UNITS_PER_VERTEX;
 
                   return new VertexResult
                   {
@@ -152,7 +152,7 @@ namespace TerrainEditor.Generators
 
             Func<int, int, int, int, VertexResult> getNormal = (a, b, x, z) =>
             {
-                int i = (z + (b - 1)) * normalsSize.x + (x + (a - 1));
+                int i = (z + (b - 1)) * normalsSize.X + (x + (a - 1));
                 Vector3 v = normalsPerVertex[i].Normalized();
 
                 return new VertexResult
@@ -163,9 +163,9 @@ namespace TerrainEditor.Generators
             };
 
             // Calculate per-quad normals and apply them to nearby vertices
-            for (int z = normalsStart.y; z < normalsEnd.y - 1; z++)
+            for (int z = normalsStart.Y; z < normalsEnd.Y - 1; z++)
             {
-                for (int x = normalsStart.x; x < normalsEnd.x - 1; x++)
+                for (int x = normalsStart.X; x < normalsEnd.X - 1; x++)
                 {
                     // Get four vertices from the quad
                     VertexResult v00 = getVertex(0, 0, x, z);
@@ -188,9 +188,9 @@ namespace TerrainEditor.Generators
             }
 
             // Smooth normals
-            for (int z = 1; z < normalsSize.y - 1; z++)
+            for (int z = 1; z < normalsSize.Y - 1; z++)
             {
-                for (int x = 1; x < normalsSize.x - 1; x++)
+                for (int x = 1; x < normalsSize.X - 1; x++)
                 {
                     VertexResult n00 = getNormal(0, 0, x, z);
                     VertexResult n10 = getNormal(1, 0, x, z);
@@ -232,32 +232,32 @@ namespace TerrainEditor.Generators
                 int chunkHeightmapZ = chunkZ * patch.info.chunkSize;
 
                 // Skip unmodified chunks
-                if (chunkHeightmapX >= modifiedEnd.x || chunkHeightmapX + patch.info.chunkSize < modifiedOffset.x ||
-                    chunkHeightmapZ >= modifiedEnd.y || chunkHeightmapZ + patch.info.chunkSize < modifiedOffset.y)
+                if (chunkHeightmapX >= modifiedEnd.X || chunkHeightmapX + patch.info.chunkSize < modifiedOffset.X ||
+                    chunkHeightmapZ >= modifiedEnd.Y || chunkHeightmapZ + patch.info.chunkSize < modifiedOffset.Y)
                     continue;
 
                 // TODO: adjust loop range to reduce iterations count for edge cases (skip checking unmodified samples)
                 for (int z = 0; z < patch.info.vertexCountEdge; z++)
                 {
                     // Skip unmodified columns
-                    int dz = chunkHeightmapZ + z - modifiedOffset.y;
-                    if (dz < 0 || dz >= modifiedSize.y)
+                    int dz = chunkHeightmapZ + z - modifiedOffset.Y;
+                    if (dz < 0 || dz >= modifiedSize.Y)
                         continue;
                     int hz = (chunkHeightmapZ + z) * heightMapSize;
-                    int sz = (chunkHeightmapZ + z - normalsStart.y) * normalsSize.x;
+                    int sz = (chunkHeightmapZ + z - normalsStart.Y) * normalsSize.X;
                     int tz = (chunkTextureZ + z) * patch.info.textureSize;
 
                     // TODO: adjust loop range to reduce iterations count for edge cases (skip checking unmodified samples)
                     for (int x = 0; x < patch.info.vertexCountEdge; x++)
                     {
                         // Skip unmodified rows
-                        int dx = chunkHeightmapX + x - modifiedOffset.x;
+                        int dx = chunkHeightmapX + x - modifiedOffset.X;
 
-                        if (dx < 0 || dx >= modifiedSize.x)
+                        if (dx < 0 || dx >= modifiedSize.X)
                             continue;
 
                         int hx = chunkHeightmapX + x;
-                        int sx = chunkHeightmapX + x - normalsStart.x;
+                        int sx = chunkHeightmapX + x - normalsStart.X;
                         int tx = chunkTextureX + x;
 
                         int textureIndex = tz + tx;
@@ -270,8 +270,8 @@ namespace TerrainEditor.Generators
                         if (holesMask != null && holesMask.Length >= heightmapIndex && holesMask[heightmapIndex] == 0)
                             normal = Vector3.One;
 
-                        imgRGBABuffer[textureIndex].b = (byte)(normal.x * byte.MaxValue);
-                        imgRGBABuffer[textureIndex].a = (byte)(normal.z * byte.MaxValue);
+                        imgRGBABuffer[textureIndex].b = (byte)(normal.X * byte.MaxValue);
+                        imgRGBABuffer[textureIndex].a = (byte)(normal.Z * byte.MaxValue);
                     }
                 }
             }
