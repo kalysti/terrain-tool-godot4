@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using TerrainEditor.Utils;
 
 namespace TerrainEditor;
 
@@ -103,7 +104,7 @@ public partial class TerrainChunk : Resource
             RenderingServer.InstanceSetTransform(InstanceRid.Value, global);
 
         if (MaterialId.HasValue)
-            RenderingServer.MaterialSetParam(MaterialId.Value, "uv_scale", GetUvScale());
+            RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.UV_SCALE, GetUvScale());
 
         return global;
     }
@@ -129,9 +130,9 @@ public partial class TerrainChunk : Resource
             return;
         }
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "Color", color);
-        RenderingServer.MaterialSetParam(MaterialId.Value, "BrushData0", brushData0);
-        RenderingServer.MaterialSetParam(MaterialId.Value, "BrushData1", brushData1);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.COLOR, color);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.BRUSH_DATA0, brushData0);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.BRUSH_DATA1, brushData1);
     }
 
     /// <summary>
@@ -145,7 +146,7 @@ public partial class TerrainChunk : Resource
             return;
         }
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainDefaultMaterial", image.GetRid());
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_DEFAULT_MATERIAL, image.GetRid());
     }
 
     /// <summary>
@@ -244,23 +245,23 @@ public partial class TerrainChunk : Resource
         if (heightMap == null)
             GD.PrintErr($"{heightMap} is null");
         else
-            RenderingServer.MaterialSetParam(MaterialId.Value, "terrainHeightMap", heightMap.GetRid());
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainChunkSize", TerrainChunkSizeLod0);
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainNextLodChunkSize", nextChunkSizeLod);
+            RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_HEIGHT_MAP, heightMap.GetRid());
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_CHUNK_SIZE, TerrainChunkSizeLod0);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_NEXT_LOD_CHUNK_SIZE, nextChunkSizeLod);
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainCurrentLodLevel", lod);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_CURRENT_LOD_LEVEL, lod);
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainSplatmap1", splatMaps[0].GetRid());
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainSplatmap2", splatMaps[1].GetRid());
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_SPLATMAP1, splatMaps[0].GetRid());
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_SPLATMAP2, splatMaps[1].GetRid());
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainUvScale", GetUvScale());
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainNeighborLod", GetNeighbors());
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_UV_SCALE, GetUvScale());
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_NEIGHBOR_LOD, GetNeighbors());
 
 
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainSmoothing", true);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_SMOOTHING, true);
 
         OffsetUv = new Vector2(patch.PatchCoordinates.X * Terrain3D.PATCH_CHUNK_EDGES + Position.X, patch.PatchCoordinates.Y * Terrain3D.PATCH_CHUNK_EDGES + Position.Y);
-        RenderingServer.MaterialSetParam(MaterialId.Value, "terrainUvOffset", OffsetUv);
+        RenderingServer.MaterialSetParam(MaterialId.Value, MaterialParameterNames.TERRAIN_UV_OFFSET, OffsetUv);
         RenderingServer.InstanceSetVisible(InstanceRid.Value, false);
 
         UpdateSettings(tf);

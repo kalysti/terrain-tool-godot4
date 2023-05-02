@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=57 format=3 uid="uid://rhmyhuveb7yv"]
+[gd_resource type="ShaderMaterial" load_steps=58 format=3 uid="uid://rhmyhuveb7yv"]
 
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" id="1"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" id="2"]

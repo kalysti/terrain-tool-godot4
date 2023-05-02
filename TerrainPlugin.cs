@@ -343,13 +343,13 @@ public partial class TerrainPlugin : EditorPlugin
 		AddCustomType(nameof(TerrainMapBox3D), nameof(Node3D), scriptMapBox, texture);
 
 		menuButton.SwitchOnHover = true;
-		menuButton.Text = Names.TERRAIN;
+		menuButton.Text = UserInterfaceNames.TERRAIN;
 		menuButton.Icon = texture;
 
-		menuButton.GetPopup().AddItem(Names.TERRAIN_CREATE, 0);
-		menuButton.GetPopup().AddItem(Names.EXPORT_HEIGHTMAP, 1);
-		menuButton.GetPopup().AddItem(Names.EXPORT_SPLATMAP, 2);
-		menuButton.GetPopup().AddItem(Names.IMPORT_MAPBOX, 3);
+		menuButton.GetPopup().AddItem(UserInterfaceNames.TERRAIN_CREATE, 0);
+		menuButton.GetPopup().AddItem(UserInterfaceNames.EXPORT_HEIGHTMAP, 1);
+		menuButton.GetPopup().AddItem(UserInterfaceNames.EXPORT_SPLATMAP, 2);
+		menuButton.GetPopup().AddItem(UserInterfaceNames.IMPORT_MAPBOX, 3);
 
 		menuButton.Visible = false;
 		menuButton.GetPopup().IdPressed += OpenCreateMenu;
@@ -358,25 +358,25 @@ public partial class TerrainPlugin : EditorPlugin
         AddNode3DGizmoPlugin(GizmoPlugin);
         CreateImportMenu();
 
-		editorPanel.Name = Names.TERRAIN;
-		AddPanelOptionBox(Keys.TOOL_MODE, "Tool mode", TerrainToolMode.NONE);
-		AddPanelOptionBox(Keys.TOOL_SCULPT_MODE, "Sculpt mode", TerrainSculptMode.SCULPT);
+		editorPanel.Name = UserInterfaceNames.TERRAIN;
+		AddPanelOptionBox(ToolSettingKeys.TOOL_MODE, "Tool mode", TerrainToolMode.NONE);
+		AddPanelOptionBox(ToolSettingKeys.TOOL_SCULPT_MODE, "Sculpt mode", TerrainSculptMode.SCULPT);
 
-		AddPanelSpinBox(Keys.TOOL_STRENGTH, "Strength", 1.2f, 0f, 10f, 0.01f);
-		AddPanelSpinBox(Keys.TOOL_RADIUS, "Filter Radius", 0.4f, 0f, 10f, 0.01f);
-		AddPanelSpinBox(Keys.TOOL_HEIGHT, "Target Height", 0f, -100000f, 100000f, 0.01f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_STRENGTH, "Strength", 1.2f, 0f, 10f, 0.01f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_RADIUS, "Filter Radius", 0.4f, 0f, 10f, 0.01f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_HEIGHT, "Target Height", 0f, -100000f, 100000f, 0.01f);
 
-		AddPanelSpinBox(Keys.TOOL_NOISE_AMOUNT, "Noise amount", 10000f, 0, 100000f, 0.1f);
-		AddPanelSpinBox(Keys.TOOL_NOISE_SCALE, "Noise scale", 128f, 0, 100000f, 0.1f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_NOISE_AMOUNT, "Noise amount", 10000f, 0, 100000f, 0.1f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_NOISE_SCALE, "Noise scale", 128f, 0, 100000f, 0.1f);
 
-		AddPanelSpinBox(Keys.TOOL_BRUSH_SIZE, "Brush size", 4000f, 0f, 1000000f, 0.1f);
-		AddPanelSpinBox(Keys.TOOL_BRUSH_FALLOFF, "Brush falloff", 0.5f, 0f, 1f, 0.1f);
-		AddPanelSpinBox(Keys.TOOL_LAYER, "Layer", 0f, 0f, 7f, 1f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_BRUSH_SIZE, "Brush size", 4000f, 0f, 1000000f, 0.1f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_BRUSH_FALLOFF, "Brush falloff", 0.5f, 0f, 1f, 0.1f);
+		AddPanelSpinBox(ToolSettingKeys.TOOL_LAYER, "Layer", 0f, 0f, 7f, 1f);
 
-		AddPanelOptionBox(Keys.TOOL_BRUSH_FALLOFF_TYPE, "Falloff type", BrushFallOffType.SMOOTH);
+		AddPanelOptionBox(ToolSettingKeys.TOOL_BRUSH_FALLOFF_TYPE, "Falloff type", BrushFallOffType.SMOOTH);
 
-		AddCheckBox(Keys.TOOL_SHOW_AABB, "Show AABB");
-		AddCheckBox(Keys.TOOL_SHOW_COLLIDER, "Show Collider (Slow)");
+		AddCheckBox(ToolSettingKeys.TOOL_SHOW_AABB, "Show AABB");
+		AddCheckBox(ToolSettingKeys.TOOL_SHOW_COLLIDER, "Show Collider (Slow)");
 
 		RefreshPanel();
 	}
@@ -428,7 +428,7 @@ public partial class TerrainPlugin : EditorPlugin
 
 	public void OpenDialog()
 	{
-		CreateDialog.PopupCentered();
+		CreateDialog.PopupCentered(new Vector2I(800, 600));
 	}
 
 	private void AddPanelSpinBox(string name, string text, float def, float min, float max, float step)
@@ -502,15 +502,15 @@ public partial class TerrainPlugin : EditorPlugin
 	{
 		var st = new TerrainEditorInfo
 		{
-			BrushFalloff = GetPanelControlFloatValue("brush_falloff"),
-			BrushSize = GetPanelControlFloatValue("brush_size"),
-			Strength = GetPanelControlFloatValue("strength"),
-			Radius = GetPanelControlFloatValue("radius"),
-			Height = GetPanelControlFloatValue("height"),
-			Layer = (int)GetPanelControlFloatValue("layer"),
-			NoiseAmount = GetPanelControlFloatValue("noise_amount"),
-			NoiseScale = GetPanelControlFloatValue("noise_scale"),
-			BrushFalloffType = GetPanelControlValue<BrushFallOffType>("brush_falloff_type")
+			BrushFalloff = GetPanelControlFloatValue(ToolSettingKeys.TOOL_BRUSH_FALLOFF),
+			BrushSize = GetPanelControlFloatValue(ToolSettingKeys.TOOL_BRUSH_SIZE),
+			Strength = GetPanelControlFloatValue(ToolSettingKeys.TOOL_STRENGTH),
+			Radius = GetPanelControlFloatValue(ToolSettingKeys.TOOL_RADIUS),
+			Height = GetPanelControlFloatValue(ToolSettingKeys.TOOL_HEIGHT),
+			Layer = (int)GetPanelControlFloatValue(ToolSettingKeys.TOOL_LAYER),
+			NoiseAmount = GetPanelControlFloatValue(ToolSettingKeys.TOOL_NOISE_AMOUNT),
+			NoiseScale = GetPanelControlFloatValue(ToolSettingKeys.TOOL_NOISE_SCALE),
+			BrushFalloffType = GetPanelControlValue<BrushFallOffType>(ToolSettingKeys.TOOL_BRUSH_FALLOFF_TYPE)
 		};
 
 		return st;
@@ -886,23 +886,23 @@ public partial class TerrainPlugin : EditorPlugin
 		PanelControls.Clear();
 	}
 
-	public override bool _Handles(Variant variant)
+	public override bool _Handles(GodotObject go)
 	{
-		return variant.Obj is Terrain3D;
+		return go is Terrain3D;
 	}
 
 	public override void _MakeVisible(bool visible)
 	{
 		if (!visible)
-			_Edit(new Variant());
+			_Edit(new Node());
 	}
 
-	public override void _Edit(Variant variant)
+	public override void _Edit(GodotObject variant)
 	{
 		if (_Handles(variant))
 		{
 			menuButton.Visible = true;
-			SelectedTerrain = variant.Obj as Terrain3D;
+			SelectedTerrain = variant as Terrain3D;
 			SelectedTerrain?.NotifyPropertyListChanged();
 			AddControlToDock(DockSlot.RightUl, editorPanel);
 			DockAttached = true;

@@ -43,10 +43,10 @@ public partial class Terrain3D : Node3D
 	}
 
 
-    public TerrainPatch? GetPatch(int x, int z)
-    {
-        return TerrainPatches.FirstOrDefault(patch => patch != null && patch.PatchCoordinates.X == x && patch.PatchCoordinates.Y == z);
-    }
+	public TerrainPatch? GetPatch(int x, int z)
+	{
+		return TerrainPatches.FirstOrDefault(patch => patch != null && patch.PatchCoordinates.X == x && patch.PatchCoordinates.Y == z);
+	}
 
 	public int GetPatchesCount()
 	{
@@ -73,13 +73,13 @@ public partial class Terrain3D : Node3D
 			CreatePatch(x, y, chunkSize);
 	}
 
-    /// <summary>
-    /// Creating a patch by given coords and chunksize
-    /// </summary>
-    public void CreatePatch(Vector2I coord, int chunkSize)
-    {
-        CreatePatch(coord.X, coord.Y, chunkSize);
-    }
+	/// <summary>
+	/// Creating a patch by given coords and chunksize
+	/// </summary>
+	public void CreatePatch(Vector2I coord, int chunkSize)
+	{
+		CreatePatch(coord.X, coord.Y, chunkSize);
+	}
 
 	/// <summary>
 	/// Creating a patch by given coords and chunksize
@@ -93,11 +93,11 @@ public partial class Terrain3D : Node3D
 			var cSharpScript = GD.Load<CSharpScript>(TerrainPlugin.ResourcePath($"{nameof(TerrainPatch)}.cs"));
 			Variant script = cSharpScript.New();
 
-            if (script.Obj is TerrainPatch patch)
-            {
-                patch.Offset = new Vector3(x * size, 0.0f, y * size);
-                patch.ResourceLocalToScene = true;
-                patch.PatchCoordinates = new Vector2I(x, y);
+			if (script.Obj is TerrainPatch patch)
+			{
+				patch.Offset = new Vector3(x * size, 0.0f, y * size);
+				patch.ResourceLocalToScene = true;
+				patch.PatchCoordinates = new Vector2I(x, y);
 
 				TerrainPatches.Add(patch);
 				patch.Init(chunkSize);
@@ -113,19 +113,19 @@ public partial class Terrain3D : Node3D
 		}
 	}
 
-    /// <summary>
-    /// Load heightmap from given image
-    /// </summary>
-    public Error LoadHeightmapFromImage(Vector2I patchCoord, Image? heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
-    {
-        try
-        {
-            TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
-            if (patch == null)
-            {
-                GD.PrintErr($"Patch {patchCoord} not found.");
-                return Error.FileNotFound;
-            }
+	/// <summary>
+	/// Load heightmap from given image
+	/// </summary>
+	public Error LoadHeightmapFromImage(Vector2I patchCoord, Image? heightMapImage, HeightmapAlgo algo = HeightmapAlgo.R16, float heightmapScale = 5000)
+	{
+		try
+		{
+			TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
+			if (patch == null)
+			{
+				GD.PrintErr($"Patch {patchCoord} not found.");
+				return Error.FileNotFound;
+			}
 
 			if (heightMapImage == null)
 			{
@@ -148,38 +148,38 @@ public partial class Terrain3D : Node3D
 
 			var heightmapData = new float[patch.Info.HeightMapSize * patch.Info.HeightMapSize];
 
-            for (var z = 0; z < patch.Info.HeightMapSize; z++)
-            for (var x = 0; x < patch.Info.HeightMapSize; x++)
-            {
-                Color raw = heightMapImage.GetPixel(x, z);
-                switch (algo)
-                {
-                    //my tool 
-                    case HeightmapAlgo.RGBA8_HALF:
-                    {
-                        float normalizedHeight = TerrainByteConverter.ReadNormalizedHeight16Bit(raw);
-                        heightmapData[z * patch.Info.HeightMapSize + x] = normalizedHeight * heightmapScale;
-                        break;
-                    }
-                    //mapbox default
-                    case HeightmapAlgo.RGB8_FULL:
-                    {
-                        float height = -10000f + (raw.R8 * 256f * 256f + raw.G8 * 256f + raw.B8) * 0.1f;
-                        float normalizedHeight = height / 50; //reduce because 24bit of mapbox
+			for (var z = 0; z < patch.Info.HeightMapSize; z++)
+			for (var x = 0; x < patch.Info.HeightMapSize; x++)
+			{
+				Color raw = heightMapImage.GetPixel(x, z);
+				switch (algo)
+				{
+					//my tool 
+					case HeightmapAlgo.RGBA8_HALF:
+					{
+						float normalizedHeight = TerrainByteConverter.ReadNormalizedHeight16Bit(raw);
+						heightmapData[z * patch.Info.HeightMapSize + x] = normalizedHeight * heightmapScale;
+						break;
+					}
+					//mapbox default
+					case HeightmapAlgo.RGB8_FULL:
+					{
+						float height = -10000f + (raw.R8 * 256f * 256f + raw.G8 * 256f + raw.B8) * 0.1f;
+						float normalizedHeight = height / 50; //reduce because 24bit of mapbox
 
-                        heightmapData[z * patch.Info.HeightMapSize + x] = normalizedHeight * heightmapScale;
-                        break;
-                    }
-                    //industrial default
-                    case HeightmapAlgo.R16:
-                        heightmapData[z * patch.Info.HeightMapSize + x] = raw.R * heightmapScale;
-                        break;
-                    case HeightmapAlgo.RGBA8_NORMAL:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(algo), algo, null);
-                }
-            }
+						heightmapData[z * patch.Info.HeightMapSize + x] = normalizedHeight * heightmapScale;
+						break;
+					}
+					//industrial default
+					case HeightmapAlgo.R16:
+						heightmapData[z * patch.Info.HeightMapSize + x] = raw.R * heightmapScale;
+						break;
+					case HeightmapAlgo.RGBA8_NORMAL:
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(algo), algo, null);
+				}
+			}
 
 			patch.CreateHeightmap(heightmapData);
 			return Error.Ok;
@@ -192,15 +192,15 @@ public partial class Terrain3D : Node3D
 		return Error.Bug;
 	}
 
-    /// <summary>
-    /// Load splatmap from given image
-    /// </summary>
-    public Error LoadSplatmapFromImage(Vector2I patchCoord, int idx, Image splatmapImage)
-    {
-        try
-        {
-            TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
-            if (patch == null) return Error.FileNotFound;
+	/// <summary>
+	/// Load splatmap from given image
+	/// </summary>
+	public Error LoadSplatmapFromImage(Vector2I patchCoord, int idx, Image splatmapImage)
+	{
+		try
+		{
+			TerrainPatch? patch = GetPatch(patchCoord.X, patchCoord.Y);
+			if (patch == null) return Error.FileNotFound;
 
 			var splatmapData = new Color[patch.Info.HeightMapSize * patch.Info.HeightMapSize];
 
@@ -244,8 +244,8 @@ public partial class Terrain3D : Node3D
 			UpdateGizmos();
 
 
-            float kmX = GetBounds().Size.X * 0.00001f;
-            float kmY = GetBounds().Size.Z * 0.00001f;
+			float kmX = GetBounds().Size.X * 0.00001f;
+			float kmY = GetBounds().Size.Z * 0.00001f;
 
 			GD.Print($"[Draw Size] {kmX}x{kmY}km");
 
@@ -297,9 +297,9 @@ public partial class Terrain3D : Node3D
 		}
 	}
 
-    public Aabb GetBounds()
-    {
-        var bounds = new Aabb();
-        return TerrainPatches.Aggregate(bounds, (current, patch) => patch != null ? current.Merge(patch.GetBounds()) : default);
-    }
+	public Aabb GetBounds()
+	{
+		var bounds = new Aabb();
+		return TerrainPatches.Aggregate(bounds, (current, patch) => patch != null ? current.Merge(patch.GetBounds()) : default);
+	}
 }
