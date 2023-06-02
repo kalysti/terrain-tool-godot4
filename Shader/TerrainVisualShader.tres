@@ -22,7 +22,6 @@
 [ext_resource type="Texture2D" uid="uid://dl6sqatoftgcw" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Displacement.jpg" id="20_vymy8"]
 [ext_resource type="Texture2D" uid="uid://bc6gwklfsx8rh" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Normal.jpg" id="21_epq78"]
 [ext_resource type="Texture2D" uid="uid://c0fksnmlfatn8" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg" id="22_x63ai"]
-[ext_resource type="Texture2D" uid="uid://dly1js17gm0s5" path="res://Terrain/Heightmaps/canyon01.png" id="23_2hlgo"]
 [ext_resource type="Texture2D" uid="uid://bxcs8nbrw74qc" path="res://addons/TerrainPlugin/TestTextures/texel.png" id="24_v1c3n"]
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_hod58"]
