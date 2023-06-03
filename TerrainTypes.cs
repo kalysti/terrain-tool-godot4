@@ -1,86 +1,79 @@
-using System.ComponentModel;
-using System.Collections.Generic;
 using Godot;
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace TerrainEditor
+namespace TerrainEditor;
+
+public enum TerrainToolMode
 {
-    public enum TerrainToolMode
-    {
+    SCULPT,
+    PAINT,
+    NONE
+}
 
-        Sculpt,
-        Paint,
-        None
-    }
-    public enum TerrainSculptMode
-    {
-        Flatten,
-        Holes,
-        Noise,
-        Sculpt,
-        Smooth
-    }
+public enum TerrainSculptMode
+{
+    FLATTEN,
+    HOLES,
+    NOISE,
+    SCULPT,
+    SMOOTH
+}
 
-    public enum BrushFallOffType
-    {
-        Smooth,
-        Linear,
-        Spherical,
-        Tip
-    }
+public enum BrushFallOffType
+{
+    SMOOTH,
+    LINEAR,
+    SPHERICAL,
+    TIP
+}
 
-    public enum TerrainBrushType
-    {
-        Circle
-    }
+public enum TerrainBrushType
+{
+    CIRCLE
+}
 
+public struct VertexResult
+{
+    public int I { get; set; }
+    public Vector3 V { get; set; }
+}
 
-    public struct VertexResult
-    {
-        public int i { get; set; }
-        public Vector3 v { get; set; }
-    }
+public enum HeightmapAlgo
+{
+    R16,
+    RGBA8_NORMAL,
+    RGBA8_HALF,
+    RGB8_FULL
+};
 
-    public enum HeightmapAlgo
-    {
-        R16,
-        RGBA8_Normal,
-        RGBA8_Half,
-        RGB8_Full
-    };
-    public enum GIMode
-    {
-        Disabled,
-        Baked,
-        Dynamic
-    };
+public enum GiMode
+{
+    DISABLED,
+    BAKED,
+    DYNAMIC
+};
 
-    public enum LightmapScale
-    {
-        LIGHTMAP_SCALE_1X,
-        LIGHTMAP_SCALE_2X,
-        LIGHTMAP_SCALE_4X,
-        LIGHTMAP_SCALE_8X,
-        LIGHTMAP_SCALE_MAX,
-    };
+public enum LightMapScale
+{
+    LIGHTMAP_SCALE_1_X,
+    LIGHTMAP_SCALE_2_X,
+    LIGHTMAP_SCALE_4_X,
+    LIGHTMAP_SCALE_8_X,
+    LIGHTMAP_SCALE_MAX
+};
 
+[StructLayout(LayoutKind.Sequential)]
+public struct Rgba
+{
+    public byte r;
+    public byte g;
+    public byte b;
+    public byte a;
+}
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct RGBA
-    {
-        public byte r;
-        public byte g;
-        public byte b;
-        public byte a;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct R16
-    {
-        public UInt16 r;
-    }
-
-
+[StructLayout(LayoutKind.Sequential)]
+public struct R16
+{
+    public ushort r;
 }

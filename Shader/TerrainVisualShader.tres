@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=58 format=3 uid="uid://rhmyhuveb7yv"]
+[gd_resource type="ShaderMaterial" load_steps=57 format=3 uid="uid://rhmyhuveb7yv"]
 
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" id="1"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" id="2"]
@@ -22,7 +22,6 @@
 [ext_resource type="Texture2D" uid="uid://dl6sqatoftgcw" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Displacement.jpg" id="20_vymy8"]
 [ext_resource type="Texture2D" uid="uid://bc6gwklfsx8rh" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Normal.jpg" id="21_epq78"]
 [ext_resource type="Texture2D" uid="uid://c0fksnmlfatn8" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg" id="22_x63ai"]
-[ext_resource type="Texture2D" uid="uid://dly1js17gm0s5" path="res://Terrain/Heightmaps/canyon01.png" id="23_2hlgo"]
 [ext_resource type="Texture2D" uid="uid://bxcs8nbrw74qc" path="res://addons/TerrainPlugin/TestTextures/texel.png" id="24_v1c3n"]
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_hod58"]
@@ -514,11 +513,6 @@ void vertex() {
 }
 
 void fragment() {
-
-
-
-
-
 // Vector3Constant:33
 	vec3 n_out33p0 = vec3(75.000000, 75.000000, 75.000000);
 
@@ -571,11 +565,6 @@ void fragment() {
 		n_out19p1 = packedOriginal;
 		n_out19p0 = packedMixed;
 	}
-
-
-
-
-
 
 
 // FloatConstant:29
@@ -672,11 +661,6 @@ void fragment() {
 		result[3].rgb = HeightLerp(n_out31p0, n_out19p0[3].rgb, avg1, n_out20p0[3].rgb, avg2, n_out34p3);
 		n_out22p0 = result;
 	}
-
-
-
-
-
 
 
 // FloatConstant:30
@@ -873,30 +857,29 @@ nodes/light/connections = PackedInt32Array(2, 0, 0, 0)
 [resource]
 render_priority = 0
 shader = SubResource("VisualShader_ofbnr")
-shader_parameter/BrushColor = null
+shader_parameter/terrainUvScale = null
+shader_parameter/terrainUvOffset = null
+shader_parameter/terrainChunkSize = 0.0
+shader_parameter/terrainNextLodChunkSize = 0.0
+shader_parameter/terrainNeighborLod = Quaternion(0, 0, 0, 0)
+shader_parameter/terrainCurrentLodLevel = 0.0
+shader_parameter/terrainSmoothing = false
 shader_parameter/BrushData0 = null
 shader_parameter/BrushData1 = null
+shader_parameter/BrushColor = null
 shader_parameter/Layer_1 = ExtResource("8_0au65")
-shader_parameter/Layer_1_AO = ExtResource("9_i4a20")
 shader_parameter/Layer_1_Dis = ExtResource("10_n1vaw")
 shader_parameter/Layer_1_Normal = ExtResource("11_oncw3")
 shader_parameter/Layer_1_Rough = ExtResource("12_4egyj")
+shader_parameter/Layer_1_AO = ExtResource("9_i4a20")
 shader_parameter/Layer_2 = ExtResource("13_w4xsk")
-shader_parameter/Layer_2_AO = ExtResource("14_e5u5p")
 shader_parameter/Layer_2_Dis = ExtResource("15_h3y7g")
 shader_parameter/Layer_2_Normal = ExtResource("16_m333e")
 shader_parameter/Layer_2_Rough = ExtResource("17_mm8pq")
+shader_parameter/Layer_2_AO = ExtResource("14_e5u5p")
 shader_parameter/Layer_3 = ExtResource("18_p6mbg")
-shader_parameter/Layer_3_AO = ExtResource("19_fxm6v")
 shader_parameter/Layer_3_Dis = ExtResource("20_vymy8")
 shader_parameter/Layer_3_Normal = ExtResource("21_epq78")
 shader_parameter/Layer_3_Rough = ExtResource("22_x63ai")
-shader_parameter/terrainChunkSize = 0.0
-shader_parameter/terrainCurrentLodLevel = 0.0
-shader_parameter/terrainHeightMap = ExtResource("23_2hlgo")
-shader_parameter/terrainNeighborLod = null
-shader_parameter/terrainNextLodChunkSize = 0.0
-shader_parameter/terrainSmoothing = false
+shader_parameter/Layer_3_AO = ExtResource("19_fxm6v")
 shader_parameter/terrainSplatmap1 = ExtResource("24_v1c3n")
-shader_parameter/terrainUvOffset = null
-shader_parameter/terrainUvScale = null
