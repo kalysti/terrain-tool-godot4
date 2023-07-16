@@ -1,103 +1,137 @@
+using System;
 using System.Net;
-using System.Net.Cache;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Godot;
+using HttpClient = System.Net.Http.HttpClient;
 
-namespace TerrainEditor
+namespace TerrainEditor;
+
+[Tool]
+public partial class TerrainMapBox3D : Terrain3D
 {
-	[Tool]
-	public partial class TerrainMapBox3D : Terrain3D
-	{
-		[ExportCategory("Terrain Mapbox")]
-		[ExportGroup("Mapbox Data")]
-		[Export]
-		public string mapBoxAccessToken = "pk.eyJ1IjoiaGlnaGNsaWNrZXJzIiwiYSI6ImNrZHdveTAxZjQxOXoyenJvcjlldmpoejEifQ.0LKYqSO1cCQoVCWObvVB5w";
-		[Export]
-		public string mapBoxCachePath = "user://mapCache";
+    [ExportCategory("Terrain Mapbox")]
+    [ExportGroup("Mapbox Data")]
+    [Export]
+    public string MapBoxAccessToken { get; set; } = "pk.eyJ1IjoiaGlnaGNsaWNrZXJzIiwiYSI6ImNrZHdveTAxZjQxOXoyenJvcjlldmpoejEifQ.0LKYqSO1cCQoVCWObvVB5w";
 
-		protected void initCacheFolder()
-		{
-			DirAccess? dir = DirAccess.Open("user://");
-			if (!dir.DirExists("mapCache")) 
-				dir.MakeDir("mapCache");
-		}
-		private Image loadImageFromBox(string filePath)
-		{
-			var image = new Image();
-			image.Load(filePath);
+    [Export]
+    public string MapBoxCachePath { get; set; } = "user://mapCache";
 
-			return image;
-		}
+    protected static void InitCacheFolder()
+    {
+        try
+        {
+            DirAccess? dir = DirAccess.Open("user://");
+            if (!dir.DirExists("mapCache"))
+                dir.MakeDir("mapCache");
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr(e);
+        }
+    }
 
-		public Error loadHeightmapFromBox(ref Image image, int x = 12558, int y = 6127, int zoomLevel = 14)
-		{
-			initCacheFolder();
+    public async Task<Error> LoadHeightmapFromBox(int x = 12558, int y = 6127, int zoomLevel = 14)
+    {
+        try
+        {
+            InitCacheFolder();
 
-			string? url = "https://api.mapbox.com/v4/mapbox.terrain-rgb/" + zoomLevel + "/" + x + "/" + y + ".pngraw?access_token=" + mapBoxAccessToken;
+            string url = $"https://api.mapbox.com/v4/mapbox.terrain-rgb/{zoomLevel}/{x}/{y}.pngraw?access_token={MapBoxAccessToken}";
 
-			string? filename = zoomLevel + "_" + x + "_" + y + ".png";
-			string? filePath = mapBoxCachePath + "/" + filename;
+            string filePath = $"{MapBoxCachePath}/{zoomLevel}_{x}_{y}.png";
 
-			if (FileAccess.FileExists(filePath))
-			{
-				image = loadImageFromBox(filePath);
-				return Error.Ok;
-			}
-			else
-			{
-				using (var client = new WebClient())
-				{
-					ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
-					ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => { return true; };
-					client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-					client.Headers.Add("Cache-Control", "no-cache");
+            if (FileAccess.FileExists(filePath))
+            {
+                return Error.Ok;
+            }
 
-					GD.Print("Download: " + url);
-					byte[] data = client.DownloadData(url);
-					GD.Print("Store in: " + filePath);
 
-					FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
-					if (result.IsOpen())
-					{
-						result.StoreBuffer(data);
-					}
-					else
-					{
-						GD.PrintErr("Cant write file: " + result);
-						return Error.FileNotFound;
-					}
+            using (var client = new HttpClient()) //TODO: check if Godot HttpClient is better.
+            {
+                // ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                // ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => true;
+                // client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache); //why do we request 
+                // client.Headers.Add("Cache-Control", "no-cache");
 
-					image = loadImageFromBox(filePath);
+                GD.Print($"Download: {url}");
+                HttpResponseMessage responseMessage = await client.GetAsync(url);
 
-					result.Flush();
-					GD.PrintErr("Ready storing image succesfull");
+                if (responseMessage.StatusCode == HttpStatusCode.OK)
+                {
+                    GD.Print($"Store in: {filePath}");
 
-					return Error.Ok;
-				}
-			}
-		}
+                    using (FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write))
+                    {
+                        if (result.IsOpen())
+                        {
+                            result.StoreBuffer(await responseMessage.Content.ReadAsByteArrayAsync());
+                        }
+                        else
+                        {
+                            GD.PrintErr($"Cant write file: {result}");
+                            return Error.FileNotFound;
+                        }
 
-		public void testGrid()
-		{
-			this.CreatePatchGrid(1, 4, 64);
+                        result.Flush();
+                    }
 
-			loadTile(new Vector2I(0, 0), 62360, 48541);
-			loadTile(new Vector2I(0, 1), 62360, 48542);
-			loadTile(new Vector2I(0, 2), 62360, 48543);
-			loadTile(new Vector2I(0, 3), 62360, 48544);
+                    GD.PrintErr("Done storing image successfully");
 
-			this.Draw();
+                    return Error.Ok;
+                }
 
-		}
 
-		public void loadTile(Vector2I patch, int x = 62360, int y = 48541, int zoomLevel = 17)
-		{
-			var image = new Image();
-			Error error = loadHeightmapFromBox(ref image, x, y, zoomLevel);
+                GD.PrintErr($"Request failed: {responseMessage}");
+                return Error.Failed;
+            }
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr(e);
+        }
 
-			if (error == Error.Ok)
-			{
-				loadHeightmapFromImage(patch, image, HeightmapAlgo.RGB8_Full);
-			}
-		}
-	}
+        return Error.Bug;
+    }
+
+    public void TestGrid()
+    {
+        try
+        {
+            CreatePatchGrid(1, 4, 64);
+
+            LoadTile(new Vector2I(0, 0), 62360, 48541);
+            LoadTile(new Vector2I(0, 1), 62360, 48542);
+            LoadTile(new Vector2I(0, 2), 62360, 48543);
+            LoadTile(new Vector2I(0, 3), 62360, 48544);
+
+            Draw();
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr(e);
+        }
+    }
+
+    public void LoadTile(Vector2I patch, int x = 62360, int y = 48541, int zoomLevel = 17)
+    {
+        try
+        {
+            Task.Run(async () =>
+            {
+                string filePath = $"{MapBoxCachePath}/{zoomLevel}_{x}_{y}.png";
+                Error error = await LoadHeightmapFromBox(x, y, zoomLevel);
+                if (error == Error.Ok)
+                {
+                    Image? image = Image.LoadFromFile(filePath);
+                    LoadHeightmapFromImage(patch, image, HeightmapAlgo.RGB8_FULL);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr(e);
+        }
+    }
 }

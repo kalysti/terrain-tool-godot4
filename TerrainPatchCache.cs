@@ -1,65 +1,61 @@
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Godot;
-using System;
+using Godot.Collections;
 using TerrainEditor.Generators;
-using System.Linq;
+using Array = System.Array;
 
-namespace TerrainEditor
+namespace TerrainEditor;
+
+public partial class TerrainPatch : Resource
 {
-	public partial class TerrainPatch : Resource
-	{
-		protected float[] cachedHeightMapData;
+    protected float[] CachedHeightMapData = Array.Empty<float>();
 
-		protected byte[] cachedHolesMask;
+    protected byte[] CachedHolesMask = Array.Empty<byte>();
 
-		protected Godot.Collections.Array<Color[]> cachedSplatMap;
+    protected Array<Color[]> CachedSplatMap = new();
 
-		public float[] CacheHeightData()
-		{
-			if (cachedHeightMapData == null || cachedHeightMapData.Length <= 0)
-			{
-				var heightmapGen = new TerrainHeightMapGenerator(this);
+    public float[] CacheHeightData()
+    {
+        if (CachedHeightMapData.Length <= 0)
+        {
+            var heightmapGen = new TerrainHeightMapGenerator(this);
 
-				var heights = new float[0];
-				var holes = new byte[0];
+            float[] heights = Array.Empty<float>();
+            byte[] holes = Array.Empty<byte>();
 
-				heightmapGen.CacheHeights(ref heights, ref holes);
-				cachedHeightMapData = heights;
-				cachedHolesMask = holes;
-			}
+            heightmapGen.CacheHeights(ref heights, ref holes);
+            CachedHeightMapData = heights;
+            CachedHolesMask = holes;
+        }
 
-			return cachedHeightMapData;
-		}
-		public byte[] CacheHoleMask()
-		{
-			if (cachedHolesMask == null || cachedHolesMask.Length <= 0)
-			{
-				var heightmapGen = new TerrainHeightMapGenerator(this);
-				var heights = new float[0];
-				var holes = new byte[0];
+        return CachedHeightMapData;
+    }
 
-				heightmapGen.CacheHeights(ref heights, ref holes);
-				cachedHolesMask = holes;
-			}
+    public byte[] CacheHoleMask()
+    {
+        if (CachedHolesMask.Length <= 0)
+        {
+            var heightmapGen = new TerrainHeightMapGenerator(this);
+            float[] heights = Array.Empty<float>();
+            byte[] holes = Array.Empty<byte>();
 
-			return cachedHolesMask;
-		}
+            heightmapGen.CacheHeights(ref heights, ref holes);
+            CachedHolesMask = holes;
+        }
 
-		public Color[] CacheSplatMap(int idx)
-		{
-			if (cachedSplatMap == null || cachedSplatMap.Count < (idx + 1))
-			{
-				cachedSplatMap.Resize(idx +1);
-			}
+        return CachedHolesMask;
+    }
 
-			if (cachedSplatMap.Count < idx || cachedSplatMap[idx] == null || cachedSplatMap[idx].Length <= 0)
-			{
-				var splatmapGen = new TerrainSplatMapGenerator(this);
-				return splatmapGen.CacheSplatmap(idx);
-			}
-			else
-				return cachedSplatMap[idx];
-		}
-	}
+    public Color[] CacheSplatMap(int idx)
+    {
+        if (CachedSplatMap.Count < idx + 1)
+            CachedSplatMap.Resize(idx + 1);
+
+        if (CachedSplatMap.Count < idx || CachedSplatMap[idx] == null || CachedSplatMap[idx].Length <= 0)
+        {
+            var splatmapGen = new TerrainSplatMapGenerator(this);
+            return splatmapGen.CacheSplatmap(idx) ?? Array.Empty<Color>();
+        }
+
+        return CachedSplatMap[idx] ?? Array.Empty<Color>();
+    }
 }
