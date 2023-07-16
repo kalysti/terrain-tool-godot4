@@ -654,7 +654,7 @@ public partial class TerrainPlugin : EditorPlugin
 
 			if (SelectedTerrain.TerrainDefaultTexture == null)
 			{
-				var mat = GD.Load<CompressedTexture2D>(ResourcePath("TestTextures/texel.png"));
+				var mat = GD.Load<CompressedTexture2D>(ResourcePath("TestTextures/512x512 Texel Density Texture.png"));
 				SelectedTerrain.TerrainDefaultTexture = mat;
 			}
 

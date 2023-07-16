@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=57 format=3 uid="uid://rhmyhuveb7yv"]
+[gd_resource type="ShaderMaterial" load_steps=56 format=3 uid="uid://rhmyhuveb7yv"]
 
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" id="1"]
 [ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" id="2"]
@@ -22,7 +22,6 @@
 [ext_resource type="Texture2D" uid="uid://dl6sqatoftgcw" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Displacement.jpg" id="20_vymy8"]
 [ext_resource type="Texture2D" uid="uid://bc6gwklfsx8rh" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Normal.jpg" id="21_epq78"]
 [ext_resource type="Texture2D" uid="uid://c0fksnmlfatn8" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg" id="22_x63ai"]
-[ext_resource type="Texture2D" uid="uid://bxcs8nbrw74qc" path="res://addons/TerrainPlugin/TestTextures/texel.png" id="24_v1c3n"]
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_hod58"]
 parameter_name = "Layer_2_Rough"
@@ -155,6 +154,8 @@ script = ExtResource("1")
 
 [sub_resource type="VisualShader" id="VisualShader_ofbnr"]
 code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+
 uniform sampler2D Layer_1 : source_color;
 uniform sampler2D Layer_1_Dis : source_color;
 uniform sampler2D Layer_1_Normal : hint_normal;
@@ -882,4 +883,3 @@ shader_parameter/Layer_3_Dis = ExtResource("20_vymy8")
 shader_parameter/Layer_3_Normal = ExtResource("21_epq78")
 shader_parameter/Layer_3_Rough = ExtResource("22_x63ai")
 shader_parameter/Layer_3_AO = ExtResource("19_fxm6v")
-shader_parameter/terrainSplatmap1 = ExtResource("24_v1c3n")
