@@ -10,13 +10,13 @@ config_version=5
 
 [application]
 
-config/name="Terrain Plugin-testing"
+config/name="terrain-tool-godot4"
 config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [dotnet]
 
-project/assembly_name="Terrain Plugin-testing"
+project/assembly_name="terrain-tool-godot4"
 
 [editor_plugins]
 

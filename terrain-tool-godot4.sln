@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrain Plugin-testing", "Terrain Plugin-testing.csproj", "{B189AACD-28E2-4DCD-BAE1-86C08D32EF50}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "terrain-tool-godot4", "terrain-tool-godot4.csproj", "{B189AACD-28E2-4DCD-BAE1-86C08D32EF50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
