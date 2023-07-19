@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using TerrainEditor.Utils.Editor.Brush;
 

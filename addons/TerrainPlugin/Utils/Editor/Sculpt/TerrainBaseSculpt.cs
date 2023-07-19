@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 
 namespace TerrainEditor.Utils.Editor.Sculpt;

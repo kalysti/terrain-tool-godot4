@@ -1,3 +1,4 @@
+#nullable enable
 namespace TerrainEditor.Utils;
 
 ///<author email="Sythelux Rikd">Sythelux Rikd</author>

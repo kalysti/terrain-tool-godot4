@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using Godot.Collections;
 using TerrainEditor.Generators;

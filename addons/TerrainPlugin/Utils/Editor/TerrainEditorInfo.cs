@@ -1,3 +1,4 @@
+#nullable enable
 namespace TerrainEditor.Utils.Editor;
 
 public struct TerrainEditorInfo
