@@ -483,13 +483,10 @@ public partial class TerrainPlugin : EditorPlugin
 		return float.NaN;
 	}
 
-	private bool GetPanelControlBoolean(string name)
-	{
-		var control = PanelControls[name] as CheckBox;
-		return control != null && control.ButtonPressed;
-	}
+	private bool GetPanelControlBoolean(string name) =>
+        PanelControls[name] is CheckBox control && control.ButtonPressed;
 
-	private TerrainEditorInfo GetEditorApply()
+    private TerrainEditorInfo GetEditorApply()
 	{
 		var st = new TerrainEditorInfo
 		{
