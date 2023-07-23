@@ -147,10 +147,13 @@ public partial class TerrainPlugin : EditorPlugin
 					float distance = editorCamera.Far * 1.2f;
 					PhysicsDirectSpaceState3D? spaceState = SelectedTerrain.GetWorld3D().DirectSpaceState;
 
-					var query = new PhysicsRayQueryParameters3D();
-					query.From = from;
-					query.To = from + dir * distance;
-					Dictionary? result = spaceState.IntersectRay(query);
+                    var query = new PhysicsRayQueryParameters3D
+                    {
+                        From = from,
+                        To = from + dir * distance
+                    };
+
+                    Dictionary? result = spaceState.IntersectRay(query);
 
 					if (result.Count > 0 && result["collider"].Obj != null)
 						if (result["collider"].Obj == SelectedTerrain)
@@ -420,14 +423,15 @@ public partial class TerrainPlugin : EditorPlugin
 
     private void AddPanelSpinBox(string name, string text, float def, float min, float max, float step)
 	{
-		var spinBox = new SpinBox();
+        var spinBox = new SpinBox
+        {
+            MinValue = min,
+            MaxValue = max,
+            Step = step,
+            Value = def
+        };
 
-		spinBox.MinValue = min;
-		spinBox.MaxValue = max;
-		spinBox.Step = step;
-		spinBox.Value = def;
-
-		CreateMarginInput(editorPanel, text, spinBox);
+        CreateMarginInput(editorPanel, text, spinBox);
 		PanelControls.Add(name, spinBox);
 	}
 
@@ -682,10 +686,11 @@ public partial class TerrainPlugin : EditorPlugin
 		var vboxRoot = new VBoxContainer();
 
 		var margin = new MarginContainer();
-		var label = new Label();
-		label.Text = text;
+        var label = new Label {
+            Text = text
+        };
 
-		margin.AddThemeConstantOverride("margin_left", 0);
+        margin.AddThemeConstantOverride("margin_left", 0);
 		margin.AddChild(control);
 
 		vboxRoot.AddChild(label);

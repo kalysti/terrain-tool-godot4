@@ -149,10 +149,12 @@ public class TerrainHeightMapGenerator : TerrainBaseGenerator
             int i = (z + b - normalsStart.Y) * normalsSize.X + (x + a - normalsStart.X);
             int h = (z + b) * heightMapSize + x + a;
 
-            var v = new Vector3();
-            v.X = (x + a) * Terrain3D.UNITS_PER_VERTEX;
-            v.Y = heightmapData[h]; // << takes time
-            v.Z = (z + b) * Terrain3D.UNITS_PER_VERTEX;
+            var v = new Vector3
+            {
+                X = (x + a) * Terrain3D.UNITS_PER_VERTEX,
+                Y = heightmapData[h], // << takes time
+                Z = (z + b) * Terrain3D.UNITS_PER_VERTEX
+            };
 
             return new VertexResult
             {
