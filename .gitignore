@@ -1,3 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 *.csproj.old
+
+# Mono Specific Ignores
+.vs/
