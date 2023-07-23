@@ -37,20 +37,16 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         };
     }
 
-    public override PortType _GetOutputPortType(int port)
-    {
-        return port switch
+    public override PortType _GetOutputPortType(int port) =>
+        port switch
         {
             0 => PortType.Transform,
             1 => PortType.Transform,
             _ => 0,
         };
-    }
 
-
-    public override string _GetInputPortName(int port)
-    {
-        return port switch
+    public override string _GetInputPortName(int port) =>
+        port switch
         {
             0 => "Color",
             1 => "Displacement",
@@ -63,16 +59,13 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
             8 => "Mix",
             _ => "",
         };
-    }
 
-    public override PortType _GetInputPortType(int port)
-    {
-        return port switch
+    public override PortType _GetInputPortType(int port) =>
+        port switch
         {
             0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 => PortType.Sampler,
             _ => 0,
         };
-    }
 
     public override string _GetGlobalCode(Shader.Mode mode) => @"float rand(vec2 input)
 				{
