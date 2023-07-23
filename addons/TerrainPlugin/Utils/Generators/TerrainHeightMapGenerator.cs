@@ -144,7 +144,7 @@ public class TerrainHeightMapGenerator : TerrainBaseGenerator
         int normalsLength = normalsSize.X * normalsSize.Y;
         var normalsPerVertex = new Vector3[normalsLength];
 
-        Func<int, int, int, int, VertexResult> getVertex = (a, b, x, z) =>
+        VertexResult getVertex(int a, int b, int x, int z)
         {
             int i = (z + b - normalsStart.Y) * normalsSize.X + (x + a - normalsStart.X);
             int h = (z + b) * heightMapSize + x + a;
@@ -161,9 +161,9 @@ public class TerrainHeightMapGenerator : TerrainBaseGenerator
                 V = v,
                 I = i
             };
-        };
+        }
 
-        Func<int, int, int, int, VertexResult> getNormal = (a, b, x, z) =>
+        VertexResult getNormal(int a, int b, int x, int z)
         {
             int i = (z + (b - 1)) * normalsSize.X + x + (a - 1);
             Vector3 v = normalsPerVertex[i].Normalized();
@@ -173,7 +173,7 @@ public class TerrainHeightMapGenerator : TerrainBaseGenerator
                 V = v,
                 I = i
             };
-        };
+        }
 
         // Calculate per-quad normals and apply them to nearby vertices
         for (int z = normalsStart.Y; z < normalsEnd.Y - 1; z++)
