@@ -45,25 +45,18 @@ public partial class Terrain3D : Node3D
 	}
 
 
-	public TerrainPatch? GetPatch(int x, int z)
-	{
-		return TerrainPatches.FirstOrDefault(patch => patch != null && patch.PatchCoordinates.X == x && patch.PatchCoordinates.Y == z);
-	}
+    public TerrainPatch? GetPatch(int x, int z) => 
+		TerrainPatches.FirstOrDefault(patch => patch != null && patch.PatchCoordinates.X == x && patch.PatchCoordinates.Y == z);
 
-	public int GetPatchesCount()
-	{
-		return TerrainPatches.Count;
-	}
+    public int GetPatchesCount() => TerrainPatches.Count;
 
-	public TerrainPatch? GetPatch(int idx)
-	{
-		return TerrainPatches.Count >= idx ? TerrainPatches[idx] : null;
-	}
+    public TerrainPatch? GetPatch(int idx) => 
+		TerrainPatches.Count >= idx ? TerrainPatches[idx] : null;
 
-	/// <summary>
-	/// Creating a patch grid
-	/// </summary>
-	public void CreatePatchGrid(int patchX, int patchY, int chunkSize)
+    /// <summary>
+    /// Creating a patch grid
+    /// </summary>
+    public void CreatePatchGrid(int patchX, int patchY, int chunkSize)
 	{
 		ClearDraw();
 
@@ -75,18 +68,15 @@ public partial class Terrain3D : Node3D
 			CreatePatch(x, y, chunkSize);
 	}
 
-	/// <summary>
-	/// Creating a patch by given coords and chunksize
-	/// </summary>
-	public void CreatePatch(Vector2I coord, int chunkSize)
-	{
-		CreatePatch(coord.X, coord.Y, chunkSize);
-	}
+    /// <summary>
+    /// Creating a patch by given coords and chunksize
+    /// </summary>
+    public void CreatePatch(Vector2I coord, int chunkSize) => CreatePatch(coord.X, coord.Y, chunkSize);
 
-	/// <summary>
-	/// Creating a patch by given coords and chunksize
-	/// </summary>
-	public void CreatePatch(int x, int y, int chunkSize)
+    /// <summary>
+    /// Creating a patch by given coords and chunksize
+    /// </summary>
+    public void CreatePatch(int x, int y, int chunkSize)
 	{
 		try
 		{

@@ -13,37 +13,19 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         SetInputPortDefaultValue(8, 0.0);
     }
 
-    public override string _GetName()
-    {
-        return "AntiTilingCS3D";
-    }
+    public override string _GetName() => "AntiTilingCS3D";
 
 
-    public override string _GetCategory()
-    {
-        return "TerrainTools";
-    }
+    public override string _GetCategory() => "TerrainTools";
 
-    public override string _GetDescription()
-    {
-        return "Anti tiling for terrain textures";
-    }
+    public override string _GetDescription() => "Anti tiling for terrain textures";
 
-    public override PortType _GetReturnIconType()
-    {
-        return PortType.Scalar;
-    }
+    public override PortType _GetReturnIconType() => PortType.Scalar;
 
-    public override int _GetInputPortCount()
-    {
-        return 9;
-    }
+    public override int _GetInputPortCount() => 9;
 
 
-    public override int _GetOutputPortCount()
-    {
-        return 2;
-    }
+    public override int _GetOutputPortCount() => 2;
 
     public override string _GetOutputPortName(int port)
     {
@@ -104,9 +86,7 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         return 0;
     }
 
-    public override string _GetGlobalCode(Shader.Mode mode)
-    {
-        return @"float rand(vec2 input)
+    public override string _GetGlobalCode(Shader.Mode mode) => @"float rand(vec2 input)
 				{
 					return fract(sin(dot(input.Xy, vec2(12.9898, 78.233))) * 43758.5453123);
 				}
@@ -123,7 +103,6 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
 					mat2 rotation_mat = mat2(vec2(cosine, -sine), vec2(sine, cosine));
 					return rotation_mat * tiled_UV + 0.5f;
 				}";
-    }
 
     public override string _GetCode(Array<string> inputVars, Array<string> outputVars, Shader.Mode mode, VisualShader.Type type)
     {

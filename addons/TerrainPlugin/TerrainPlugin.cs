@@ -93,12 +93,10 @@ public partial class TerrainPlugin : EditorPlugin
 		chunk.UpdateInspectorMaterial(color, new Plane(position, radius), new Plane(falloff, (float)info.BrushFalloffType, 0, 0));
 	}
 
-	protected static void ResetMaterialParams(TerrainChunk chunk)
-	{
+    protected static void ResetMaterialParams(TerrainChunk chunk) => 
 		chunk.UpdateInspectorMaterial(new Color(), new Plane(Vector3.Zero, 0f), new Plane(Vector3.Zero, 0f));
-	}
 
-	protected void DrawInspector(Vector3 pos, bool reset = false)
+    protected void DrawInspector(Vector3 pos, bool reset = false)
 	{
 		if (SelectedTerrain != null && SelectedTerrain.IsInsideTree() && editorCamera != null)
 		{
@@ -388,22 +386,13 @@ public partial class TerrainPlugin : EditorPlugin
 		RefreshGizmo();
 	}
 
-	public void SelectFilePathSplatmap1(string path)
-	{
-		SplatmapPath1 = path;
-	}
+    public void SelectFilePathSplatmap1(string path) => SplatmapPath1 = path;
 
-	public void SelectFilePathSplatmap2(string path)
-	{
-		SplatmapPath2 = path;
-	}
+    public void SelectFilePathSplatmap2(string path) => SplatmapPath2 = path;
 
-	public void SelectFilePath(string path)
-	{
-		HeightMapPath = path;
-	}
+    public void SelectFilePath(string path) => HeightMapPath = path;
 
-	public void OpenCreateMenu(long id)
+    public void OpenCreateMenu(long id)
 	{
 		HeightMapPath = null;
 		SplatmapPath1 = null;
@@ -427,12 +416,9 @@ public partial class TerrainPlugin : EditorPlugin
 		}
 	}
 
-	public void OpenDialog()
-	{
-		CreateDialog.PopupCentered(new Vector2I(800, 600));
-	}
+    public void OpenDialog() => CreateDialog.PopupCentered(new Vector2I(800, 600));
 
-	private void AddPanelSpinBox(string name, string text, float def, float min, float max, float step)
+    private void AddPanelSpinBox(string name, string text, float def, float min, float max, float step)
 	{
 		var spinBox = new SpinBox();
 
@@ -517,12 +503,9 @@ public partial class TerrainPlugin : EditorPlugin
 		return st;
 	}
 
-	public void OnPanelControlSelected(long index)
-	{
-		RefreshPanel();
-	}
+    public void OnPanelControlSelected(long index) => RefreshPanel();
 
-	private void RefreshGizmo()
+    private void RefreshGizmo()
 	{
 		GizmoPlugin.ShowAabb = GetPanelControlBoolean("show_aabb");
 		GizmoPlugin.ShowCollider = GetPanelControlBoolean("show_collider");
@@ -887,12 +870,9 @@ public partial class TerrainPlugin : EditorPlugin
 		PanelControls.Clear();
 	}
 
-	public override bool _Handles(GodotObject go)
-	{
-		return go is Terrain3D;
-	}
+    public override bool _Handles(GodotObject go) => go is Terrain3D;
 
-	public override void _MakeVisible(bool visible)
+    public override void _MakeVisible(bool visible)
 	{
 		if (!visible)
 			_Edit(new Node());

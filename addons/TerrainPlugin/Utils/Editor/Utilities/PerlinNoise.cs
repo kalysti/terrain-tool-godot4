@@ -45,10 +45,7 @@ public class PerlinNoise
         return @base + noise * NoiseAmount;
     }
 
-    private float Fade(float t)
-    {
-        return t * t * t * (t * (t * 6 - 15) + 10);
-    }
+    private float Fade(float t) => t * t * t * (t * (t * 6 - 15) + 10);
 
     private float Grad(int hash, float x, float y)
     {

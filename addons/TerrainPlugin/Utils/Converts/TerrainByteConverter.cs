@@ -6,10 +6,8 @@ namespace TerrainEditor.Converters;
 
 public static class TerrainByteConverter
 {
-    public static bool ReadIsHoleByte(Rgba raw)
-    {
-        return raw.b + raw.a >= (int)(1.9f * byte.MaxValue);
-    }
+    public static bool ReadIsHoleByte(Rgba raw) =>
+        raw.b + raw.a >= (int)(1.9f * byte.MaxValue);
 
     public static float ReadNormalizedHeight16Bit(Color raw)
     {

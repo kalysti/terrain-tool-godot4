@@ -21,15 +21,9 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
         CreateMaterial("shape_material", gizmoColor);
     }
 
-    public override bool _HasGizmo(Node3D spatial)
-    {
-        return spatial is Terrain3D;
-    }
+    public override bool _HasGizmo(Node3D spatial) => spatial is Terrain3D;
 
-    public override string _GetGizmoName()
-    {
-        return "TerrainGizmo";
-    }
+    public override string _GetGizmoName() => "TerrainGizmo";
 
     public static void GetEdge(int pEdge, Vector3 position, Vector3 size, ref Vector3 rFrom, ref Vector3 rTo)
     {
