@@ -48,45 +48,44 @@ public partial class TerrainMapBox3D : Terrain3D
                 return Error.Ok;
             }
 
+            //TODO: check if Godot HttpClient is better.
+            // ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            // ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => true;
+            // client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache); //why do we request 
+            // client.Headers.Add("Cache-Control", "no-cache");
 
-            using (var client = new HttpClient()) //TODO: check if Godot HttpClient is better.
+            using var client = new HttpClient();
+
+            GD.Print($"Download: {url}");
+            HttpResponseMessage responseMessage = await client.GetAsync(url);
+
+            if (responseMessage.StatusCode == HttpStatusCode.OK)
             {
-                // ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
-                // ServicePointManager.ServerCertificateValidationCallback += (send, certificate, chain, sslPolicyErrors) => true;
-                // client.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache); //why do we request 
-                // client.Headers.Add("Cache-Control", "no-cache");
+                GD.Print($"Store in: {filePath}");
 
-                GD.Print($"Download: {url}");
-                HttpResponseMessage responseMessage = await client.GetAsync(url);
-
-                if (responseMessage.StatusCode == HttpStatusCode.OK)
+                using (FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write))
                 {
-                    GD.Print($"Store in: {filePath}");
-
-                    using (FileAccess? result = FileAccess.Open(filePath, FileAccess.ModeFlags.Write))
+                    if (result.IsOpen())
                     {
-                        if (result.IsOpen())
-                        {
-                            result.StoreBuffer(await responseMessage.Content.ReadAsByteArrayAsync());
-                        }
-                        else
-                        {
-                            GD.PrintErr($"Cant write file: {result}");
-                            return Error.FileNotFound;
-                        }
-
-                        result.Flush();
+                        result.StoreBuffer(await responseMessage.Content.ReadAsByteArrayAsync());
+                    }
+                    else
+                    {
+                        GD.PrintErr($"Cant write file: {result}");
+                        return Error.FileNotFound;
                     }
 
-                    GD.PrintErr("Done storing image successfully");
-
-                    return Error.Ok;
+                    result.Flush();
                 }
 
+                GD.PrintErr("Done storing image successfully");
 
-                GD.PrintErr($"Request failed: {responseMessage}");
-                return Error.Failed;
+                return Error.Ok;
             }
+
+
+            GD.PrintErr($"Request failed: {responseMessage}");
+            return Error.Failed;
         }
         catch (Exception e)
         {
