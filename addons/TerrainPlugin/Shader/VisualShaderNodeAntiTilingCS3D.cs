@@ -29,61 +29,49 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
 
     public override string _GetOutputPortName(int port)
     {
-        switch (port)
+        return port switch
         {
-            case 0: return "Packed";
-            case 1: return "Original";
-        }
-
-        return "";
+            0 => "Packed",
+            1 => "Original",
+            _ => "",
+        };
     }
 
     public override PortType _GetOutputPortType(int port)
     {
-        switch (port)
+        return port switch
         {
-            case 0: return PortType.Transform;
-            case 1: return PortType.Transform;
-        }
-
-        return 0;
+            0 => PortType.Transform,
+            1 => PortType.Transform,
+            _ => 0,
+        };
     }
 
 
     public override string _GetInputPortName(int port)
     {
-        switch (port)
+        return port switch
         {
-            case 0: return "Color";
-            case 1: return "Displacement";
-            case 2: return "Normal";
-            case 3: return "Roughness";
-            case 4: return "AO";
-            case 5: return "UV";
-            case 6: return "Randomize";
-            case 7: return "Tiling";
-            case 8: return "Mix";
-        }
-
-        return "";
+            0 => "Color",
+            1 => "Displacement",
+            2 => "Normal",
+            3 => "Roughness",
+            4 => "AO",
+            5 => "UV",
+            6 => "Randomize",
+            7 => "Tiling",
+            8 => "Mix",
+            _ => "",
+        };
     }
 
     public override PortType _GetInputPortType(int port)
     {
-        switch (port)
+        return port switch
         {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8: return PortType.Sampler;
-        }
-
-        return 0;
+            0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 => PortType.Sampler,
+            _ => 0,
+        };
     }
 
     public override string _GetGlobalCode(Shader.Mode mode) => @"float rand(vec2 input)
