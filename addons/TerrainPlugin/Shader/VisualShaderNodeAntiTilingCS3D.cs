@@ -27,15 +27,13 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
 
     public override int _GetOutputPortCount() => 2;
 
-    public override string _GetOutputPortName(int port)
-    {
-        return port switch
+    public override string _GetOutputPortName(int port) =>
+        port switch
         {
             0 => "Packed",
             1 => "Original",
             _ => "",
         };
-    }
 
     public override PortType _GetOutputPortType(int port) =>
         port switch
