@@ -9,6 +9,7 @@ using HttpClient = System.Net.Http.HttpClient;
 namespace TerrainEditor;
 
 [Tool]
+[GlobalClass]
 public partial class TerrainMapBox3D : Terrain3D
 {
     [ExportCategory("Terrain Mapbox")]
