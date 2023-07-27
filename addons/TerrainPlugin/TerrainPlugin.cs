@@ -545,12 +545,13 @@ public partial class TerrainPlugin : EditorPlugin
 
 	protected void CreateImportMenu()
 	{
-		AddChild(CreateDialog);
-		AddChild(fileDialog);
-		AddChild(fileDialogSplatmap1);
-		AddChild(fileDialogSplatmap2);
+		EditorInterface? editorInterface = GetEditorInterface();
+		editorInterface?.GetBaseControl().AddChild(CreateDialog);
+		editorInterface?.GetBaseControl().AddChild(fileDialog);
+		editorInterface?.GetBaseControl().AddChild(fileDialogSplatmap1);
+		editorInterface?.GetBaseControl().AddChild(fileDialogSplatmap2);
 
-		AddChild(fileDialogExport);
+		editorInterface?.GetBaseControl().AddChild(fileDialogExport);
 		CreateDialog.Confirmed += GenerateTerrain;
 		fileDialogExport.FileSelected += ExportHeightmap;
 
