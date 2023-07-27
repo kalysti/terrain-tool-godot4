@@ -52,7 +52,7 @@ public partial class TextureUnpack3D : VisualShaderNodeCustom
         var heightStr = "";
         heightStr += $"{outputVars[0]} = {inputVars[0]}[0].rgb;\n";
         heightStr += $"{outputVars[1]} = {inputVars[0]}[1].r;\n";
-        heightStr += $"{outputVars[2]} = new Vector3({inputVars[0]}[2].r, {inputVars[0]}[2].g, {inputVars[0]}[2].b);\n";
+        heightStr += $"{outputVars[2]} = vec3({inputVars[0]}[2].r, {inputVars[0]}[2].g, {inputVars[0]}[2].b);\n";
         heightStr += $"{outputVars[3]} = {inputVars[0]}[3].r;\n";
         heightStr += $"{outputVars[4]} = {inputVars[0]}[3].b;\n";
 

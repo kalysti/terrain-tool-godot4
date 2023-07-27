@@ -42,8 +42,7 @@ public partial class AntiTiling3D : VisualShaderNodeCustom
     public override PortType _GetOutputPortType(int port) =>
         port switch
         {
-            0 => PortType.Transform,
-            1 => PortType.Transform,
+            0 or 1 => PortType.Transform,
             _ => 0,
         };
 
@@ -65,7 +64,9 @@ public partial class AntiTiling3D : VisualShaderNodeCustom
     public override PortType _GetInputPortType(int port) =>
         port switch
         {
-            0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 => PortType.Sampler,
+            0 or 1 or 2 or 3 or 4 => PortType.Sampler,
+            5 => PortType.Vector3D,
+            6 or 7 or 8 => PortType.Scalar,
             _ => 0,
         };
 
@@ -90,7 +91,7 @@ public partial class AntiTiling3D : VisualShaderNodeCustom
         heightStr += "packedOriginal[1].r = dispMap.r;\n";
         heightStr += "packedOriginal[2].rg = normalMap.rg;\n";
         heightStr += "packedOriginal[3].r = roughMap.r;\n";
-        heightStr += "packedOriginal[3].B = aoMap.r;\n";
+        heightStr += "packedOriginal[3].b = aoMap.r;\n"; // r to b?
 
 
         heightStr += $"{outputVars[1]} = packedOriginal;\n";
@@ -109,7 +110,7 @@ public partial class AntiTiling3D : VisualShaderNodeCustom
         heightStr += "packedMixed[1].r = dispMapRot.r;\n";
         heightStr += "packedMixed[2].rg = normalMapRot.rg;\n";
         heightStr += "packedMixed[3].r = roughMapRot.r;\n";
-        heightStr += "packedMixed[3].B = aoMapRot.r;\n";
+        heightStr += "packedMixed[3].b = aoMapRot.r;\n"; // r to b?
 
         heightStr += $"packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  {inputVars[8]});\n";
         heightStr += $"packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  {inputVars[8]});\n";
