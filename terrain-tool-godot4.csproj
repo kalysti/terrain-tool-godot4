@@ -4,4 +4,11 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>TerrainPlugintesting</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="addons\TerrainPlugin\Shader\AntiTiling3D.gdshader" />
+    <Content Include="addons\TerrainPlugin\Shader\DepthBlending3D.gdshader" />
+    <Content Include="addons\TerrainPlugin\Shader\PerlinNoise2D.gdshader" />
+    <Content Include="addons\TerrainPlugin\Shader\SplatmapHeight3D.gdshader" />
+    <Content Include="addons\TerrainPlugin\Shader\TerrainMaterial3D.gdshader" />
+  </ItemGroup>
 </Project>

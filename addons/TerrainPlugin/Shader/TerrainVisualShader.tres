@@ -1,27 +1,12 @@
-[gd_resource type="ShaderMaterial" load_steps=56 format=3 uid="uid://rhmyhuveb7yv"]
+[gd_resource type="ShaderMaterial" load_steps=41 format=3 uid="uid://rhmyhuveb7yv"]
 
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainGenerator3D.gd" id="1"]
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeAntiTiling3D.gd" id="2"]
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeDepthBlending3D.gd" id="3"]
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTextureUnpack3D.gd" id="4"]
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeTerrainMaterial3D.gd" id="5"]
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeUVMultiply3D.gd" id="6"]
-[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/VisualShaderNodeSplatmapHeight3D.gd" id="7"]
-[ext_resource type="Texture2D" uid="uid://dc2xi4hsf3t0f" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Color.jpg" id="8_0au65"]
-[ext_resource type="Texture2D" uid="uid://cotxdvt4tewp0" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_AmbientOcclusion.jpg" id="9_i4a20"]
-[ext_resource type="Texture2D" uid="uid://dpdgc1ku7e6fr" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Displacement.jpg" id="10_n1vaw"]
-[ext_resource type="Texture2D" uid="uid://c0o2ihy33nxoi" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Normal.jpg" id="11_oncw3"]
-[ext_resource type="Texture2D" uid="uid://djoj3jl1n2rtt" path="res://addons/TerrainPlugin/TestTextures/Grass/Ground037_2K_Roughness.jpg" id="12_4egyj"]
-[ext_resource type="Texture2D" uid="uid://dyvdrwt45k7j6" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Color.jpg" id="13_w4xsk"]
-[ext_resource type="Texture2D" uid="uid://dn8quy5008k78" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_AmbientOcclusion.jpg" id="14_e5u5p"]
-[ext_resource type="Texture2D" uid="uid://d1yt3ecldar2a" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Displacement.jpg" id="15_h3y7g"]
-[ext_resource type="Texture2D" uid="uid://clc4kcx4335tx" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Normal.jpg" id="16_m333e"]
-[ext_resource type="Texture2D" uid="uid://mk7mytfdmrhp" path="res://addons/TerrainPlugin/TestTextures/Pave/PavingStones046_2K_Roughness.jpg" id="17_mm8pq"]
-[ext_resource type="Texture2D" uid="uid://b785uofraj4si" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Color.jpg" id="18_p6mbg"]
-[ext_resource type="Texture2D" uid="uid://cmxwi81tkqvo" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_AmbientOcclusion.jpg" id="19_fxm6v"]
-[ext_resource type="Texture2D" uid="uid://dl6sqatoftgcw" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Displacement.jpg" id="20_vymy8"]
-[ext_resource type="Texture2D" uid="uid://bc6gwklfsx8rh" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Normal.jpg" id="21_epq78"]
-[ext_resource type="Texture2D" uid="uid://c0fksnmlfatn8" path="res://addons/TerrainPlugin/TestTextures/Sandy/Ground022_2K_Roughness.jpg" id="22_x63ai"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/TerrainGenerator3D.cs" id="1"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/AntiTiling3D.cs" id="2"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/DepthBlending3D.cs" id="3"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/TextureUnpack3D.cs" id="4"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/TerrainMaterial3D.cs" id="5"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/UVMultiply3D.cs" id="6"]
+[ext_resource type="Script" path="res://addons/TerrainPlugin/Shader/SplatmapHeight3D.cs" id="7"]
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_hod58"]
 parameter_name = "Layer_2_Rough"
@@ -175,303 +160,288 @@ uniform sampler2D Layer_3_AO : source_color;
 
 // TerrainGenerator3D
 
+uniform vec4 terrainUvScale;
+uniform vec2 terrainUvOffset;
+uniform sampler2D terrainHeightMap : filter_linear, repeat_disable;
 
-		uniform vec4 terrainUvScale;
-		uniform vec2 terrainUvOffset;
-		uniform sampler2D terrainHeightMap : filter_linear, repeat_disable;
+uniform float terrainChunkSize = 0;
+uniform float terrainNextLodChunkSize = 0;
+uniform vec4 terrainNeighborLod = vec4(0,0,0,0);
+uniform float terrainCurrentLodLevel = 0;
+uniform bool terrainSmoothing = false;
 
-		uniform float terrainChunkSize = 0;
-		uniform float terrainNextLodChunkSize = 0;
-		uniform vec4 terrainNeighborLod = vec4(0,0,0,0);
-		uniform float terrainCurrentLodLevel = 0;
-		uniform bool terrainSmoothing = false;
-		
-		uniform sampler2D terrainSplatmap1 : filter_linear, repeat_disable;
-		uniform sampler2D terrainSplatmap2 : filter_linear, repeat_disable;
+uniform sampler2D terrainSplatmap1 : filter_linear, repeat_disable;
+uniform sampler2D terrainSplatmap2 : filter_linear, repeat_disable;
 
-		float calculateLOD(bool _smoothing, float _currentLod, vec4 _neighborLod, vec2 xy, vec4 morph)
-		{
-			if(_smoothing)
-			{
-				// Use LOD value based on Barycentric coordinates to morph to the lower LOD near chunk edges
-				vec4 lodCalculated = morph * _currentLod + _neighborLod * (vec4(1, 1, 1, 1) - morph);
+float calculateLOD(bool _smoothing, float _currentLod, vec4 _neighborLod, vec2 xy, vec4 morph)
+{
+    if(_smoothing)
+    {
+        // Use LOD value based on Barycentric coordinates to morph to the lower LOD near chunk edges
+        vec4 lodCalculated = morph * _currentLod + _neighborLod * (vec4(1, 1, 1, 1) - morph);
 
-				// Pick a quadrant (top, left, right or bottom)
-				float lod;
-				if ((xy.x + xy.y) > 1.0)
-				{
-					if (xy.x < xy.y)
-					{
-						lod = lodCalculated.w;
-					}
-					else
-					{
-						lod = lodCalculated.z;
-					}
-				}
-				else
-				{
-					if (xy.x < xy.y)
-					{
-						lod = lodCalculated.y;
-					}
-					else
-					{
-						lod = lodCalculated.x;
-					}
-				}
+        // Pick a quadrant (top, left, right or bottom)
+        float lod;
+        if ((xy.x + xy.y) > 1.0)
+        {
+            if (xy.x < xy.y)
+            {
+                lod = lodCalculated.w;
+            }
+            else
+            {
+                lod = lodCalculated.z;
+            }
+        }
+        else
+        {
+            if (xy.x < xy.y)
+            {
+                lod = lodCalculated.y;
+            }
+            else
+            {
+                lod = lodCalculated.x;
+            }
+        }
 
-				return lod;
-			}
-			else
-				return _currentLod;
-		}
+        return lod;
+    }
+    else
+        return _currentLod;
+}
 
-		mat3 CalcTangentBasisFromWorldNormal(vec3 normal)
-		{
-			vec3 tangenttest = cross(normal, vec3(1, 0, 0));
-			vec3 bitangenttest = cross(normal, tangenttest);
-			return mat3(tangenttest, bitangenttest, normal);
-		}
+mat3 CalcTangentBasisFromWorldNormal(vec3 normal)
+{
+    vec3 tangenttest = cross(normal, vec3(1, 0, 0));
+    vec3 bitangenttest = cross(normal, tangenttest);
+    return mat3(tangenttest, bitangenttest, normal);
+}
 
-		float getHeight(vec4 heightmapValue)
-		{
-			int heightR = int((heightmapValue.x * 255.0));
-			int heightG = int((heightmapValue.y * 255.0)) << 8;
+float getHeight(vec4 heightmapValue)
+{
+    int heightR = int((heightmapValue.x * 255.0));
+    int heightG = int((heightmapValue.y * 255.0)) << 8;
 
-			int sum = heightR + heightG;
-			return float(sum) / 65535.0;
-		}
+    int sum = heightR + heightG;
+    return float(sum) / 65535.0;
+}
 
-		vec3 getNormal(vec4 heightmapValue)
-		{
-			vec2 normalTemp = vec2(heightmapValue.b, heightmapValue.a) * 2.0f - 1.0f;
+vec3 getNormal(vec4 heightmapValue)
+{
+    vec2 normalTemp = vec2(heightmapValue.b, heightmapValue.a) * 2.0f - 1.0f;
 
-			float yNormalSaturated = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
-			vec3 normal = vec3(normalTemp.x, sqrt(1.0 - yNormalSaturated), normalTemp.y);
-			bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
-			normal = normalize(normal);
+    float yNormalSaturated = clamp(dot(normalTemp, normalTemp), 0.0, 1.0);
+    vec3 normal = vec3(normalTemp.x, sqrt(1.0 - yNormalSaturated), normalTemp.y);
+    bool isHole = (heightmapValue.b + heightmapValue.a) >= 1.9f;
+    normal = normalize(normal);
 
-			if (isHole)
-			{
-				normal = vec3(0, 1, 0);
-			}
+    if (isHole)
+    {
+        normal = vec3(0, 1, 0);
+    }
 
-			return normal;
-		}
+    return normal;
+}
 
-		vec3 getPosition(vec2 uv, float _terrainChunkSize, float _terrainCurrentLodLevel, bool _smoothing, float _terrainNextLodChunkSize, float lodCalculated)
-		{
-			float lodValue = _terrainCurrentLodLevel;
-			vec2 positionXZ = vec2(0,0);
+vec3 getPosition(vec2 uv, float _terrainChunkSize, float _terrainCurrentLodLevel, bool _smoothing, float _terrainNextLodChunkSize, float lodCalculated)
+{
+    float lodValue = _terrainCurrentLodLevel;
+    vec2 positionXZ = vec2(0,0);
 
-			if(_smoothing)
-			{		
-					vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
-					float morphAlpha = lodCalculated - _terrainCurrentLodLevel;
+    if(_smoothing)
+    {		
+            vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
+            float morphAlpha = lodCalculated - _terrainCurrentLodLevel;
 
-					vec2 positionXZThisLOD = uv * _terrainChunkSize;
-					vec2 positionXZNextLOD = nextLODPos * _terrainChunkSize;
-					positionXZ = mix(positionXZThisLOD, positionXZNextLOD, morphAlpha);
-			}
-			else {
-				positionXZ = uv * _terrainChunkSize;
-			}
-			
-			return vec3(positionXZ.x, 0.0f, positionXZ.y);
-	
-		}
+            vec2 positionXZThisLOD = uv * _terrainChunkSize;
+            vec2 positionXZNextLOD = nextLODPos * _terrainChunkSize;
+            positionXZ = mix(positionXZThisLOD, positionXZNextLOD, morphAlpha);
+    }
+    else {
+        positionXZ = uv * _terrainChunkSize;
+    }
+    
+    return vec3(positionXZ.x, 0.0f, positionXZ.y);
 
-		vec4 getHeightmap(vec2 uv, float _terrainChunkSize,  bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
+}
 
-			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
+vec4 getHeightmap(vec2 uv, float _terrainChunkSize,  bool _smoothing, vec4 uv_scale, sampler2D heightmap, float morphAlpha, float _terrainNextLodChunkSize, float _currentLODLevel){
 
-			if(_smoothing)
-			{
+    vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
 
-				//vec4 heightmapValueThisLOD = textureLod( heightmap, heightmapUVs, _currentLODLevel);
-				vec4 heightmapValueThisLOD = texture( heightmap, heightmapUVs);
-				vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
-				vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
-				vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1.0f);
-				vec4 heightmapValue = mix(heightmapValueThisLOD, heightmapValueNextLOD, morphAlpha);
+    if(_smoothing)
+    {
 
-				return heightmapValue;
-			}
-			else {
-				return textureLod(heightmap, heightmapUVs, _currentLODLevel);
-			}
-		}
+        //vec4 heightmapValueThisLOD = textureLod( heightmap, heightmapUVs, _currentLODLevel);
+        vec4 heightmapValueThisLOD = texture( heightmap, heightmapUVs);
+        vec2 nextLODPos = round(uv * _terrainNextLodChunkSize) / _terrainNextLodChunkSize;
+        vec2 heightmapUVsNextLOD = nextLODPos * uv_scale.xy + uv_scale.zw;
+        vec4 heightmapValueNextLOD = textureLod( heightmap, heightmapUVsNextLOD, _currentLODLevel + 1.0f);
+        vec4 heightmapValue = mix(heightmapValueThisLOD, heightmapValueNextLOD, morphAlpha);
 
-		mat3 RemoveScaleFromLocalToWorld(mat3 localToWorld)
-		{
-			//localToWorld[0] *= WorldInvScale.x;
-			//localToWorld[1] *= WorldInvScale.y;
-			//localToWorld[2] *= WorldInvScale.z;
+        return heightmapValue;
+    }
+    else {
+        return textureLod(heightmap, heightmapUVs, _currentLODLevel);
+    }
+}
 
-			return localToWorld;
-		}
+mat3 RemoveScaleFromLocalToWorld(mat3 localToWorld)
+{
+    //localToWorld[0] *= WorldInvScale.x;
+    //localToWorld[1] *= WorldInvScale.y;
+    //localToWorld[2] *= WorldInvScale.z;
 
-		mat3 CalcTangentToWorld(mat4 world, mat3 tangentToLocal)
-		{
-			mat3 localToWorld = RemoveScaleFromLocalToWorld(mat3(world));
-			return  tangentToLocal * localToWorld; 
-		}
+    return localToWorld;
+}
 
-	
-// UVMultiply3D
-
-	
-	
+mat3 CalcTangentToWorld(mat4 world, mat3 tangentToLocal)
+{
+    mat3 localToWorld = RemoveScaleFromLocalToWorld(mat3(world));
+    return  tangentToLocal * localToWorld; 
+}
 // AntiTiling3D
 
-		float rand(vec2 input) {
-			return fract(sin(dot(input.xy, vec2(12.9898,78.233))) * 43758.5453123);
-		}
 
-		vec2 rotatedUV(vec2 uv, float tiling, float randomize_rotation)
-		{
-			vec2 tiled_UV_raw = uv * tiling;
-			vec2 tiled_UV = fract(tiled_UV_raw) - 0.5f;
-			
-			vec2 unique_val = floor(uv * tiling) / tiling;
-			float rotation = (rand(unique_val) * 2.0f - 1.0f) * randomize_rotation * 3.14f;
-			float cosine = cos(rotation);
-			float sine = sin(rotation);
-			mat2 rotation_mat = mat2(vec2(cosine, -sine), vec2(sine, cosine));
-			return rotation_mat * tiled_UV + 0.5f;
-		}
-		
-	
+float rand(vec2 input)
+{
+    return fract(sin(dot(input.Xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+vec2 rotatedUV(vec2 uv, float tiling, float randomize_rotation)
+{
+    vec2 tiled_UV_raw = uv * tiling;
+    vec2 tiled_UV = fract(tiled_UV_raw) - 0.5f;
+
+    vec2 unique_val = floor(uv * tiling) / tiling;
+    float rotation = (rand(unique_val) * 2.0f - 1.0f) * randomize_rotation * 3.14f;
+    float cosine = cos(rotation);
+    float sine = sin(rotation);
+    mat2 rotation_mat = mat2(vec2(cosine, -sine), vec2(sine, cosine));
+    return rotation_mat * tiled_UV + 0.5f;
+}
 // SplatmapHeight3D
 
 
-		vec4 getSplatmap(vec2 uv, float _terrainChunkSize, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
-			vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
+vec4 _GetSplatmap(vec2 uv, float _terrainChunkSize, vec4 uv_scale, sampler2D heightmap, float currentLODLevel){
+    vec2 heightmapUVs = uv * uv_scale.xy + uv_scale.zw;
 
-			float currentChunkSize = (_terrainChunkSize / 100.0f + 1.0f) * 4.0f;
-			float extraPolate = 0.5f / currentChunkSize;
-			heightmapUVs = heightmapUVs + vec2(extraPolate, extraPolate);
+    float currentChunkSize = (_terrainChunkSize / 100.0f + 1.0f) * 4.0f;
+    float extraPolate = 0.5f / currentChunkSize;
+    heightmapUVs = heightmapUVs + vec2(extraPolate, extraPolate);
 
-			return textureLod(heightmap, heightmapUVs, currentLODLevel);
-		}
-		
-	
+    return textureLod(heightmap, heightmapUVs, currentLODLevel);
+}
 // DepthBlending3D
 
 
-		vec3 HeightBlend(float blending, vec3 input1, float height1, vec3 input2, float height2)
-		{
-			float height_start = max(height1, height2) - blending;
-			float b1 = max(height1 - height_start, 0.0f);
-			float b2 = max(height2 - height_start, 0.0f);
-			return ((input1 * b1) + (input2 * b2)) / (b1 + b2);
-		}
+vec3 HeightBlend(float blending, vec3 input1, float height1, vec3 input2, float height2)
+{
+    float height_start = max(height1, height2) - blending;
+    float b1 = max(height1 - height_start, 0.0f);
+    float b2 = max(height2 - height_start, 0.0f);
+    return ((input1 * b1) + (input2 * b2)) / (b1 + b2);
+}
 
-		vec3 HeightLerp(float blending, vec3 input1, float height1, vec3 input2, float height2, float lerp)
-		{
-			return HeightBlend(blending, input1, height1 * (1.0f - lerp), input2, height2 * lerp);
-		}
-
-	
-// TextureUnpack3D
-
-	
-	
+vec3 HeightLerp(float blending, vec3 input1, float height1, vec3 input2, float height2, float lerp)
+{
+    return HeightBlend(blending, input1, height1 * (1.0f - lerp), input2, height2 * lerp);
+}
 // TerrainMaterial3D
 
 
-		uniform vec4 BrushData0;
-		uniform vec4 BrushData1;
-		uniform vec4 BrushColor	 : source_color;
+uniform vec4 BrushData0;
+uniform vec4 BrushData1;
+uniform vec4 BrushColor	 : source_color;
 
-		uniform sampler2D terrainDefaultMaterial : source_color;
+uniform sampler2D terrainDefaultMaterial : source_color;
 
 
-		vec3 genInspectorHighliteTerrain(vec4 brushColor, vec4 brushData0, vec4 brushData1, mat4 CAMMATRIX, vec3 vertexLocal)
-		{
-			float n_out12p0 = 0.000000;
-			mat4 n_out6p0 =  CAMMATRIX;
-			vec3 n_out7p0 = vertexLocal;
-			vec3 n_out8p0 = (n_out6p0 * vec4(n_out7p0, 1.0)).xyz;
+vec3 genInspectorHighliteTerrain(vec4 brushColor, vec4 brushData0, vec4 brushData1, mat4 CAMMATRIX, vec3 vertexLocal)
+{
+    float n_out12p0 = 0.000000;
+    mat4 n_out6p0 =  CAMMATRIX;
+    vec3 n_out7p0 = vertexLocal;
+    vec3 n_out8p0 = (n_out6p0 * vec4(n_out7p0, 1.0)).xyz;
 
-			vec3 n_out2p0 = BrushData0.rgb;
-			float n_out2p1 = BrushData0.a;
+    vec3 n_out2p0 = BrushData0.rgb;
+    float n_out2p1 = BrushData0.a;
 
-			float n_out4p0 = distance(n_out8p0, n_out2p0);
+    float n_out4p0 = distance(n_out8p0, n_out2p0);
 
-			vec3 n_out3p0 = BrushData1.rgb;
-			float n_out3p1 = BrushData1.a;
+    vec3 n_out3p0 = BrushData1.rgb;
+    float n_out3p1 = BrushData1.a;
 
-			float n_out10p0 = n_out3p0.x;
-			float n_out10p1 = n_out3p0.y;
-			float n_out10p2 = n_out3p0.z;
+    float n_out10p0 = n_out3p0.x;
+    float n_out10p1 = n_out3p0.y;
+    float n_out10p2 = n_out3p0.z;
 
-			float n_out9p0;
-			n_out9p0 = 0.0;
-			{
-				float dist = n_out4p0;
-				float radius = n_out2p1;
-				float falloff = n_out10p0;
-				float falloffType = n_out10p1;
-				
-				// Output0 = brush intensity
-				n_out9p0 = 0.0f;
-				
-				if (dist < radius)
-				{
-					n_out9p0 = 1.0f;
-				}
-				else if (dist < radius + falloff)
-				{
-					float valueLinear = mix(1, 0, (dist - radius) / falloff);
-					if (falloffType == 0.0f) // Smooth
-						n_out9p0 = valueLinear * valueLinear * (3.0f - 2.0f * valueLinear);
-					else if (falloffType == 1.0f) // Linear
-						n_out9p0 = valueLinear;
-					else if (falloffType == 2.0f) // Spherical
-						n_out9p0 = sqrt(1.0f - ((dist - radius) / falloff) * (dist - radius) / falloff);
-					else if (falloffType == 3.0f) // Tip
-						n_out9p0 = 1.0f - sqrt(1.0f - ((falloff + radius - dist) / falloff) * (falloff + radius - dist) / falloff);
-				}
-				
-			}
+    float n_out9p0;
+    n_out9p0 = 0.0;
+    {
+        float dist = n_out4p0;
+        float radius = n_out2p1;
+        float falloff = n_out10p0;
+        float falloffType = n_out10p1;
+        
+        // Output0 = brush intensity
+        n_out9p0 = 0.0f;
+        
+        if (dist < radius)
+        {
+            n_out9p0 = 1.0f;
+        }
+        else if (dist < radius + falloff)
+        {
+            float valueLinear = mix(1, 0, (dist - radius) / falloff);
+            if (falloffType == 0.0f) // Smooth
+                n_out9p0 = valueLinear * valueLinear * (3.0f - 2.0f * valueLinear);
+            else if (falloffType == 1.0f) // Linear
+                n_out9p0 = valueLinear;
+            else if (falloffType == 2.0f) // Spherical
+                n_out9p0 = sqrt(1.0f - ((dist - radius) / falloff) * (dist - radius) / falloff);
+            else if (falloffType == 3.0f) // Tip
+                n_out9p0 = 1.0f - sqrt(1.0f - ((falloff + radius - dist) / falloff) * (falloff + radius - dist) / falloff);
+        }
+        
+    }
 
-			float n_in11p1 = 0.20000;
-			float n_out11p0 = mix(n_out12p0, n_in11p1, n_out9p0);
+    float n_in11p1 = 0.20000;
+    float n_out11p0 = mix(n_out12p0, n_in11p1, n_out9p0);
 
-			vec3 n_out16p0 = vec3(0.968750, 1.000000, 0.000000);
-			float n_out16p1 = 1.000000;
+    vec3 n_out16p0 = vec3(0.968750, 1.000000, 0.000000);
+    float n_out16p1 = 1.000000;
 
-			float n_out15p0;
-			n_out15p0 = 0.0f;
-			{
-				float Width = 7.0f;
-				if (abs(n_out4p0) < Width || abs(n_out4p0 - n_out2p1) < Width)
-					n_out15p0 = 1.0f;
-				else if (abs(n_out4p0 - n_out2p1 - n_out10p0) < Width)
-					n_out15p0 = 1.0f;
-				else
-					n_out15p0 = 0.0f;
-				
-			}
+    float n_out15p0;
+    n_out15p0 = 0.0f;
+    {
+        float Width = 7.0f;
+        if (abs(n_out4p0) < Width || abs(n_out4p0 - n_out2p1) < Width)
+            n_out15p0 = 1.0f;
+        else if (abs(n_out4p0 - n_out2p1 - n_out10p0) < Width)
+            n_out15p0 = 1.0f;
+        else
+            n_out15p0 = 0.0f;
+        
+    }
 
-			float n_out19p0 = mix(n_out11p0, n_out16p1, n_out15p0);
+    float n_out19p0 = mix(n_out11p0, n_out16p1, n_out15p0);
 
-			vec3 n_out13p0 = brushColor.rgb;
-			float n_out13p1 = brushColor.a;
+    vec3 n_out13p0 = brushColor.rgb;
+    float n_out13p1 = brushColor.a;
 
-			float n_out20p0 = n_out19p0 * n_out13p1;
+    float n_out20p0 = n_out19p0 * n_out13p1;
 
-			vec3 n_out18p0 = vec3(n_out15p0, n_out15p0, n_out15p0);
-			vec3 n_out17p0 = mix(n_out13p0, n_out16p0, n_out18p0);
-			vec3 n_out22p0 = vec3(n_out13p1, n_out13p1, n_out13p1);
+    vec3 n_out18p0 = vec3(n_out15p0, n_out15p0, n_out15p0);
+    vec3 n_out17p0 = mix(n_out13p0, n_out16p0, n_out18p0);
+    vec3 n_out22p0 = vec3(n_out13p1, n_out13p1, n_out13p1);
 
-			vec3 n_out21p0 = n_out17p0 * n_out22p0;
-			return mix(vec3(0.0f,0.0f,0.0f), n_out21p0, n_out20p0);
-		}
+    vec3 n_out21p0 = n_out17p0 * n_out22p0;
+    return mix(vec3(0.0f,0.0f,0.0f), n_out21p0, n_out20p0);
+}
 
-	
+
 
 void vertex() {
 	vec3 n_out2p0;
@@ -536,33 +506,33 @@ void fragment() {
 	float n_in19p6 = 0.50000;
 	float n_in19p7 = 1.00000;
 	{
-		vec4 colorMap = texture(Layer_1, n_out25p0.xy);
-		vec4 dispMap = texture(Layer_1_Dis,  n_out25p0.xy);
-		vec4 normalMap = texture(Layer_1_Normal,  n_out25p0.xy);
-		vec4 roughMap = texture(Layer_1_Rough,  n_out25p0.xy);
-		vec4 aoMap = texture(Layer_1_AO,  n_out25p0.xy);
+		vec4 colorMap = texture(Layer_1, .Xy);
+		vec4 dispMap = texture(Layer_1_Dis,  .Xy);
+		vec4 normalMap = texture(Layer_1_Normal,  .Xy);
+		vec4 roughMap = texture(Layer_1_Rough,  .Xy);
+		vec4 aoMap = texture(Layer_1_AO,  .Xy);
 		mat4 packedOriginal = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));
 		packedOriginal[0].rgb = colorMap.rgb;
-		packedOriginal[1].r = dispMap.r;
+		packedOriginal[1].R = dispMap.R;
 		packedOriginal[2].rg = normalMap.rg;
-		packedOriginal[3].r = roughMap.r;
-		packedOriginal[3].b = aoMap.r;
+		packedOriginal[3].R = roughMap.R;
+		packedOriginal[3].B = aoMap.R;
 		n_out19p1 = packedOriginal;
-		vec2 newUv = rotatedUV(n_out25p0.xy, n_in19p7, n_in19p6);vec4 colorMapRot = texture(Layer_1, newUv);
+		vec2 newUv = rotatedUV(.Xy, n_in19p7, n_in19p6);vec4 colorMapRot = texture(Layer_1, newUv);
 		vec4 dispMapRot = texture(Layer_1_Dis,  newUv);
 		vec4 normalMapRot = texture(Layer_1_Normal,  newUv);
 		vec4 roughMapRot = texture(Layer_1_Rough,  newUv);
 		vec4 aoMapRot = texture(Layer_1_AO,  newUv);
 		mat4 packedMixed = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));
 		packedMixed[0].rgb = colorMapRot.rgb;
-		packedMixed[1].r = dispMapRot.r;
+		packedMixed[1].R = dispMapRot.R;
 		packedMixed[2].rg = normalMapRot.rg;
-		packedMixed[3].r = roughMapRot.r;
-		packedMixed[3].b = aoMapRot.r;
-		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_out28p0);
-		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_out28p0);
-		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  n_out28p0);
-		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_out28p0);
+		packedMixed[3].R = roughMapRot.R;
+		packedMixed[3].B = aoMapRot.R;
+		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  );
+		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  );
+		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  );
+		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  );
 		n_out19p1 = packedOriginal;
 		n_out19p0 = packedMixed;
 	}
@@ -578,33 +548,33 @@ void fragment() {
 	float n_in20p6 = 0.50000;
 	float n_in20p7 = 1.00000;
 	{
-		vec4 colorMap = texture(Layer_2, n_out25p0.xy);
-		vec4 dispMap = texture(Layer_2_Dis,  n_out25p0.xy);
-		vec4 normalMap = texture(Layer_2_Normal,  n_out25p0.xy);
-		vec4 roughMap = texture(Layer_2_Rough,  n_out25p0.xy);
-		vec4 aoMap = texture(Layer_2_AO,  n_out25p0.xy);
+		vec4 colorMap = texture(Layer_2, .Xy);
+		vec4 dispMap = texture(Layer_2_Dis,  .Xy);
+		vec4 normalMap = texture(Layer_2_Normal,  .Xy);
+		vec4 roughMap = texture(Layer_2_Rough,  .Xy);
+		vec4 aoMap = texture(Layer_2_AO,  .Xy);
 		mat4 packedOriginal = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));
 		packedOriginal[0].rgb = colorMap.rgb;
-		packedOriginal[1].r = dispMap.r;
+		packedOriginal[1].R = dispMap.R;
 		packedOriginal[2].rg = normalMap.rg;
-		packedOriginal[3].r = roughMap.r;
-		packedOriginal[3].b = aoMap.r;
+		packedOriginal[3].R = roughMap.R;
+		packedOriginal[3].B = aoMap.R;
 		n_out20p1 = packedOriginal;
-		vec2 newUv = rotatedUV(n_out25p0.xy, n_in20p7, n_in20p6);vec4 colorMapRot = texture(Layer_2, newUv);
+		vec2 newUv = rotatedUV(.Xy, n_in20p7, n_in20p6);vec4 colorMapRot = texture(Layer_2, newUv);
 		vec4 dispMapRot = texture(Layer_2_Dis,  newUv);
 		vec4 normalMapRot = texture(Layer_2_Normal,  newUv);
 		vec4 roughMapRot = texture(Layer_2_Rough,  newUv);
 		vec4 aoMapRot = texture(Layer_2_AO,  newUv);
 		mat4 packedMixed = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));
 		packedMixed[0].rgb = colorMapRot.rgb;
-		packedMixed[1].r = dispMapRot.r;
+		packedMixed[1].R = dispMapRot.R;
 		packedMixed[2].rg = normalMapRot.rg;
-		packedMixed[3].r = roughMapRot.r;
-		packedMixed[3].b = aoMapRot.r;
-		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_out29p0);
-		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_out29p0);
-		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  n_out29p0);
-		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_out29p0);
+		packedMixed[3].R = roughMapRot.R;
+		packedMixed[3].B = aoMapRot.R;
+		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  );
+		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  );
+		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  );
+		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  );
 		n_out20p1 = packedOriginal;
 		n_out20p0 = packedMixed;
 	}
@@ -620,8 +590,8 @@ void fragment() {
 	float n_out34p7;
 // SplatmapHeight3D:34
 	{
-		vec4 splatmap1Values = getSplatmap(UV, terrainChunkSize, terrainUvScale, terrainSplatmap1, terrainCurrentLodLevel);
-		vec4 splatmap2Values = getSplatmap(UV, terrainChunkSize,  terrainUvScale, terrainSplatmap2, terrainCurrentLodLevel);
+		vec4 splatmap1Values = _GetSplatmap(UV, terrainChunkSize, terrainUvScale, terrainSplatmap1, terrainCurrentLodLevel);
+		vec4 splatmap2Values = _GetSplatmap(UV, terrainChunkSize,  terrainUvScale, terrainSplatmap2, terrainCurrentLodLevel);
 		n_out34p0 = splatmap1Values.r;
 		n_out34p1 = splatmap1Values.g;
 		n_out34p2 = splatmap1Values.b;
@@ -674,33 +644,33 @@ void fragment() {
 	float n_in21p6 = 0.50000;
 	float n_in21p7 = 1.00000;
 	{
-		vec4 colorMap = texture(Layer_3, n_out25p0.xy);
-		vec4 dispMap = texture(Layer_3_Dis,  n_out25p0.xy);
-		vec4 normalMap = texture(Layer_3_Normal,  n_out25p0.xy);
-		vec4 roughMap = texture(Layer_3_Rough,  n_out25p0.xy);
-		vec4 aoMap = texture(Layer_3_AO,  n_out25p0.xy);
+		vec4 colorMap = texture(Layer_3, .Xy);
+		vec4 dispMap = texture(Layer_3_Dis,  .Xy);
+		vec4 normalMap = texture(Layer_3_Normal,  .Xy);
+		vec4 roughMap = texture(Layer_3_Rough,  .Xy);
+		vec4 aoMap = texture(Layer_3_AO,  .Xy);
 		mat4 packedOriginal = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));
 		packedOriginal[0].rgb = colorMap.rgb;
-		packedOriginal[1].r = dispMap.r;
+		packedOriginal[1].R = dispMap.R;
 		packedOriginal[2].rg = normalMap.rg;
-		packedOriginal[3].r = roughMap.r;
-		packedOriginal[3].b = aoMap.r;
+		packedOriginal[3].R = roughMap.R;
+		packedOriginal[3].B = aoMap.R;
 		n_out21p1 = packedOriginal;
-		vec2 newUv = rotatedUV(n_out25p0.xy, n_in21p7, n_in21p6);vec4 colorMapRot = texture(Layer_3, newUv);
+		vec2 newUv = rotatedUV(.Xy, n_in21p7, n_in21p6);vec4 colorMapRot = texture(Layer_3, newUv);
 		vec4 dispMapRot = texture(Layer_3_Dis,  newUv);
 		vec4 normalMapRot = texture(Layer_3_Normal,  newUv);
 		vec4 roughMapRot = texture(Layer_3_Rough,  newUv);
 		vec4 aoMapRot = texture(Layer_3_AO,  newUv);
 		mat4 packedMixed = mat4(vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0));
 		packedMixed[0].rgb = colorMapRot.rgb;
-		packedMixed[1].r = dispMapRot.r;
+		packedMixed[1].R = dispMapRot.R;
 		packedMixed[2].rg = normalMapRot.rg;
-		packedMixed[3].r = roughMapRot.r;
-		packedMixed[3].b = aoMapRot.r;
-		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  n_out30p0);
-		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  n_out30p0);
-		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  n_out30p0);
-		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  n_out30p0);
+		packedMixed[3].R = roughMapRot.R;
+		packedMixed[3].B = aoMapRot.R;
+		packedMixed[0] = mix(packedOriginal[0], packedMixed[0],  );
+		packedMixed[1] = mix(packedOriginal[1], packedMixed[1],  );
+		packedMixed[2] = mix(packedOriginal[2], packedMixed[2],  );
+		packedMixed[3] = mix(packedOriginal[3], packedMixed[3],  );
 		n_out21p1 = packedOriginal;
 		n_out21p0 = packedMixed;
 	}
@@ -742,7 +712,7 @@ void fragment() {
 	{
 		n_out24p0 = n_out23p0[0].rgb;
 		n_out24p1 = n_out23p0[1].r;
-		n_out24p2 = vec3(n_out23p0[2].r, n_out23p0[2].g, n_out23p0[2].b);
+		n_out24p2 = new Vector3(n_out23p0[2].r, n_out23p0[2].g, n_out23p0[2].b);
 		n_out24p3 = n_out23p0[3].r;
 		n_out24p4 = n_out23p0[3].b;
 	}
@@ -784,6 +754,7 @@ void light() {
 
 }
 "
+graph_offset = Vector2(719.61, -500.522)
 nodes/vertex/0/position = Vector2(1120, -320)
 nodes/vertex/2/node = SubResource("VisualShaderNodeCustom_jh5gm")
 nodes/vertex/2/position = Vector2(560, -280)
@@ -828,7 +799,7 @@ nodes/fragment/21/position = Vector2(1240, 560)
 nodes/fragment/22/node = SubResource("VisualShaderNodeCustom_nj3w2")
 nodes/fragment/22/position = Vector2(1480, -280)
 nodes/fragment/23/node = SubResource("VisualShaderNodeCustom_s6evc")
-nodes/fragment/23/position = Vector2(1900, 60)
+nodes/fragment/23/position = Vector2(1900, -120)
 nodes/fragment/24/node = SubResource("VisualShaderNodeCustom_0l7r6")
 nodes/fragment/24/position = Vector2(2280, 100)
 nodes/fragment/25/node = SubResource("VisualShaderNodeCustom_7oaa4")
@@ -858,28 +829,3 @@ nodes/light/connections = PackedInt32Array(2, 0, 0, 0)
 [resource]
 render_priority = 0
 shader = SubResource("VisualShader_ofbnr")
-shader_parameter/terrainUvScale = null
-shader_parameter/terrainUvOffset = null
-shader_parameter/terrainChunkSize = 0.0
-shader_parameter/terrainNextLodChunkSize = 0.0
-shader_parameter/terrainNeighborLod = Quaternion(0, 0, 0, 0)
-shader_parameter/terrainCurrentLodLevel = 0.0
-shader_parameter/terrainSmoothing = false
-shader_parameter/BrushData0 = null
-shader_parameter/BrushData1 = null
-shader_parameter/BrushColor = null
-shader_parameter/Layer_1 = ExtResource("8_0au65")
-shader_parameter/Layer_1_Dis = ExtResource("10_n1vaw")
-shader_parameter/Layer_1_Normal = ExtResource("11_oncw3")
-shader_parameter/Layer_1_Rough = ExtResource("12_4egyj")
-shader_parameter/Layer_1_AO = ExtResource("9_i4a20")
-shader_parameter/Layer_2 = ExtResource("13_w4xsk")
-shader_parameter/Layer_2_Dis = ExtResource("15_h3y7g")
-shader_parameter/Layer_2_Normal = ExtResource("16_m333e")
-shader_parameter/Layer_2_Rough = ExtResource("17_mm8pq")
-shader_parameter/Layer_2_AO = ExtResource("14_e5u5p")
-shader_parameter/Layer_3 = ExtResource("18_p6mbg")
-shader_parameter/Layer_3_Dis = ExtResource("20_vymy8")
-shader_parameter/Layer_3_Normal = ExtResource("21_epq78")
-shader_parameter/Layer_3_Rough = ExtResource("22_x63ai")
-shader_parameter/Layer_3_AO = ExtResource("19_fxm6v")

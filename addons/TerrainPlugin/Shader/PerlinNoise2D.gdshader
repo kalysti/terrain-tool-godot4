@@ -1,67 +1,5 @@
-@tool
-extends VisualShaderNodeCustom
-class_name VisualShaderNodeNoisePerlin2D
+shader_type spatial;
 
-func _init():
-	set_input_port_default_value(1, Vector3(0, 0, 0))
-	set_input_port_default_value(2, 5.0)
-	set_input_port_default_value(3, Vector3(0.0, 0.0, 0.0))
-
-func _get_name():
-	return "PerlinNoise2D"
-
-func _get_category():
-	return "RGBA"
-
-func _get_subcategory():
-	return "Noise"
-
-func _get_description():
-	return ""
-
-func _get_return_icon_type():
-	return VisualShaderNode.PORT_TYPE_SCALAR
-
-func _get_input_port_count():
-	return 4
-
-func _get_input_port_name(port: int):
-	match port:
-		0:
-			return "uv"
-		1:
-			return "offset"
-		2:
-			return "scale"
-		3:
-			return "period"
-
-func _get_input_port_type(port: int):
-	match port:
-		0:
-			return VisualShaderNode.PORT_TYPE_VECTOR_3D
-		1:
-			return VisualShaderNode.PORT_TYPE_VECTOR_3D
-		2:
-			return VisualShaderNode.PORT_TYPE_SCALAR
-		3:
-			return VisualShaderNode.PORT_TYPE_VECTOR_3D
-
-func _get_output_port_count():
-	return 1
-
-func _get_output_port_name(port: int):
-	match port:
-		0:
-			return "result"
-
-func _get_output_port_type(port: int):
-	match port:
-		0:
-			return VisualShaderNode.PORT_TYPE_SCALAR
-
-func _get_global_code(mode: int):
-	return """
 float perlin2dN0iseFunc(vec2 P, vec2 _per10d_perl2) {
 	vec4 Pi = floor(vec4(P, P)) + vec4(0.0, 0.0, 1.0, 1.0);
 	vec4 Pf = fract(vec4(P, P)) - vec4(0.0, 0.0, 1.0, 1.0);
@@ -106,13 +44,3 @@ float perlin2dN0iseFunc(vec2 P, vec2 _per10d_perl2) {
 	float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
 	return 2.3 * n_xy;
 }
-"""
-
-func _get_code(input_vars: Array, output_vars: Array, mode: int, type: int):
-	var uv = "UV"
-	
-	if input_vars[0]:
-		uv = input_vars[0]
-	
-	return "%s = perlin2dN0iseFunc((%s.xy+%s.xy)*%s, %s.xy);" % [
-output_vars[0], uv, input_vars[1], input_vars[2], input_vars[3]]

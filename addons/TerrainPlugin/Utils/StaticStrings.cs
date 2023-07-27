@@ -46,3 +46,8 @@ public static class MaterialParameterNames
     public const string TERRAIN_SMOOTHING = "terrainSmoothing";
     public const string TERRAIN_UV_OFFSET = "terrainUvOffset";
 }
+
+public static class VisualShaderNodeStrings
+{
+    public const string CATEGORY_TERRAIN_TOOL = "TerrainTools";
+}

@@ -343,7 +343,7 @@ public partial class TerrainPlugin : EditorPlugin
 		AddCustomType(nameof(TerrainChunk), nameof(Resource), scriptChunk, texture);
 		AddCustomType(nameof(Terrain3D), nameof(Node3D), script, texture);
 		AddCustomType(nameof(TerrainMapBox3D), nameof(Node3D), scriptMapBox, texture);
-
+		
 		menuButton.SwitchOnHover = true;
 		menuButton.Text = UserInterfaceNames.TERRAIN;
 		menuButton.Icon = texture;
