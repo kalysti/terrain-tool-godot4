@@ -13,100 +13,59 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
         SetInputPortDefaultValue(8, 0.0);
     }
 
-    public override string _GetName()
-    {
-        return "AntiTilingCS3D";
-    }
+    public override string _GetName() => "AntiTilingCS3D";
 
 
-    public override string _GetCategory()
-    {
-        return "TerrainTools";
-    }
+    public override string _GetCategory() => "TerrainTools";
 
-    public override string _GetDescription()
-    {
-        return "Anti tiling for terrain textures";
-    }
+    public override string _GetDescription() => "Anti tiling for terrain textures";
 
-    public override PortType _GetReturnIconType()
-    {
-        return PortType.Scalar;
-    }
+    public override PortType _GetReturnIconType() => PortType.Scalar;
 
-    public override int _GetInputPortCount()
-    {
-        return 9;
-    }
+    public override int _GetInputPortCount() => 9;
 
 
-    public override int _GetOutputPortCount()
-    {
-        return 2;
-    }
+    public override int _GetOutputPortCount() => 2;
 
-    public override string _GetOutputPortName(int port)
-    {
-        switch (port)
+    public override string _GetOutputPortName(int port) =>
+        port switch
         {
-            case 0: return "Packed";
-            case 1: return "Original";
-        }
+            0 => "Packed",
+            1 => "Original",
+            _ => "",
+        };
 
-        return "";
-    }
-
-    public override PortType _GetOutputPortType(int port)
-    {
-        switch (port)
+    public override PortType _GetOutputPortType(int port) =>
+        port switch
         {
-            case 0: return PortType.Transform;
-            case 1: return PortType.Transform;
-        }
+            0 => PortType.Transform,
+            1 => PortType.Transform,
+            _ => 0,
+        };
 
-        return 0;
-    }
-
-
-    public override string _GetInputPortName(int port)
-    {
-        switch (port)
+    public override string _GetInputPortName(int port) =>
+        port switch
         {
-            case 0: return "Color";
-            case 1: return "Displacement";
-            case 2: return "Normal";
-            case 3: return "Roughness";
-            case 4: return "AO";
-            case 5: return "UV";
-            case 6: return "Randomize";
-            case 7: return "Tiling";
-            case 8: return "Mix";
-        }
+            0 => "Color",
+            1 => "Displacement",
+            2 => "Normal",
+            3 => "Roughness",
+            4 => "AO",
+            5 => "UV",
+            6 => "Randomize",
+            7 => "Tiling",
+            8 => "Mix",
+            _ => "",
+        };
 
-        return "";
-    }
-
-    public override PortType _GetInputPortType(int port)
-    {
-        switch (port)
+    public override PortType _GetInputPortType(int port) =>
+        port switch
         {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8: return PortType.Sampler;
-        }
+            0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 => PortType.Sampler,
+            _ => 0,
+        };
 
-        return 0;
-    }
-
-    public override string _GetGlobalCode(Shader.Mode mode)
-    {
-        return @"float rand(vec2 input)
+    public override string _GetGlobalCode(Shader.Mode mode) => @"float rand(vec2 input)
 				{
 					return fract(sin(dot(input.Xy, vec2(12.9898, 78.233))) * 43758.5453123);
 				}
@@ -123,7 +82,6 @@ public partial class VisualShaderNodeAntiTilingCs3D : VisualShaderNodeCustom
 					mat2 rotation_mat = mat2(vec2(cosine, -sine), vec2(sine, cosine));
 					return rotation_mat * tiled_UV + 0.5f;
 				}";
-    }
 
     public override string _GetCode(Array<string> inputVars, Array<string> outputVars, Shader.Mode mode, VisualShader.Type type)
     {

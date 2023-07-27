@@ -21,15 +21,9 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
         CreateMaterial("shape_material", gizmoColor);
     }
 
-    public override bool _HasGizmo(Node3D spatial)
-    {
-        return spatial is Terrain3D;
-    }
+    public override bool _HasGizmo(Node3D spatial) => spatial is Terrain3D;
 
-    public override string _GetGizmoName()
-    {
-        return "TerrainGizmo";
-    }
+    public override string _GetGizmoName() => "TerrainGizmo";
 
     public static void GetEdge(int pEdge, Vector3 position, Vector3 size, ref Vector3 rFrom, ref Vector3 rTo)
     {
@@ -112,14 +106,15 @@ public partial class TerrainGizmoPlugin : EditorNode3DGizmoPlugin
 
     private static StandardMaterial3D GetDebugMaterial()
     {
-        var lineMaterial = new StandardMaterial3D();
-        lineMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
-        lineMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-        lineMaterial.AlbedoColor = new Color(0, 1, 1);
-
-        lineMaterial.AlbedoTextureForceSrgb = true;
-        lineMaterial.VertexColorIsSrgb = true;
-        lineMaterial.VertexColorUseAsAlbedo = true;
+        var lineMaterial = new StandardMaterial3D
+        {
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            AlbedoColor = new Color(0, 1, 1),
+            AlbedoTextureForceSrgb = true,
+            VertexColorIsSrgb = true,
+            VertexColorUseAsAlbedo = true
+        };
 
         return lineMaterial;
     }
