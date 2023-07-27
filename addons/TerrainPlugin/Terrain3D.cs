@@ -8,6 +8,7 @@ using TerrainEditor.Converters;
 
 namespace TerrainEditor;
 
+[GlobalClass]
 [Tool]
 public partial class Terrain3D : Node3D
 {

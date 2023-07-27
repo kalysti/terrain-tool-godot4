@@ -7,7 +7,7 @@ using Array = System.Array;
 
 namespace TerrainEditor;
 
-[Tool]
+[GlobalClass]
 public partial class TerrainPatch : Resource
 {
     private Array<ImageTexture> splatMaps = new();

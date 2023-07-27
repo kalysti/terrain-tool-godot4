@@ -5,7 +5,7 @@ using TerrainEditor.Utils;
 
 namespace TerrainEditor;
 
-[Tool]
+[GlobalClass]
 public partial class TerrainChunk : Resource
 {
     [Export]

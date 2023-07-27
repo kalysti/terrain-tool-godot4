@@ -3,7 +3,7 @@ using Godot;
 
 namespace TerrainEditor;
 
-[Tool]
+[GlobalClass]
 public partial class TerrainPatchInfo : Resource
 {
     [Export]
